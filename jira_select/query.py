@@ -1,11 +1,15 @@
-import csv
 import re
-from typing import Any, Dict, Generator, cast, List, IO
+from typing import Any, Dict, Generator, cast, List
 
 from jira import JIRA, Issue
 
 from .exceptions import UserError
-from .types import JQLIssueQuery, ListIssueQuery, QueryDefinition, Field
+from .types import (
+    JQLIssueQuery,
+    ListIssueQuery,
+    QueryDefinition,
+    SelectFieldDefinition,
+)
 
 
 class Query:
@@ -23,11 +27,21 @@ class Query:
     def definition(self) -> QueryDefinition:
         return self._definition
 
-    def _generate_fieldnames(self) -> List[str]:
-        fields = []
+    def get_fields(self) -> List[SelectFieldDefinition]:
+        fields: List[SelectFieldDefinition] = []
 
         for field in self.definition["select"]:
-            fields.append(self._get_field_display(field))
+            if isinstance(field, str):
+                as_match = self.FIELD_DISPLAY_DEFN_RE.match(field)
+                display = field
+                if as_match:
+                    match_dict = as_match.groupdict()
+                    field = match_dict["field"]
+                    display = match_dict["display"]
+
+                fields.append({"field": field, "display": display})
+            else:
+                fields.append(field)
 
         return fields
 
@@ -46,42 +60,17 @@ class Query:
 
         return cursor
 
-    def _get_field_display(self, field: Field) -> str:
-        if isinstance(field, dict):
-            return field["display"]
-
-        assert isinstance(field, str)
-
-        matched = self.FIELD_DISPLAY_DEFN_RE.match(field)
-        if matched:
-            return matched.groupdict()["display"]
-
-        return field
-
-    def _get_field_path(self, field: Field) -> str:
-        if isinstance(field, dict):
-            return field["field"]
-
-        assert isinstance(field, str)
-
-        matched = self.FIELD_DISPLAY_DEFN_RE.match(field)
-        if matched:
-            return matched.groupdict()["field"]
-
-        return field
-
     def _generate_row_dict(self, row: Any) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
 
-        for field_defn in self.definition["select"]:
-            field_display = self._get_field_display(field_defn)
-            field_path = self._get_field_path(field_defn)
-
-            result[field_display] = self._get_field_data(row, field_path)
+        for field_defn in self.get_fields():
+            result[field_defn["display"]] = self._get_field_data(
+                row, field_defn["field"]
+            )
 
         return result
 
-    def _get_issues(self) -> Generator[Issue, None, None]:
+    def _get_jql(self) -> str:
         if isinstance(self.definition["where"], dict):
             where = cast(JQLIssueQuery, self.definition["where"])
             if "jql" not in where:
@@ -90,6 +79,11 @@ class Query:
         else:
             where = cast(ListIssueQuery, self.definition["where"])
             jql = " AND ".join(where)
+
+        return jql
+
+    def _get_issues(self) -> Generator[Issue, None, None]:
+        jql = self._get_jql()
 
         expand = self.definition.get("expand", [])
 
@@ -102,7 +96,8 @@ class Query:
                 yield self.jira.issue(result.key, expand=",".join(expand))
                 startAt += 1
 
-    def __iter__(self) -> Generator[Any, None, None]:
+    def _get_iterator(self) -> Generator[Any, None, None]:
+        source = self.definition["from"]
         source = self.definition["from"]
 
         if source == "issues":
@@ -110,9 +105,11 @@ class Query:
         else:
             raise NotImplementedError(f"No search for source {source} implemented.")
 
-    def write_csv(self, stream: IO[str]):
-        out = csv.DictWriter(stream, fieldnames=self._generate_fieldnames())
-        out.writeheader()
+    def count(self) -> int:
+        jql = self._get_jql()
 
-        for row in self:
-            out.writerow(self._generate_row_dict(row))
+        return self.jira.search_issues(jql).total
+
+    def __iter__(self) -> Generator[Dict[str, Any], None, None]:
+        for row in self._get_iterator():
+            yield self._generate_row_dict(row)

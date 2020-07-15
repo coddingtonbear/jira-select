@@ -39,11 +39,15 @@ QueryDefinition = TypedDict(
 )
 
 
+class ViewerDefinitionDict(TypedDict, total=False):
+    csv: str
+
+
 class ConfigDict(TypedDict, total=False):
     instance_url: str
     username: str
     password: str
-    viewer: str  # App to use for viewing CSV
+    viewers: ViewerDefinitionDict
 
 
 class Question(TypedDict, total=False):

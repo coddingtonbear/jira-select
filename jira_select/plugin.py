@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 import argparse
 import logging
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, IO
 import pkg_resources
 
 from PyInquirer import prompt
@@ -15,6 +15,7 @@ from .constants import APP_NAME
 from .exceptions import ConfigurationError
 from .types import ConfigDict, Question
 from .utils import save_config
+from .query import Query
 
 
 logger = logging.getLogger(__name__)
@@ -110,4 +111,59 @@ class BaseCommand(metaclass=ABCMeta):
 
     @abstractmethod
     def handle(self) -> None:
-        pass
+        ...
+
+
+def get_installed_formatters() -> Dict[str, Type[BaseFormatter]]:
+    possible_formatters: Dict[str, Type[BaseFormatter]] = {}
+    for entry_point in pkg_resources.iter_entry_points(group="jira_select.formatters"):
+        try:
+            loaded_class = entry_point.load()
+        except ImportError:
+            logger.warning(
+                "Attempted to load entrypoint %s, but " "an ImportError occurred.",
+                entry_point,
+            )
+            continue
+        if not issubclass(loaded_class, BaseFormatter):
+            logger.warning(
+                "Loaded entrypoint %s, but loaded class is "
+                "not a subclass of `jira_select.plugin.BaseFormatter`.",
+                entry_point,
+            )
+            continue
+        possible_formatters[entry_point.name] = loaded_class
+
+    return possible_formatters
+
+
+class BaseFormatter(metaclass=ABCMeta):
+    def __init__(self, query: Query, stream: IO[str]):
+        self._query = query
+        self._stream = stream
+
+    @property
+    def query(self):
+        return self._query
+
+    @property
+    def stream(self):
+        return self._stream
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        # Exception handling here
+        self.close()
+
+    def open(self):
+        return
+
+    def close(self):
+        return
+
+    @abstractmethod
+    def writerow(self, row: Dict[str, Any]):
+        ...
