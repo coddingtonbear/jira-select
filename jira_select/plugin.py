@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def get_installed_commands() -> Dict[str, Type[BaseCommand]]:
     possible_commands: Dict[str, Type[BaseCommand]] = {}
-    for entry_point in pkg_resources.iter_entry_points(group="jira_select_commands"):
+    for entry_point in pkg_resources.iter_entry_points(group="jira_select.commands"):
         try:
             loaded_class = entry_point.load()
         except ImportError:

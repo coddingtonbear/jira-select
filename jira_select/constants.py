@@ -1,1 +1,1 @@
-APP_NAME = "jira-csv"
+APP_NAME = "jira-select"
