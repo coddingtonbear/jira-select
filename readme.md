@@ -31,3 +31,20 @@ jira-csv run /path/to/query.yaml
 ```
 
 & it'll hand you back a CSV document with the fields you've selected.
+
+See the built-in help (`--help`) for more options.
+
+## Future Goals
+
+- Interactive mode: field names are a little arcane in Jira for things
+  like custom fields. It might be nice to be able to be handeld through
+  the process of building a query using a PyInquirer-based UI, and either
+  generating a yaml file for later execution or running that query
+  immediately.
+- Support for output formatting functions so you can do things like
+  look up the name of a sprint instead of just showing the ID. This will
+  probably take the form of a function call wrapping the field name that
+  matches the name of an entrypoint in `jira_csv_functions`.
+- Support for filtering rows to ones that meet specific conditions using
+  python code. I'm imagining being represented in a `having:` section
+  of the query yaml.
