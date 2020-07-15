@@ -1,4 +1,4 @@
-# Jira-CSV: Easily export issues from Jira to a CSV file
+# Jira-Select: Easily export issues from Jira to CSV
 
 ## Quickstart
 
@@ -41,6 +41,8 @@ See the built-in help (`--help`) for more options.
   the process of building a query using a PyInquirer-based UI, and either
   generating a yaml file for later execution or running that query
   immediately.
+- SQlite support: Instead of exporting a CSV, exporting an SQLite database.
+- XLSX support: Instead of exporting a CSV, exporing an XLSX document.
 - Output formatting: Support for output formatting functions so you can
   do things like look up the name of a sprint instead of just showing the
   ID. This will probably take the form of a function call wrapping the

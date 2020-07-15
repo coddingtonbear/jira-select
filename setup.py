@@ -1,7 +1,7 @@
 import os
 from setuptools import setup
 
-from jira_csv import __version__ as version_string
+from jira_select import __version__ as version_string
 
 
 requirements_path = os.path.join(os.path.dirname(__file__), "requirements.txt",)
@@ -26,15 +26,15 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     install_requires=requirements,
-    packages=["jira_csv"],
+    packages=["jira_select"],
     include_package_data=True,
     entry_points={
-        "console_scripts": ["jira-csv = jira_csv.cmdline:main"],
-        "jira_csv_commands": [
-            "configure = jira_csv.commands.configure:Command",
-            "store-password = jira_csv.commands.store_password:Command",
-            "build-query = jira_csv.commands.build_query:Command",
-            "run-query = jira_csv.commands.run:Command",
+        "console_scripts": ["jira-select = jira_select.cmdline:main"],
+        "jira_select_commands": [
+            "configure = jira_select.commands.configure:Command",
+            "store-password = jira_select.commands.store_password:Command",
+            "build-query = jira_select.commands.build_query:Command",
+            "run-query = jira_select.commands.run:Command",
         ],
     },
 )
