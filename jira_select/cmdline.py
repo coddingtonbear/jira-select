@@ -23,14 +23,14 @@ def main():
         "-i",
         default=None,
         type=str,
-        help="URL of the Jira instance to connect to.",
+        help="URL of the Jira instance to connect to (if you cannot use 'configure')",
     )
     parser.add_argument(
         "--username",
         "-u",
         default=None,
         type=str,
-        help="Username to use for connecting to Jira.",
+        help="Username to use for connecting to Jira (if you cannot use 'configure')",
     )
     parser.add_argument(
         "--password",
@@ -39,7 +39,7 @@ def main():
         type=str,
         help=(
             "Password to use for connecting to Jira.  NOT RECOMMENDED: use the "
-            "'store-password' command instead."
+            "'store-password' or 'configure' command instead."
         ),
     )
     subparsers = parser.add_subparsers(dest="command")

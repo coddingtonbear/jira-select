@@ -142,6 +142,11 @@ class BaseFormatter(metaclass=ABCMeta):
         self._query = query
         self._stream = stream
 
+    @abstractmethod
+    @classmethod
+    def get_file_extension(cls) -> str:
+        ...
+
     @property
     def query(self):
         return self._query

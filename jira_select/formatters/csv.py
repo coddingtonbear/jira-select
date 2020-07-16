@@ -5,6 +5,10 @@ from ..plugin import BaseFormatter
 
 
 class Formatter(BaseFormatter):
+    @classmethod
+    def get_file_extension(cls) -> str:
+        return "csv"
+
     def _generate_fieldnames(self) -> List[str]:
         fields = []
 
