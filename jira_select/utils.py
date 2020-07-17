@@ -1,7 +1,10 @@
+from __future__ import annotations
+
+import hashlib
 import logging
 import os
 import re
-from typing import Any, Callable, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from appdirs import user_config_dir
 from simpleeval import AttributeDoesNotExist, simple_eval
@@ -9,6 +12,9 @@ from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
 from .types import ConfigDict, SelectFieldDefinition
+
+if TYPE_CHECKING:
+    from .query import Result
 
 FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
 
@@ -57,12 +63,15 @@ def parse_select_definition(
     return expression
 
 
-def get_field_data(
-    row: Any, expression: str, functions: Optional[Dict[str, Callable]] = None
-) -> Any:
-    if functions is None:
-        functions = {}
+def calculate_result_hash(row: Any, group_fields: List[str]) -> int:
+    computed = get_row_dict(row)
 
+    params = [str(computed.get(group_field)) for group_field in group_fields]
+
+    return int(hashlib.sha1(":".join(params).encode("UTF-8")).hexdigest(), 16)
+
+
+def get_row_dict(row: Any) -> Dict[str, Any]:
     names: Dict[str, Any] = {}
 
     if hasattr(row, "fields"):
@@ -79,7 +88,16 @@ def get_field_data(
         ):
             names[key] = getattr(row, key)
 
+    return names
+
+
+def get_field_data(
+    row: Result, expression: str, functions: Optional[Dict[str, Callable]] = None
+) -> Any:
+    if functions is None:
+        functions = {}
+
     try:
-        return simple_eval(expression, names=names, functions=functions)
+        return simple_eval(expression, names=row.as_dict(), functions=functions)
     except AttributeDoesNotExist:
         return None

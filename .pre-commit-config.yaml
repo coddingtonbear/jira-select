@@ -3,10 +3,6 @@ default_language_version:
 repos:
   # Sort imports prior to black reformatting, to
   # ensure black always takes prescedence
-  - repo: https://github.com/timothycrosley/isort
-    rev: 4.3.21
-    hooks:
-      - id: isort
   - repo: https://github.com/ambv/black
     rev: 19.10b0
     hooks:
