@@ -75,6 +75,9 @@ class Command(BaseCommand):
                         formatter.writerow(row)
             else:
                 count = 0
+                # This progressbar is here only to make it clear that
+                # something is happening -- sometimes the count takes
+                # a few seconds to complete
                 for _ in track([None], description="Preparing", total=1):
                     count = query.count()
                 for row in track(query, description="Executing", total=count):
