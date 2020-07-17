@@ -70,6 +70,8 @@ select:
   - customfield_10069 as "Story Points"
 from: issues
 having:
+  # The quoting below is required only because the first character of line
+  # being a double-quote causes YAML parsers to parse the line differently
   - '"Sprint #19" in coalesce(sprint_name(array_item(customfield_10010, -1)), "")'
 ```
 
@@ -77,6 +79,12 @@ In the above example, the issues returned from Jira will be compared against
 each constraint you've entered in the `having` section; in this case, all
 returned issues not having the string "Sprint #19" in the name of the last
 sprint associated with the displayed issue will not be written to your output.
+
+Note that `having` entries are processed locally instead of on the
+Jira server so filtering using `having` entries is much slower than
+using standard Jql due to the amount of (potentially) unnecessary data
+transfer involved. It is recommended that you use `having` only when
+your logic cannot be expressed in standard Jql (i.e. in the "where" section).
 
 ## Future Goals
 
