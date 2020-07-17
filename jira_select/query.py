@@ -59,10 +59,12 @@ class Query:
         startAt = 0
         maxResults = float("inf")
         while startAt < maxResults:
-            results = self.jira.search_issues(jql, startAt=startAt)
+            results = self.jira.search_issues(
+                jql, startAt=startAt, expand=",".join(expand), fields="*all"
+            )
             maxResults = results.total
             for result in results:
-                yield self.jira.issue(result.key, expand=",".join(expand))
+                yield result
                 startAt += 1
 
     def _get_issues_having(self) -> Generator[Optional[Issue], None, None]:
