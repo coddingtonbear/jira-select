@@ -1,22 +1,21 @@
 from __future__ import annotations
 
-from abc import ABCMeta, abstractmethod
 import argparse
 import logging
-from typing import Any, Dict, Optional, Type, IO
+from abc import ABCMeta, abstractmethod
+from typing import IO, Any, Dict, Optional, Type
+
 import pkg_resources
 
-from PyInquirer import prompt
-from jira import JIRA
 import keyring
+from jira import JIRA
 from rich.console import Console
 
 from .constants import APP_NAME
 from .exceptions import ConfigurationError
-from .types import ConfigDict, Question
-from .utils import save_config
 from .query import Query
-
+from .types import ConfigDict
+from .utils import save_config
 
 logger = logging.getLogger(__name__)
 
@@ -67,11 +66,6 @@ class BaseCommand(metaclass=ABCMeta):
     @property
     def console(self) -> Console:
         return self._console
-
-    def prompt(self, question: Question) -> Any:
-        question["name"] = "question"
-
-        return prompt([question]).get("question", None)
 
     @property
     def jira(self) -> JIRA:

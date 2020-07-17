@@ -2,10 +2,8 @@ from typing import Any, Dict, Generator, List
 
 from jira import JIRA, Issue
 
-from .types import (
-    QueryDefinition,
-    SelectFieldDefinition,
-)
+from .exceptions import UserError
+from .types import QueryDefinition, SelectFieldDefinition
 from .utils import get_field_data, parse_select_definition
 
 
@@ -39,7 +37,14 @@ class Query:
         return result
 
     def _get_jql(self) -> str:
-        return " AND ".join(self.definition["where"])
+        where = self.definition.get("where")
+
+        if where is None:
+            return ""
+        elif isinstance(where, List):
+            return " AND ".join(self.definition["where"])
+
+        raise UserError(f"Could not generate JQL from {where}.")
 
     def _get_issues(self) -> Generator[Issue, None, None]:
         jql = self._get_jql()

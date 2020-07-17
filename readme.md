@@ -36,11 +36,6 @@ See the built-in help (`--help`) for more options.
 
 ## Future Goals
 
-- Interactive mode: field names are a little arcane in Jira for things
-  like custom fields. It might be nice to be able to be handeld through
-  the process of building a query using a PyInquirer-based UI, and either
-  generating a yaml file for later execution or running that query
-  immediately.
 - SQlite support: Instead of exporting a CSV, exporting an SQLite database.
 - XLSX support: Instead of exporting a CSV, exporing an XLSX document.
 - Output formatting: Support for output formatting functions so you can
