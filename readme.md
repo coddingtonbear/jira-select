@@ -120,5 +120,6 @@ in [Jira's documentation](https://developer.atlassian.com/cloud/jira/platform/re
 
 ## Future Goals
 
+- Support for `Group By` and aggregation functions.
 - SQlite support: Instead of exporting a CSV, exporting an SQLite database.
 - XLSX support: Instead of exporting a CSV, exporing an XLSX document.
