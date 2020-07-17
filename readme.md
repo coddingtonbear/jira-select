@@ -118,8 +118,24 @@ expand:
 The meaning of these expansions is defined by Jira; you can find more information
 in [Jira's documentation](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#expansion).
 
+### Grouping & Aggregation
+
+You can group and/or aggregate your returned rows by using `group_by`:
+
+```yaml
+select:
+  - status
+  - count(key)
+from: issues
+group_by:
+  - status
+```
+
+You'll receive just a single result row for each status, and a count
+of how many records shared that status in the second column.
+
 ## Future Goals
 
-- Support for `Group By` and aggregation functions.
+- Support for "Order By" expressions
 - SQlite support: Instead of exporting a CSV, exporting an SQLite database.
 - XLSX support: Instead of exporting a CSV, exporing an XLSX document.
