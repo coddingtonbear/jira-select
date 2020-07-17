@@ -38,6 +38,12 @@ QueryDefinition = TypedDict(
 )
 
 
+class SchemaRow(TypedDict):
+    key: str
+    type: str
+    description: str
+
+
 class ViewerDefinitionDict(TypedDict, total=False):
     csv: str
 

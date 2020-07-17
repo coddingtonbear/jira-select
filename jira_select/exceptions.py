@@ -1,10 +1,10 @@
-class JiraCSVError(Exception):
+class JiraSelectError(Exception):
     pass
 
 
-class ConfigurationError(JiraCSVError):
+class ConfigurationError(JiraSelectError):
     pass
 
 
-class UserError(JiraCSVError):
+class UserError(JiraSelectError):
     pass
