@@ -1,16 +1,16 @@
 import argparse
 import subprocess
-import tempfile
 import sys
+import tempfile
 from typing import IO, Dict, Optional, cast
 
 from rich.progress import track
 from yaml import safe_load
 
+from ..exceptions import UserError
 from ..plugin import BaseCommand, get_installed_formatters
 from ..query import Query
 from ..types import QueryDefinition
-from ..exceptions import UserError
 
 
 class Command(BaseCommand):
@@ -67,15 +67,17 @@ class Command(BaseCommand):
             )
             output_file = output.name
 
-        query = Query(self.jira, query_definition)
+        query = Query(self.jira, query_definition, emit_omissions=True)
         with formatter_cls(query, output) as formatter:
             if output == sys.stdout:
                 for row in query:
-                    formatter.writerow(row)
+                    if row is not None:
+                        formatter.writerow(row)
             else:
                 count = query.count()
                 for row in track(query, description="Running query...", total=count):
-                    formatter.writerow(row)
+                    if row is not None:
+                        formatter.writerow(row)
         output.flush()
 
         if self.options.view:

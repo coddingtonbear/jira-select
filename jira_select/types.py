@@ -4,19 +4,23 @@ from typing_extensions import TypedDict
 
 DataSource = Literal["issues", "boards"]
 
+JiraFieldName = str
+
 
 class SelectFieldDefinition(TypedDict):
     expression: str
     column: str
 
 
-Field = Union[SelectFieldDefinition, str]
+Field = Union[SelectFieldDefinition, JiraFieldName]
 
 JQLString = str
 
 CustomFilterFieldName = str
 
-WhereList = List
+JqlList = List[str]
+
+ExpressionList = List[str]
 
 # We have to use the alternative method of defining the TypedDict since
 # one of our dictionary fields' names is a reserved word
@@ -25,8 +29,9 @@ QueryDefinition = TypedDict(
     {
         "select": List[Field],
         "from": DataSource,
-        "where": WhereList,
-        "expand": List[str],
+        "where": JqlList,
+        "having": ExpressionList,
+        "expand": List[JiraFieldName],
         # "having": Dict[CustomFilterFieldName, Any],
     },
     total=False,

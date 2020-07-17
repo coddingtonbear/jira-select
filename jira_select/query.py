@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Generator, List
+from typing import Any, Callable, Dict, Generator, List, Optional
 
 from jira import JIRA, Issue
 
@@ -9,10 +9,11 @@ from .utils import get_field_data, parse_select_definition
 
 
 class Query:
-    def __init__(self, jira: JIRA, definition: QueryDefinition):
+    def __init__(self, jira: JIRA, definition: QueryDefinition, emit_omissions=False):
         self._definition: QueryDefinition = definition
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
+        self._emit_omissions: bool = emit_omissions
 
     @property
     def jira(self) -> JIRA:
@@ -64,12 +65,25 @@ class Query:
                 yield self.jira.issue(result.key, expand=",".join(expand))
                 startAt += 1
 
-    def _get_iterator(self) -> Generator[Any, None, None]:
+    def _get_issues_having(self) -> Generator[Optional[Issue], None, None]:
+        for row in self._get_issues():
+            include_row = True
+            for having in self.definition.get("having", []):
+                if not get_field_data(row, having, self._functions):
+                    include_row = False
+                    break
+
+            if include_row:
+                yield row
+            elif self._emit_omissions:
+                yield None
+
+    def _get_iterator(self) -> Generator[Optional[Any], None, None]:
         source = self.definition["from"]
         source = self.definition["from"]
 
         if source == "issues":
-            yield from self._get_issues()
+            yield from self._get_issues_having()
         else:
             raise NotImplementedError(f"No search for source {source} implemented.")
 
@@ -78,6 +92,9 @@ class Query:
 
         return self.jira.search_issues(jql).total
 
-    def __iter__(self) -> Generator[Dict[str, Any], None, None]:
+    def __iter__(self) -> Generator[Optional[Dict[str, Any]], None, None]:
         for row in self._get_iterator():
-            yield self._generate_row_dict(row)
+            if row is None:
+                yield None
+            else:
+                yield self._generate_row_dict(row)
