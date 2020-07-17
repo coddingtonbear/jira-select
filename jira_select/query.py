@@ -58,14 +58,19 @@ class Query:
 
         startAt = 0
         maxResults = float("inf")
+        resultLimit = self.definition.get("limit", float("inf"))
         while startAt < maxResults:
             results = self.jira.search_issues(
-                jql, startAt=startAt, expand=",".join(expand), fields="*all"
+                jql, startAt=startAt, expand=",".join(expand), fields="*all",
             )
             maxResults = results.total
             for result in results:
                 yield result
                 startAt += 1
+
+                # Return early if our result limit has been reached
+                if startAt >= resultLimit:
+                    return
 
     def _get_issues_having(self) -> Generator[Optional[Issue], None, None]:
         for row in self._get_issues():
@@ -92,7 +97,9 @@ class Query:
     def count(self) -> int:
         jql = self._get_jql()
 
-        return self.jira.search_issues(jql).total
+        resultLimit = self.definition.get("limit", float("inf"))
+
+        return min(self.jira.search_issues(jql).total, resultLimit)
 
     def __iter__(self) -> Generator[Optional[Dict[str, Any]], None, None]:
         for row in self._get_iterator():

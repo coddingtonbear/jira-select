@@ -86,6 +86,38 @@ using standard Jql due to the amount of (potentially) unnecessary data
 transfer involved. It is recommended that you use `having` only when
 your logic cannot be expressed in standard Jql (i.e. in the "where" section).
 
+### Limiting the number of results
+
+You can limit the number of results returned by adding a `limit` to your query:
+
+```yaml
+select:
+  - key
+  - status
+  - summary
+from: issues
+where:
+  - assignee = "me@adamcoddington.net"
+limit: 10
+```
+
+### Expanding Jira fields
+
+You can ask Jira to expand issue fields by adding an `expand` element to your query:
+
+```yaml
+select:
+  - key
+  - status
+  - summary
+from: issues
+expand:
+  - transitions
+```
+
+The meaning of these expansions is defined by Jira; you can find more information
+in [Jira's documentation](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#expansion).
+
 ## Future Goals
 
 - SQlite support: Instead of exporting a CSV, exporting an SQLite database.

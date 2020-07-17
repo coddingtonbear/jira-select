@@ -64,12 +64,20 @@ def get_field_data(
         functions = {}
 
     names: Dict[str, Any] = {}
-    if hasattr(row, "key"):
-        names["key"] = row.key
 
     if hasattr(row, "fields"):
         for field_name in dir(row.fields):
             names[field_name] = getattr(row.fields, field_name)
+
+    # Gather any top-level keys, too, to make sure we fetch any expansions
+    for key in dir(row):
+        value = getattr(row, key)
+        if (
+            key.lower() == key
+            and not key.startswith("_")
+            and isinstance(value, (str, float, int, list, dict))
+        ):
+            names[key] = getattr(row, key)
 
     try:
         return simple_eval(expression, names=names, functions=functions)

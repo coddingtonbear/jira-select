@@ -31,8 +31,8 @@ QueryDefinition = TypedDict(
         "from": DataSource,
         "where": JqlList,
         "having": ExpressionList,
-        "expand": List[JiraFieldName],
-        # "having": Dict[CustomFilterFieldName, Any],
+        "expand": List[str],
+        "limit": int,
     },
     total=False,
 )
