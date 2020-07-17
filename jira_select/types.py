@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Literal, Union
+from typing import Any, Callable, List, Literal, Union
 from typing_extensions import TypedDict
 
 
@@ -6,8 +6,8 @@ DataSource = Literal["issues", "boards"]
 
 
 class SelectFieldDefinition(TypedDict):
-    field: str
-    display: str
+    expression: str
+    column: str
 
 
 Field = Union[SelectFieldDefinition, str]
@@ -16,12 +16,7 @@ JQLString = str
 
 CustomFilterFieldName = str
 
-
-class JQLIssueQuery(TypedDict):
-    jql: JQLString
-
-
-ListIssueQuery = List
+WhereList = List
 
 
 # We have to use the alternative method of defining the TypedDict since
@@ -31,7 +26,7 @@ QueryDefinition = TypedDict(
     {
         "select": List[Field],
         "from": DataSource,
-        "where": Dict,
+        "where": WhereList,
         "expand": List[str],
         # "having": Dict[CustomFilterFieldName, Any],
     },

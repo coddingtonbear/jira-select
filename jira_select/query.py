@@ -1,20 +1,15 @@
-import re
-from typing import Any, Dict, Generator, cast, List
+from typing import Any, Dict, Generator, List
 
 from jira import JIRA, Issue
 
-from .exceptions import UserError
 from .types import (
-    JQLIssueQuery,
-    ListIssueQuery,
     QueryDefinition,
     SelectFieldDefinition,
 )
+from .utils import get_field_data, parse_select_definition
 
 
 class Query:
-    FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<field>[\w.]+) as "(?P<display>.*)"$')
-
     def __init__(self, jira: JIRA, definition: QueryDefinition):
         self._definition: QueryDefinition = definition
         self._jira: JIRA = jira
@@ -31,56 +26,20 @@ class Query:
         fields: List[SelectFieldDefinition] = []
 
         for field in self.definition["select"]:
-            if isinstance(field, str):
-                as_match = self.FIELD_DISPLAY_DEFN_RE.match(field)
-                display = field
-                if as_match:
-                    match_dict = as_match.groupdict()
-                    field = match_dict["field"]
-                    display = match_dict["display"]
-
-                fields.append({"field": field, "display": display})
-            else:
-                fields.append(field)
+            fields.append(parse_select_definition(field))
 
         return fields
-
-    def _get_field_data(self, row: Any, field: str) -> Any:
-        if field == "key":
-            return row.key
-
-        dotpath = field.split(".")
-        cursor = row.fields
-
-        for part in dotpath:
-            try:
-                cursor = getattr(cursor, part)
-            except (AttributeError, TypeError):
-                return None
-
-        return cursor
 
     def _generate_row_dict(self, row: Any) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
 
         for field_defn in self.get_fields():
-            result[field_defn["display"]] = self._get_field_data(
-                row, field_defn["field"]
-            )
+            result[field_defn["column"]] = get_field_data(row, field_defn["expression"])
 
         return result
 
     def _get_jql(self) -> str:
-        if isinstance(self.definition["where"], dict):
-            where = cast(JQLIssueQuery, self.definition["where"])
-            if "jql" not in where:
-                raise UserError("Expected field 'jql' in query 'where' clause.")
-            jql = where["jql"]
-        else:
-            where = cast(ListIssueQuery, self.definition["where"])
-            jql = " AND ".join(where)
-
-        return jql
+        return " AND ".join(self.definition["where"])
 
     def _get_issues(self) -> Generator[Issue, None, None]:
         jql = self._get_jql()

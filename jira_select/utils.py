@@ -1,11 +1,17 @@
 import logging
 import os
+import re
+from typing import Any, Dict, Union
 
 from appdirs import user_config_dir
+from simpleeval import simple_eval, AttributeDoesNotExist
 from yaml import safe_load, safe_dump
 
 from .constants import APP_NAME
-from .types import ConfigDict
+from .types import ConfigDict, SelectFieldDefinition
+
+
+FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
 
 
 logger = logging.getLogger(__name__)
@@ -34,3 +40,34 @@ def save_config(data: ConfigDict, path: str = None) -> None:
 
     with open(path, "w") as outf:
         safe_dump(data, outf)
+
+
+def parse_select_definition(
+    expression: Union[str, SelectFieldDefinition]
+) -> SelectFieldDefinition:
+    if isinstance(expression, str):
+        as_match = FIELD_DISPLAY_DEFN_RE.match(expression)
+        column = expression
+        expression = expression
+        if as_match:
+            match_dict = as_match.groupdict()
+            expression = match_dict["expression"]
+            column = match_dict["column"]
+
+        return {"expression": expression, "column": column}
+    return expression
+
+
+def get_field_data(row: Any, expression: str) -> Any:
+    names: Dict[str, Any] = {}
+    if hasattr(row, "key"):
+        names["key"] = row.key
+
+    if hasattr(row, "fields"):
+        for field_name in dir(row.fields):
+            names[field_name] = getattr(row.fields, field_name)
+
+    try:
+        return simple_eval(expression, names=names)
+    except AttributeDoesNotExist:
+        return None

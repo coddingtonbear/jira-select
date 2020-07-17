@@ -13,7 +13,7 @@ class Formatter(BaseFormatter):
         fields = []
 
         for field in self.query.get_fields():
-            fields.append(field["display"])
+            fields.append(field["column"])
 
         return fields
 
