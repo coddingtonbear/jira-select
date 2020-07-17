@@ -1,6 +1,7 @@
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional
 
 from jira import JIRA, Issue
+from rich.progress import Progress, TaskID
 
 from .exceptions import UserError
 from .plugin import get_installed_functions
@@ -82,11 +83,13 @@ class Result:
 
 
 class Query:
-    def __init__(self, jira: JIRA, definition: QueryDefinition, emit_omissions=False):
+    def __init__(
+        self, jira: JIRA, definition: QueryDefinition, progress_bar: bool = False
+    ):
         self._definition: QueryDefinition = definition
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
-        self._emit_omissions: bool = emit_omissions
+        self._progress_bar = progress_bar
 
     @property
     def jira(self) -> JIRA:
@@ -124,26 +127,46 @@ class Query:
 
         raise UserError(f"Could not generate JQL from {where}.")
 
-    def _get_issues(self) -> Generator[Issue, None, None]:
+    def _get_issues_internal(self) -> Generator[Issue, None, None]:
         jql = self._get_jql()
 
         expand = self.definition.get("expand", [])
 
-        startAt = 0
-        maxResults = float("inf")
-        resultLimit = self.definition.get("limit", float("inf"))
-        while startAt < maxResults:
+        start_at = 0
+        max_results = float("inf")
+        result_limit = self.definition.get("limit", float("inf"))
+
+        while start_at < max_results:
             results = self.jira.search_issues(
-                jql, startAt=startAt, expand=",".join(expand), fields="*all",
+                jql, startAt=start_at, expand=",".join(expand), fields="*all",
             )
-            maxResults = results.total
+            max_results = results.total
             for result in results:
+
                 yield result
-                startAt += 1
+                start_at += 1
 
                 # Return early if our result limit has been reached
-                if startAt >= resultLimit:
+                if start_at >= result_limit:
                     return
+
+    def _get_issues(self) -> Generator[Issue, None, None]:
+        resultLimit = self.definition.get("limit", 2 ** 32)
+
+        if self._progress_bar:
+            with Progress() as progress:
+                record_count = self.count()
+                task: Optional[TaskID] = None
+                if self._progress_bar:
+                    task = progress.add_task(
+                        "Processing", total=min(record_count, resultLimit)
+                    )
+                for record in self._get_issues_internal():
+                    if task is not None:
+                        progress.update(task, advance=1)
+                    yield record
+        else:
+            yield from self._get_issues_internal()
 
     def _process_group_by(
         self, iterator: Iterable[Any]
@@ -168,7 +191,7 @@ class Query:
 
     def _process_having(
         self, iterator: Iterable[Result]
-    ) -> Generator[Optional[Result], None, None]:
+    ) -> Generator[Result, None, None]:
         for row in iterator:
             include_row = True
             for having in self.definition.get("having", []):
@@ -178,17 +201,8 @@ class Query:
 
             if include_row:
                 yield row
-                # This row might actually be composed of multiple records
-                # so if we're in 'emit_omissions' mode, we should emit
-                # a 'None' for each of those so the progressbar will
-                # update properly
-                if self._emit_omissions and len(row.rows) > 1:
-                    for _ in range(len(row.rows) - 1):
-                        yield None
-            elif self._emit_omissions:
-                yield None
 
-    def _get_iterator(self) -> Generator[Optional[Any], None, None]:
+    def _get_iterator(self) -> Generator[Any, None, None]:
         source = self.definition["from"]
 
         if source == "issues":
@@ -205,9 +219,6 @@ class Query:
 
         return min(self.jira.search_issues(jql).total, resultLimit)
 
-    def __iter__(self) -> Generator[Optional[Dict[str, Any]], None, None]:
+    def __iter__(self) -> Generator[Dict[str, Any], None, None]:
         for row in self._get_iterator():
-            if row is None:
-                yield None
-            else:
-                yield self._generate_row_dict(row)
+            yield self._generate_row_dict(row)

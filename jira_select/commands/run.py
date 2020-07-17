@@ -4,7 +4,6 @@ import sys
 import tempfile
 from typing import IO, Dict, Optional, cast
 
-from rich.progress import track
 from yaml import safe_load
 
 from ..exceptions import UserError
@@ -67,22 +66,12 @@ class Command(BaseCommand):
             )
             output_file = output.name
 
-        query = Query(self.jira, query_definition, emit_omissions=True)
+        query = Query(
+            self.jira, query_definition, progress_bar=output is not sys.stdout
+        )
         with formatter_cls(query, output) as formatter:
-            if output == sys.stdout:
-                for row in query:
-                    if row is not None:
-                        formatter.writerow(row)
-            else:
-                count = 0
-                # This progressbar is here only to make it clear that
-                # something is happening -- sometimes the count takes
-                # a few seconds to complete
-                for _ in track([None], description="Preparing", total=1):
-                    count = query.count()
-                for row in track(query, description="Executing", total=count):
-                    if row is not None:
-                        formatter.writerow(row)
+            for row in query:
+                formatter.writerow(row)
         output.flush()
 
         if self.options.view:
