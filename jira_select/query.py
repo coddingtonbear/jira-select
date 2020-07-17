@@ -1,8 +1,9 @@
-from typing import Any, Dict, Generator, List
+from typing import Any, Callable, Dict, Generator, List
 
 from jira import JIRA, Issue
 
 from .exceptions import UserError
+from .plugin import get_installed_functions
 from .types import QueryDefinition, SelectFieldDefinition
 from .utils import get_field_data, parse_select_definition
 
@@ -11,6 +12,7 @@ class Query:
     def __init__(self, jira: JIRA, definition: QueryDefinition):
         self._definition: QueryDefinition = definition
         self._jira: JIRA = jira
+        self._functions: Dict[str, Callable] = get_installed_functions(jira)
 
     @property
     def jira(self) -> JIRA:
@@ -32,7 +34,9 @@ class Query:
         result: Dict[str, Any] = {}
 
         for field_defn in self.get_fields():
-            result[field_defn["column"]] = get_field_data(row, field_defn["expression"])
+            result[field_defn["column"]] = get_field_data(
+                row, field_defn["expression"], functions=self._functions
+            )
 
         return result
 

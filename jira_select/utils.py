@@ -1,15 +1,14 @@
 import logging
 import os
 import re
-from typing import Any, Dict, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from appdirs import user_config_dir
-from simpleeval import simple_eval, AttributeDoesNotExist
-from yaml import safe_load, safe_dump
+from simpleeval import AttributeDoesNotExist, simple_eval
+from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
 from .types import ConfigDict, SelectFieldDefinition
-
 
 FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
 
@@ -58,7 +57,12 @@ def parse_select_definition(
     return expression
 
 
-def get_field_data(row: Any, expression: str) -> Any:
+def get_field_data(
+    row: Any, expression: str, functions: Optional[Dict[str, Callable]] = None
+) -> Any:
+    if functions is None:
+        functions = {}
+
     names: Dict[str, Any] = {}
     if hasattr(row, "key"):
         names["key"] = row.key
@@ -68,6 +72,6 @@ def get_field_data(row: Any, expression: str) -> Any:
             names[field_name] = getattr(row.fields, field_name)
 
     try:
-        return simple_eval(expression, names=names)
+        return simple_eval(expression, names=names, functions=functions)
     except AttributeDoesNotExist:
         return None

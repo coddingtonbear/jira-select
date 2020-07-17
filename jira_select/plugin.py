@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import IO, Any, Dict, Optional, Type
+from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Optional, Type, cast
 
 import pkg_resources
 
@@ -13,9 +13,11 @@ from rich.console import Console
 
 from .constants import APP_NAME
 from .exceptions import ConfigurationError
-from .query import Query
 from .types import ConfigDict
 from .utils import save_config
+
+if TYPE_CHECKING:
+    from .query import Query
 
 logger = logging.getLogger(__name__)
 
@@ -166,3 +168,44 @@ class BaseFormatter(metaclass=ABCMeta):
     @abstractmethod
     def writerow(self, row: Dict[str, Any]):
         ...
+
+
+def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
+    possible_commands: Dict[str, BaseFunction] = {}
+    for entry_point in pkg_resources.iter_entry_points(group="jira_select.functions"):
+        try:
+            loaded_class = entry_point.load()
+        except ImportError:
+            logger.warning(
+                "Attempted to load entrypoint %s, but " "an ImportError occurred.",
+                entry_point,
+            )
+            continue
+        if not issubclass(loaded_class, BaseFunction):
+            logger.warning(
+                "Loaded entrypoint %s, but loaded class is "
+                "not a subclass of `jira_select.plugin.BaseFunction`.",
+                entry_point,
+            )
+            continue
+        possible_commands[entry_point.name] = loaded_class(jira)
+
+    return cast(Dict[str, Callable], possible_commands)
+
+
+class BaseFunction(metaclass=ABCMeta):
+    def __init__(self, jira: Optional[JIRA]):
+        self._jira = jira
+
+    @property
+    def jira(self):
+        assert self._jira
+
+        return self._jira
+
+    @abstractmethod
+    def process(self, *args, **kwargs) -> Optional[Any]:
+        ...
+
+    def __call__(self, *args, **kwargs) -> Optional[Any]:
+        return self.process(*args, **kwargs)
