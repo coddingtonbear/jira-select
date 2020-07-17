@@ -74,8 +74,10 @@ class Command(BaseCommand):
                     if row is not None:
                         formatter.writerow(row)
             else:
-                count = query.count()
-                for row in track(query, description="Running query...", total=count):
+                count = 0
+                for _ in track([None], description="Preparing", total=1):
+                    count = query.count()
+                for row in track(query, description="Executing", total=count):
                     if row is not None:
                         formatter.writerow(row)
         output.flush()
