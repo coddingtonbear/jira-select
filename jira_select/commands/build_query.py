@@ -8,4 +8,3 @@ class Command(BaseCommand):
 
     def handle(self) -> None:
         raise NotImplementedError()
-

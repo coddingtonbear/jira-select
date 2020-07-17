@@ -2,13 +2,12 @@ from logging import getLogger
 from typing import Optional
 from urllib.parse import urlparse
 
-from jira import JIRA, JIRAError
 import keyring
+from jira import JIRA, JIRAError
 
 from ..constants import APP_NAME
 from ..exceptions import UserError
 from ..plugin import BaseCommand
-
 
 logger = getLogger(__name__)
 
@@ -79,4 +78,3 @@ class Command(BaseCommand):
         )
         if store_password:
             keyring.set_password(APP_NAME, instance_url + username, password)
-
