@@ -27,7 +27,11 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--having",
-            help="A 'having' expression to use for limiting the displayed results. E.g.--having=\"'estimate' in description.lower()\"",
+            help=(
+                "A 'having' expression to use for limiting the displayed results. "
+                "Searchable fields are 'key', 'type', and 'description'. "
+                "E.g.--having=\"'estimate' in description.lower()\". "
+            ),
         )
 
     def evaluate_expression(self, row: Any, expression: str) -> Any:
