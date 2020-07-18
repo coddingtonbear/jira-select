@@ -80,7 +80,7 @@ class TestParseOrderByDefintition(JiraSelectTestCase):
     def test_handles_nonreversed(self):
         ordering = "somefield"
 
-        expected_ordering = ordering
+        expected_ordering = ordering, False
         actual_ordering = utils.parse_sort_by_definition(ordering)
 
         assert actual_ordering == expected_ordering
@@ -88,7 +88,7 @@ class TestParseOrderByDefintition(JiraSelectTestCase):
     def test_handles_reversed(self):
         ordering = "somefield desc"
 
-        expected_ordering = "-1 * (somefield)"
+        expected_ordering = "somefield", True
         actual_ordering = utils.parse_sort_by_definition(ordering)
 
         assert actual_ordering == expected_ordering
@@ -96,7 +96,15 @@ class TestParseOrderByDefintition(JiraSelectTestCase):
     def test_handles_reversed_casing(self):
         ordering = "somefield DESC"
 
-        expected_ordering = "-1 * (somefield)"
+        expected_ordering = "somefield", True
+        actual_ordering = utils.parse_sort_by_definition(ordering)
+
+        assert actual_ordering == expected_ordering
+
+    def test_handles_nonreversed_casing(self):
+        ordering = "somefield ASC"
+
+        expected_ordering = "somefield", False
         actual_ordering = utils.parse_sort_by_definition(ordering)
 
         assert actual_ordering == expected_ordering

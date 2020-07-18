@@ -137,7 +137,7 @@ group_by:
 You'll receive just a single result row for each status, and a count
 of how many records shared that status in the second column.
 
-### sorting
+### Sorting
 
 You can order your entries using any expression, too:
 

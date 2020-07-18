@@ -5,7 +5,7 @@ import logging
 import os
 import re
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Tuple
 
 from appdirs import user_config_dir
 import simpleeval
@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
 SORT_BY_DESC_FN = re.compile(r"^(?P<expression>.*) DESC", re.IGNORECASE)
+SORT_BY_ASC_FN = re.compile(r"^(?P<expression>.*) ASC", re.IGNORECASE)
 
 
 logger = logging.getLogger(__name__)
@@ -113,15 +114,18 @@ def parse_select_definition(
     return expression
 
 
-def parse_sort_by_definition(expression: str):
-    is_reversed = SORT_BY_DESC_FN.match(expression)
+def parse_sort_by_definition(expression: str) -> Tuple[str, bool]:
+    is_reversed = False
+    is_reversed_match = SORT_BY_DESC_FN.match(expression)
+    is_not_reversed_match = SORT_BY_ASC_FN.match(expression)
+    if is_reversed_match:
+        expression = is_reversed_match.groupdict()["expression"]
+        is_reversed = True
+    elif is_not_reversed_match:
+        expression = is_not_reversed_match.groupdict()["expression"]
+        is_reversed = False
 
-    if is_reversed:
-        expression = is_reversed.groupdict()["expression"]
-
-        return f"-1 * ({expression})"
-
-    return expression
+    return expression, is_reversed
 
 
 def calculate_result_hash(

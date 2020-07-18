@@ -283,17 +283,16 @@ class Query:
 
         # Now, sort by each of the ordering expressions in reverse order
         for sort_by in reversed(self.definition["sort_by"]):
+            sort_expression, reverse = parse_sort_by_definition(sort_by)
 
             def sort_key(row):
-                result = get_field_data(
-                    row, parse_sort_by_definition(sort_by), self._functions
-                )
+                result = get_field_data(row, sort_expression, self._functions)
                 if task is not None:
                     progress.update(task, advance=1)
 
                 return result
 
-            rows = sorted(rows, key=sort_key)
+            rows = sorted(rows, key=sort_key, reverse=reverse)
 
         yield from rows
 
