@@ -172,7 +172,11 @@ class Query:
 
         while start_at < max_results:
             results = self.jira.search_issues(
-                jql, startAt=start_at, expand=",".join(expand), fields="*all",
+                jql,
+                startAt=start_at,
+                expand=",".join(expand),
+                fields="*all",
+                maxResults=result_limit,
             )
             max_results = results.total
             self._select_count = min(results.total, result_limit)
