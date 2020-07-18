@@ -15,6 +15,12 @@ class Command(BaseCommand):
     @classmethod
     def add_arguments(cls, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
+            "search_terms",
+            nargs="*",
+            type=str,
+            help="Case-insensitive search term for limiting displayed results.",
+        )
+        parser.add_argument(
             "--having",
             help=(
                 "A 'having' expression to use for limiting the displayed results. "
@@ -41,14 +47,22 @@ class Command(BaseCommand):
 
             description = signature + docstring.strip() + "\n\n"
 
+            row = {
+                "name": name,
+                "description": description,
+            }
+            if self.options.search_terms:
+                matches = True
+                for option in self.options.search_terms:
+                    if option.lower() not in str(row).lower():
+                        matches = False
+                        break
+                if not matches:
+                    continue
             if self.options.having:
-                row = {
-                    "name": name,
-                    "description": description,
-                }
                 if not evaluate_expression(self.options.having, row, functions):
                     continue
 
-            table.add_row(name, description)
+            table.add_row(row["name"], row["description"])
 
         self.console.print(table)

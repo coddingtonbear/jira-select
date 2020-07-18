@@ -26,6 +26,12 @@ class Command(BaseCommand):
             "source", choices=["issues"],
         )
         parser.add_argument(
+            "search_terms",
+            nargs="*",
+            type=str,
+            help="Case-insensitive search term for limiting displayed results.",
+        )
+        parser.add_argument(
             "--having",
             help=(
                 "A 'having' expression to use for limiting the displayed results. "
@@ -74,9 +80,16 @@ class Command(BaseCommand):
         table.add_column(header="description", style="bright_cyan")
 
         for row in data_fn():
+            if self.options.search_terms:
+                matches = True
+                for option in self.options.search_terms:
+                    if option.lower() not in str(row).lower():
+                        matches = False
+                        break
+                if not matches:
+                    continue
             if self.options.having:
-                do_show = self.evaluate_expression(DotMap(row), self.options.having)
-                if not do_show:
+                if not self.evaluate_expression(DotMap(row), self.options.having):
                     continue
 
             table.add_row(
