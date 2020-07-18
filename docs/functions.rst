@@ -62,9 +62,12 @@ Jira
 Dates
 -----
 
-.. py:function:: parse_datetime(datetime_string: str) -> datetime.datetime
+.. py:function:: parse_datetime(datetime_string: str, *args, **kwargs) -> datetime.datetime
 
    Parse a date string into a datetime object.
+
+   This relies on `python-dateutil`; there are many additional options available
+   that you can find documented `here <https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.parse>`_.
 
 Json
 ----
