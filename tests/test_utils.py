@@ -105,11 +105,9 @@ class TestParseOrderByDefintition(JiraSelectTestCase):
 class TestCalculateResultHash(JiraSelectTestCase):
     def test_simple(self):
         issue = self.get_jira_issue()
-        query_defn: QueryDefinition = {"select": ["key"], "from": "issues"}
-        query_obj = self.get_query([issue], query_defn)
 
-        row = query.Result.for_row(query_obj, ["key"], row=issue)
-        assert isinstance(utils.calculate_result_hash(row, []), int)
+        row = query.SingleResult(issue)
+        assert isinstance(utils.calculate_result_hash(row, ["key"], {}), int)
 
 
 class TestGetRowDict(JiraSelectTestCase):

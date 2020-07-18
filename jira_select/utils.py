@@ -12,7 +12,7 @@ import simpleeval
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
-from .types import ConfigDict, QueryDefinition, SelectFieldDefinition
+from .types import ConfigDict, ExpressionList, QueryDefinition, SelectFieldDefinition
 
 if TYPE_CHECKING:
     from .query import Result
@@ -123,13 +123,21 @@ def parse_order_by_definition(expression: str):
     return expression
 
 
-def calculate_result_hash(row: Result, functions: Dict[str, Callable]) -> int:
+def calculate_result_hash(
+    row: Result, group_fields: ExpressionList, functions: Dict[str, Callable],
+) -> int:
     params = [
-        str(get_field_data(row, group_field, functions))
-        for group_field in row.value_fields
+        str(get_field_data(row, group_field, functions)) for group_field in group_fields
     ]
 
     return int(hashlib.sha1(":".join(params).encode("UTF-8")).hexdigest(), 16)
+
+
+def field_name_is_public(key: str) -> bool:
+    if key.lower() == key and key != "fields" and not key.startswith("_"):
+        return True
+
+    return False
 
 
 def get_row_dict(row: Any) -> Dict[str, Any]:
@@ -137,20 +145,30 @@ def get_row_dict(row: Any) -> Dict[str, Any]:
 
     if hasattr(row, "fields"):
         for field_name in dir(row.fields):
-            names[field_name] = getattr(row.fields, field_name)
+            if field_name_is_public(field_name):
+                names[field_name] = getattr(row.fields, field_name)
 
     # Gather any top-level keys, too, to make sure we fetch any expansions
     for key in dir(row):
         value = getattr(row, key)
-        if (
-            key.lower() == key
-            and key != "fields"
-            and not key.startswith("_")
-            and isinstance(value, (str, bool, float, int, list, dict))
+        if field_name_is_public(key) and isinstance(
+            value, (str, bool, float, int, list, dict)
         ):
             names[key] = getattr(row, key)
 
     return names
+
+
+def expressions_match(left: str, right: str) -> bool:
+    """ Verifies that the expressions passed-in match one another.
+
+    This is used for determining when to force returning a single value
+    when selecting columns from a grouped query.
+
+    Right now, this just compares the string equality of the expressions;
+    it might be better later to compare them using the ast parser.
+    """
+    return left.strip() == right.strip()
 
 
 def evaluate_expression(
@@ -162,7 +180,10 @@ def evaluate_expression(
 
 
 def get_field_data(
-    row: Result, expression: str, functions: Optional[Dict[str, Callable]] = None
+    row: Result,
+    expression: str,
+    functions: Optional[Dict[str, Callable]] = None,
+    error_returns_null=True,
 ) -> Any:
     if functions is None:
         functions = {}
@@ -172,4 +193,6 @@ def get_field_data(
             expression, names={"_": row, **row.as_dict()}, functions=functions
         )
     except (simpleeval.AttributeDoesNotExist, KeyError, IndexError, TypeError):
+        if not error_returns_null:
+            raise
         return None
