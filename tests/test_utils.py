@@ -1,0 +1,270 @@
+import copy
+from unittest.mock import ANY, Mock, patch
+
+import simpleeval
+
+from jira_select import utils, query
+from jira_select.types import QueryDefinition, SelectFieldDefinition
+
+from .base import JiraSelectTestCase
+
+
+class TestCleanQueryDefinition(JiraSelectTestCase):
+    def test_stringifies_boolean(self):
+        query: QueryDefinition = {
+            "select": ["whatever"],
+            "from": "issues",
+            "group_by": [True],
+        }
+
+        actual = utils.clean_query_definition(query)
+        expected: QueryDefinition = {
+            "select": ["whatever"],
+            "from": "issues",
+            "group_by": ["True"],
+        }
+
+        assert expected == actual
+
+    def test_does_not_break_select_field_definitions(self):
+        query: QueryDefinition = {
+            "select": [{"expression": "arbitrary", "column": "whatever",}],
+            "from": "issues",
+        }
+
+        actual = utils.clean_query_definition(query)
+        expected: QueryDefinition = {
+            "select": [{"expression": "arbitrary", "column": "whatever",}],
+            "from": "issues",
+        }
+
+        assert expected == actual
+
+
+class TestParseSelectDefinition(JiraSelectTestCase):
+    def test_returns_select_field_definition_directly(self):
+        field_definition: SelectFieldDefinition = {
+            "expression": "arbitrary",
+            "column": "whatever",
+        }
+
+        expected_result = copy.deepcopy(field_definition)
+        actual_result = utils.parse_select_definition(field_definition)
+
+        assert actual_result == expected_result
+
+    def test_returns_name_if_no_as_expression(self):
+        field_definition = "my_field_name"
+
+        expected_result: SelectFieldDefinition = {
+            "expression": field_definition,
+            "column": field_definition,
+        }
+        actual_result = utils.parse_select_definition(field_definition)
+
+        assert expected_result == actual_result
+
+    def test_returns_name_and_field_if_as_expression(self):
+        field_definition = 'my_field_name as "My Field"'
+
+        expected_result: SelectFieldDefinition = {
+            "expression": "my_field_name",
+            "column": "My Field",
+        }
+        actual_result = utils.parse_select_definition(field_definition)
+
+        assert expected_result == actual_result
+
+
+class TestParseOrderByDefintition(JiraSelectTestCase):
+    def test_handles_nonreversed(self):
+        ordering = "somefield"
+
+        expected_ordering = ordering
+        actual_ordering = utils.parse_order_by_definition(ordering)
+
+        assert actual_ordering == expected_ordering
+
+    def test_handles_reversed(self):
+        ordering = "somefield desc"
+
+        expected_ordering = "-1 * (somefield)"
+        actual_ordering = utils.parse_order_by_definition(ordering)
+
+        assert actual_ordering == expected_ordering
+
+    def test_handles_reversed_casing(self):
+        ordering = "somefield DESC"
+
+        expected_ordering = "-1 * (somefield)"
+        actual_ordering = utils.parse_order_by_definition(ordering)
+
+        assert actual_ordering == expected_ordering
+
+
+class TestCalculateResultHash(JiraSelectTestCase):
+    def test_simple(self):
+        issue = self.get_jira_issue()
+        query_defn: QueryDefinition = {"select": ["key"], "from": "issues"}
+        query_obj = self.get_query([issue], query_defn)
+
+        row = query.Result.for_row(query_obj, ["key"], row=issue)
+        assert isinstance(utils.calculate_result_hash(row, []), int)
+
+
+class TestGetRowDict(JiraSelectTestCase):
+    def test_copies_field_data(self):
+        field_data = {
+            "one": 1,
+        }
+
+        expected = {
+            "key": ANY,
+            "one": 1,
+        }
+        actual = utils.get_row_dict(self.get_jira_issue(field_data))
+
+        assert actual == expected
+
+    def test_copies_top_level_extra_keys(self):
+        field_data = {
+            "one": 1,
+        }
+        issue = self.get_jira_issue(field_data)
+        issue.update(
+            {
+                "str_field": "ok",
+                "float_field": 1.0,
+                "int_field": 10,
+                "list_field": [1, 2, 3],
+                "dict_field": {"ok": True},
+                "bool_field": False,
+            }
+        )
+
+        expected = {
+            "key": ANY,
+            "str_field": "ok",
+            "float_field": 1.0,
+            "int_field": 10,
+            "list_field": [1, 2, 3],
+            "dict_field": {"ok": True},
+            "bool_field": False,
+            "one": 1,
+        }
+        actual = utils.get_row_dict(issue)
+
+        assert actual == expected
+
+    def test_does_not_copy_top_level_underscored(self):
+        field_data = {
+            "one": 1,
+        }
+        issue = self.get_jira_issue(field_data)
+        issue.update({"_nope": 1})
+
+        expected = {
+            "key": ANY,
+            "one": 1,
+        }
+        actual = utils.get_row_dict(issue)
+
+        assert actual == expected
+
+    def test_does_not_copy_top_level_nonlowercase(self):
+        field_data = {
+            "one": 1,
+        }
+        issue = self.get_jira_issue(field_data)
+        issue.update({"NOPE": 1})
+
+        expected = {
+            "key": ANY,
+            "one": 1,
+        }
+        actual = utils.get_row_dict(issue)
+
+        assert actual == expected
+
+    def test_does_not_copy_top_level_object(self):
+        field_data = {
+            "one": 1,
+        }
+        issue = self.get_jira_issue(field_data)
+        issue.update({"nope": object()})
+
+        expected = {
+            "key": ANY,
+            "one": 1,
+        }
+        actual = utils.get_row_dict(issue)
+
+        assert actual == expected
+
+
+class TestEvaluateExpression(JiraSelectTestCase):
+    def test_simple(self):
+        expression = "my_field"
+        names = {"my_field": "beep"}
+        functions = {}
+
+        expected_result = "beep"
+        actual_result = utils.evaluate_expression(expression, names, functions)
+
+        assert expected_result == actual_result
+
+    def test_function(self):
+        expression = "len(my_field)"
+        names = {"my_field": "beep"}
+        functions = {"len": len}
+
+        expected_result = 4
+        actual_result = utils.evaluate_expression(expression, names, functions)
+
+        assert expected_result == actual_result
+
+
+class TestGetFieldData(JiraSelectTestCase):
+    def test_simple(self):
+        mock_row = Mock(as_dict=Mock(return_value={"field": "OK"}))
+
+        actual = utils.get_field_data(mock_row, "field")
+        expected = "OK"
+
+        assert actual == expected
+
+    @patch("simpleeval.simple_eval")
+    def test_none_for_dne(self, simple_eval):
+        simple_eval.side_effect = simpleeval.AttributeDoesNotExist(None, None)
+
+        mock_row = Mock(as_dict=Mock(return_value={"field": "OK"}))
+
+        result = utils.get_field_data(mock_row, "arbitrary")
+        assert result is None
+
+    @patch("simpleeval.simple_eval")
+    def test_none_for_keyerror(self, simple_eval):
+        simple_eval.side_effect = KeyError()
+
+        mock_row = Mock(as_dict=Mock(return_value={"field": "OK"}))
+
+        result = utils.get_field_data(mock_row, "arbitrary")
+        assert result is None
+
+    @patch("simpleeval.simple_eval")
+    def test_none_for_valueerror(self, simple_eval):
+        simple_eval.side_effect = ValueError()
+
+        mock_row = Mock(as_dict=Mock(return_value={"field": "OK"}))
+
+        result = utils.get_field_data(mock_row, "arbitrary")
+        assert result is None
+
+    @patch("simpleeval.simple_eval")
+    def test_none_for_typerror(self, simple_eval):
+        simple_eval.side_effect = TypeError()
+
+        mock_row = Mock(as_dict=Mock(return_value={"field": "OK"}))
+
+        result = utils.get_field_data(mock_row, "arbitrary")
+        assert result is None

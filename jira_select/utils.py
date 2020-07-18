@@ -8,7 +8,7 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from appdirs import user_config_dir
-from simpleeval import AttributeDoesNotExist, simple_eval
+import simpleeval
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
@@ -144,8 +144,9 @@ def get_row_dict(row: Any) -> Dict[str, Any]:
         value = getattr(row, key)
         if (
             key.lower() == key
+            and key != "fields"
             and not key.startswith("_")
-            and isinstance(value, (str, float, int, list, dict))
+            and isinstance(value, (str, bool, float, int, list, dict))
         ):
             names[key] = getattr(row, key)
 
@@ -157,7 +158,7 @@ def evaluate_expression(
     names: Dict[str, Any],
     functions: Optional[Dict[str, Callable]] = None,
 ) -> Any:
-    return simple_eval(expression, names=names, functions=functions)
+    return simpleeval.simple_eval(expression, names=names, functions=functions)
 
 
 def get_field_data(
@@ -167,8 +168,8 @@ def get_field_data(
         functions = {}
 
     try:
-        return simple_eval(
+        return simpleeval.simple_eval(
             expression, names={"_": row, **row.as_dict()}, functions=functions
         )
-    except (AttributeDoesNotExist, KeyError, IndexError, TypeError):
+    except (simpleeval.AttributeDoesNotExist, KeyError, IndexError, TypeError):
         return None

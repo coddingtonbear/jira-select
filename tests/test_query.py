@@ -1,4 +1,3 @@
-from unittest import TestCase
 from unittest.mock import Mock
 
 from dotmap import DotMap
@@ -6,12 +5,14 @@ from dotmap import DotMap
 from jira_select.types import QueryDefinition
 from jira_select.query import Query
 
+from .base import JiraSelectTestCase
+
 
 class JiraList(list):
     pass
 
 
-class TestQuery(TestCase):
+class TestQuery(JiraSelectTestCase):
     def setUp(self):
         super().setUp()
 
