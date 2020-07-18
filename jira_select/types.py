@@ -1,6 +1,6 @@
-from typing import List, Literal, Union
+from typing import List, Union
 
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, Literal
 
 DataSource = Literal["issues", "boards"]
 
