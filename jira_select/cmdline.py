@@ -1,7 +1,9 @@
 import argparse
 
+from rich.console import Console
 from rich.traceback import install as enable_rich_traceback
 
+from .exceptions import UserError
 from .plugin import get_installed_commands
 from .utils import get_config
 
@@ -59,5 +61,11 @@ def main():
 
     config = get_config(path=args.config)
 
+    console = Console()
+
     command = commands[args.command](config=config, options=args)
-    command.handle()
+
+    try:
+        command.handle()
+    except UserError as e:
+        console.print(f"[red]{e}[/red]")

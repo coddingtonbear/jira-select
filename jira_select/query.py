@@ -11,6 +11,7 @@ from .types import ExpressionList, QueryDefinition, SelectFieldDefinition
 from .utils import (
     calculate_result_hash,
     clean_query_definition,
+    evaluate_expression,
     get_field_data,
     get_row_dict,
     parse_order_by_definition,
@@ -73,10 +74,8 @@ class Result:
         first = get_row_dict(self._rows[0])
 
         for field in self.value_fields:
-            result[field] = get_field_data(
-                Result.for_row(self.query, row=first),
-                field,
-                self.query.get_functions(),
+            result[field] = evaluate_expression(
+                field, first, self.query.get_functions(),
             )
 
         scalar_fields = self.scalar_fields
