@@ -1,6 +1,7 @@
 import argparse
 
 import keyring
+from prompt_toolkit.shortcuts import input_dialog
 
 from ..constants import APP_NAME
 from ..exceptions import UserError
@@ -17,12 +18,11 @@ class Command(BaseCommand):
         parser.add_argument("username")
 
     def handle(self):
-        password = self.prompt(
-            {
-                "type": "password",
-                "message": f"Enter password for {self.options.username}",
-            }
-        )
+        password = input_dialog(
+            title="Password",
+            text=f"Password for {self.options.username}: ",
+            password=True,
+        ).run()
 
         if not password:
             raise UserError("Password required")
