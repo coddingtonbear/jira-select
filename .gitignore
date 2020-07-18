@@ -3,3 +3,6 @@ env/
 .mypy_cache/
 *.pyc
 *.egg-info
+.eggs
+build/
+dist/
