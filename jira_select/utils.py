@@ -140,6 +140,8 @@ def get_field_data(
         functions = {}
 
     try:
-        return simple_eval(expression, names=row.as_dict(), functions=functions)
+        return simple_eval(
+            expression, names={"_": row, **row.as_dict()}, functions=functions
+        )
     except AttributeDoesNotExist:
         return None
