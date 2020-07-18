@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import json
 import logging
 from abc import ABCMeta, abstractmethod
 import statistics
@@ -70,6 +71,9 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
             "variance",
         ],
     ),
+    # JSON
+    "json_loads": json.loads,
+    "json_dumps": json.dumps,
 }
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 
