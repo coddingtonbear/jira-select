@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from .query import Result
 
 FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
-ORDER_BY_DESC_FN = re.compile(r"^(?P<expression>.*) DESC", re.IGNORECASE)
+SORT_BY_DESC_FN = re.compile(r"^(?P<expression>.*) DESC", re.IGNORECASE)
 
 
 logger = logging.getLogger(__name__)
@@ -81,9 +81,10 @@ def clean_query_definition(query: QueryDefinition) -> QueryDefinition:
 
     for section in (
         "where",
+        "order_by",
         "having",
         "group_by",
-        "order_by",
+        "sort_by",
         "expand",
     ):
         if section in query:
@@ -112,8 +113,8 @@ def parse_select_definition(
     return expression
 
 
-def parse_order_by_definition(expression: str):
-    is_reversed = ORDER_BY_DESC_FN.match(expression)
+def parse_sort_by_definition(expression: str):
+    is_reversed = SORT_BY_DESC_FN.match(expression)
 
     if is_reversed:
         expression = is_reversed.groupdict()["expression"]

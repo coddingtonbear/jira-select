@@ -81,7 +81,7 @@ class TestParseOrderByDefintition(JiraSelectTestCase):
         ordering = "somefield"
 
         expected_ordering = ordering
-        actual_ordering = utils.parse_order_by_definition(ordering)
+        actual_ordering = utils.parse_sort_by_definition(ordering)
 
         assert actual_ordering == expected_ordering
 
@@ -89,7 +89,7 @@ class TestParseOrderByDefintition(JiraSelectTestCase):
         ordering = "somefield desc"
 
         expected_ordering = "-1 * (somefield)"
-        actual_ordering = utils.parse_order_by_definition(ordering)
+        actual_ordering = utils.parse_sort_by_definition(ordering)
 
         assert actual_ordering == expected_ordering
 
@@ -97,7 +97,7 @@ class TestParseOrderByDefintition(JiraSelectTestCase):
         ordering = "somefield DESC"
 
         expected_ordering = "-1 * (somefield)"
-        actual_ordering = utils.parse_order_by_definition(ordering)
+        actual_ordering = utils.parse_sort_by_definition(ordering)
 
         assert actual_ordering == expected_ordering
 

@@ -38,7 +38,7 @@ See the built-in help (`--help`) for more options.
 
 ### Functions
 
-Your `select`, `having`, `group_by`, and `order_by` sections have access
+Your `select`, `having`, `group_by`, and `sort_by` sections have access
 to a wide range of functions as well as to the full breadth
 of Python syntax. If the built-in functions aren't enough, you can
 also just write your own and either register them at runtime or make
@@ -137,7 +137,7 @@ group_by:
 You'll receive just a single result row for each status, and a count
 of how many records shared that status in the second column.
 
-### Ordering
+### sorting
 
 You can order your entries using any expression, too:
 
@@ -148,11 +148,11 @@ select:
 from: issues
 group_by:
   - status
-order_by:
+sort_by:
   - count(key) desc
 ```
 
-This will order all tickets, grouped by status, in descending order
+This will sort all returned tickets, grouped by status, in descending order
 from the status that has the most tickets to the one that has the
 fewest.
 

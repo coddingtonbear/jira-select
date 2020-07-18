@@ -74,11 +74,11 @@ class TestQuery(JiraSelectTestCase):
 
         assert expected_results == actual_results
 
-    def test_order_by(self):
+    def test_sort_by(self):
         query: QueryDefinition = {
             "select": ["key"],
             "from": "issues",
-            "order_by": ["story_points desc", "key"],
+            "sort_by": ["story_points desc", "key"],
         }
 
         query = Query(self.mock_jira, query)
@@ -97,7 +97,7 @@ class TestQuery(JiraSelectTestCase):
             "select": ["issuetype", "len(key)"],
             "from": "issues",
             "group_by": ["issuetype"],
-            "order_by": ["len(key)"],
+            "sort_by": ["len(key)"],
         }
 
         query = Query(self.mock_jira, query)

@@ -6,7 +6,6 @@ from typing import Any, Callable, Dict, Generator, List, Optional, cast
 from jira import JIRA, Issue
 from rich.progress import Progress, TaskID
 
-from .exceptions import UserError
 from .plugin import get_installed_functions
 from .types import QueryDefinition, SelectFieldDefinition
 from .utils import (
@@ -15,7 +14,7 @@ from .utils import (
     expressions_match,
     get_field_data,
     get_row_dict,
-    parse_order_by_definition,
+    parse_sort_by_definition,
     parse_select_definition,
 )
 
@@ -150,14 +149,13 @@ class Query:
         return result
 
     def _get_jql(self) -> str:
-        where = self.definition.get("where")
+        query = " AND ".join(self.definition.get("where", []))
+        order_by_fields = ", ".join(self.definition.get("order_by", []))
 
-        if where is None:
-            return ""
-        elif isinstance(where, List):
-            return " AND ".join(self.definition["where"])
+        if order_by_fields:
+            query = f"{query} ORDER BY {order_by_fields}"
 
-        raise UserError(f"Could not generate JQL from {where}.")
+        return query
 
     def _get_issues(self, progress: Progress) -> Generator[SingleResult, None, None]:
         jql = self._get_jql()
@@ -261,17 +259,17 @@ class Query:
     def having_count(self):
         return self._having_count
 
-    def _process_order_by(
+    def _process_sort_by(
         self, iterator: Generator[Result, None, None], progress: Progress
     ) -> Generator[Result, None, None]:
-        if not self.definition.get("order_by", []):
+        if not self.definition.get("sort_by", []):
             yield from iterator
             return
 
         task: Optional[TaskID] = None
         if self.progress_bar_enabled:
             task = progress.add_task(
-                "order_by", total=len(self.definition["order_by"]) * self.having_count
+                "sort_by", total=len(self.definition["sort_by"]) * self.having_count
             )
 
         # First, materialize our list
@@ -279,12 +277,12 @@ class Query:
         if task is not None:
             progress.update(task, total=len(rows))
 
-        # Now, order by each of the ordering expressions in reverse order
-        for order_by in reversed(self.definition["order_by"]):
+        # Now, sort by each of the ordering expressions in reverse order
+        for sort_by in reversed(self.definition["sort_by"]):
 
             def sort_key(row):
                 result = get_field_data(
-                    row, parse_order_by_definition(order_by), self._functions
+                    row, parse_sort_by_definition(sort_by), self._functions
                 )
                 if task is not None:
                     progress.update(task, advance=1)
@@ -303,7 +301,7 @@ class Query:
         else:
             raise NotImplementedError(f"No search for source {source} implemented.")
 
-        yield from self._process_order_by(
+        yield from self._process_sort_by(
             self._process_having(
                 self._process_group_by(iterator(progress), progress), progress
             ),
