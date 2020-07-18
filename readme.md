@@ -38,8 +38,11 @@ See the built-in help (`--help`) for more options.
 
 ### Functions
 
-You can define and use functions for both formatting selected data
-and filtering rows returned from Jira.
+Your `select`, `having`, `group_by`, and `order_by` sections have access
+to a wide range of functions as well as to the full breadth
+of Python syntax. If the built-in functions aren't enough, you can
+also just write your own and either register them at runtime or make
+them persistently available via a setuptools entrypoint.
 
 #### Formatting rows
 
@@ -48,8 +51,8 @@ select:
   - status
   - summary
   - customfield_10069 as "Story Points"
-  - array_len(customfield_10010) as "Sprint Count"
-  - sprint_name(array_item(customfield_10010, -1)) as "Sprint Name"
+  - len(customfield_10010) as "Sprint Count"
+  - sprint_name(customfield_10010[-1]) as "Sprint Name"
 from: issues
 ```
 
@@ -72,7 +75,7 @@ from: issues
 having:
   # The quoting below is required only because the first character of line
   # being a double-quote causes YAML parsers to parse the line differently
-  - '"Sprint #19" in coalesce(sprint_name(array_item(customfield_10010, -1)), "")'
+  - '"Sprint #19" in sprint_name(customfield_10010[-1])'
 ```
 
 In the above example, the issues returned from Jira will be compared against
