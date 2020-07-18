@@ -35,7 +35,7 @@ class Command(BaseCommand):
             "--having",
             help=(
                 "A 'having' expression to use for limiting the displayed results. "
-                "Searchable fields are 'key', 'type', and 'description'. "
+                "Searchable fields are 'key', 'type', and 'description' and 'raw'. "
                 "E.g.--having=\"'estimate' in description.lower()\". "
             ),
         )
@@ -59,6 +59,7 @@ class Command(BaseCommand):
                 "key": str(self.get_field_data(DotMap(column), "key")),
                 "type": type,
                 "description": str(self.get_field_data(DotMap(column), "name")),
+                "raw": DotMap(column),
             }
             yield data
 

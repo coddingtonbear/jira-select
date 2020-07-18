@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Any, List, Union
 
 from typing_extensions import TypedDict, Literal
 
@@ -40,10 +40,11 @@ QueryDefinition = TypedDict(
 )
 
 
-class SchemaRow(TypedDict):
+class SchemaRow(TypedDict, total=False):
     key: str
     type: str
     description: str
+    raw: Any
 
 
 class ViewerDefinitionDict(TypedDict, total=False):
