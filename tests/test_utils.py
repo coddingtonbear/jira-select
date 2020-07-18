@@ -252,8 +252,8 @@ class TestGetFieldData(JiraSelectTestCase):
         assert result is None
 
     @patch("simpleeval.simple_eval")
-    def test_none_for_valueerror(self, simple_eval):
-        simple_eval.side_effect = ValueError()
+    def test_none_for_indexerror(self, simple_eval):
+        simple_eval.side_effect = IndexError()
 
         mock_row = Mock(as_dict=Mock(return_value={"field": "OK"}))
 
