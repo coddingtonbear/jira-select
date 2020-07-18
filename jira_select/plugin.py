@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import logging
 from abc import ABCMeta, abstractmethod
+import statistics
 from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Optional, Type, cast
 
 import pkg_resources
@@ -20,6 +22,51 @@ if TYPE_CHECKING:
     from .query import Query
 
 logger = logging.getLogger(__name__)
+
+
+BUILTIN_FUNCTIONS: Dict[str, Callable] = {
+    # Built-ins
+    "abs": abs,
+    "all": all,
+    "any": any,
+    "bin": bin,
+    "bool": bool,
+    "hex": hex,
+    "int": int,
+    "len": len,
+    "max": max,
+    "min": min,
+    "oct": oct,
+    "ord": ord,
+    "pow": pow,
+    "range": range,
+    "reversed": reversed,
+    "round": round,
+    "set": set,
+    "slice": slice,
+    "sorted": sorted,
+    "str": str,
+    "sum": sum,
+    "tuple": tuple,
+    "zip": zip,
+    # Statistics
+    "fmean": statistics.fmean,
+    "geometric_mean": statistics.geometric_mean,
+    "harmonic_mean": statistics.harmonic_mean,
+    "mean": statistics.mean,
+    "median": statistics.median,
+    "median_grouped": statistics.median_grouped,
+    "median_high": statistics.median_high,
+    "median_low": statistics.median_low,
+    "mode": statistics.mode,
+    "multimode": statistics.multimode,
+    "pstdev": statistics.pstdev,
+    "pvariance": statistics.pvariance,
+    "quantiles": statistics.quantiles,
+    "stdev": statistics.stdev,
+    "variance": statistics.variance,
+}
+REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 
 
 def get_installed_commands() -> Dict[str, Type[BaseCommand]]:
@@ -170,8 +217,14 @@ class BaseFormatter(metaclass=ABCMeta):
         ...
 
 
+def register_function(name: str, fn: Callable):
+    REGISTERED_FUNCTIONS[name] = fn
+
+
 def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
-    possible_commands: Dict[str, BaseFunction] = {}
+    possible_commands: Dict[str, Callable] = copy.copy(BUILTIN_FUNCTIONS)
+    possible_commands.update(REGISTERED_FUNCTIONS)
+
     for entry_point in pkg_resources.iter_entry_points(group="jira_select.functions"):
         try:
             loaded_class = entry_point.load()
@@ -188,9 +241,9 @@ def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
                 entry_point,
             )
             continue
-        possible_commands[entry_point.name] = loaded_class(jira)
+        possible_commands[entry_point.name] = cast(Callable, loaded_class(jira))
 
-    return cast(Dict[str, Callable], possible_commands)
+    return possible_commands
 
 
 class BaseFunction(metaclass=ABCMeta):
