@@ -20,7 +20,9 @@ CustomFilterFieldName = str
 
 JqlList = List[str]
 
-ExpressionList = List[str]
+Expression = str
+
+ExpressionList = List[Expression]
 
 # We have to use the alternative method of defining the TypedDict since
 # one of our dictionary fields' names is a reserved word

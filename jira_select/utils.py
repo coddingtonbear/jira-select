@@ -12,7 +12,13 @@ import simpleeval
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
-from .types import ConfigDict, ExpressionList, QueryDefinition, SelectFieldDefinition
+from .types import (
+    ConfigDict,
+    ExpressionList,
+    QueryDefinition,
+    SelectFieldDefinition,
+    Expression,
+)
 
 if TYPE_CHECKING:
     from .query import Result
@@ -164,16 +170,14 @@ def get_row_dict(row: Any) -> Dict[str, Any]:
     return names
 
 
-def expressions_match(left: str, right: str) -> bool:
-    """ Verifies that the expressions passed-in match one another.
+def expression_includes_group_by(
+    expression: Expression, group_by: List[Expression]
+) -> bool:
+    for group_by_expression in group_by:
+        if group_by_expression in expression:
+            return True
 
-    This is used for determining when to force returning a single value
-    when selecting columns from a grouped query.
-
-    Right now, this just compares the string equality of the expressions;
-    it might be better later to compare them using the ast parser.
-    """
-    return left.strip() == right.strip()
+    return False
 
 
 def evaluate_expression(

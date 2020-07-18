@@ -7,11 +7,11 @@ from jira import JIRA, Issue
 from rich.progress import Progress, TaskID
 
 from .plugin import get_installed_functions
-from .types import QueryDefinition, SelectFieldDefinition
+from .types import ExpressionList, QueryDefinition, SelectFieldDefinition, Expression
 from .utils import (
     calculate_result_hash,
     clean_query_definition,
-    expressions_match,
+    expression_includes_group_by,
     get_field_data,
     get_row_dict,
     parse_sort_by_definition,
@@ -35,6 +35,24 @@ class Result(metaclass=ABCMeta):
     @abstractmethod
     def single(self) -> SingleResult:
         ...
+
+    def evaluate_expression(
+        self,
+        expression: Expression,
+        group_by: ExpressionList = None,
+        functions: Dict[str, Callable] = None,
+    ):
+        if group_by is None:
+            group_by = []
+
+        row_source = self
+
+        # Force returning a single value if the expression under
+        # evaluation is one we're grouping on
+        if expression_includes_group_by(expression, group_by):
+            row_source = self.single()
+
+        return get_field_data(row_source, expression, functions)
 
 
 class SingleResult(Result):
@@ -101,9 +119,10 @@ class Query:
 
         # Set a high ceiling at the start so the progressbar does not
         # start "full"
-        self._select_count = 2 ** 32
+        self._query_count = 2 ** 32
         self._group_by_count = 2 ** 32
         self._having_count = 2 ** 32
+        self._sort_by_count = 2 ** 32
 
     @property
     def progress_bar_enabled(self):
@@ -117,7 +136,8 @@ class Query:
     def definition(self) -> QueryDefinition:
         return self._definition
 
-    def get_functions(self) -> Dict[str, Callable]:
+    @property
+    def functions(self) -> Dict[str, Callable]:
         return self._functions
 
     def get_fields(self) -> List[SelectFieldDefinition]:
@@ -127,26 +147,6 @@ class Query:
             fields.append(parse_select_definition(field))
 
         return fields
-
-    def _generate_row_dict(self, row: Result) -> Dict[str, Any]:
-        result: Dict[str, Any] = {}
-
-        for field_defn in self.get_fields():
-            return_singular = False
-            for expression in self.definition.get("group_by", []):
-                if expressions_match(field_defn["expression"], expression):
-                    return_singular = True
-                    break
-
-            record = row
-            if return_singular:
-                record = row.single()
-
-            result[field_defn["column"]] = get_field_data(
-                record, field_defn["expression"], functions=self._functions
-            )
-
-        return result
 
     def _get_jql(self) -> str:
         query = " AND ".join(self.definition.get("where", []))
@@ -168,7 +168,7 @@ class Query:
 
         task: Optional[TaskID] = None
         if self.progress_bar_enabled:
-            task = progress.add_task("select/where", total=self.select_count)
+            task = progress.add_task("query", total=self.query_count)
 
         while start_at < max_results:
             results = self.jira.search_issues(
@@ -176,25 +176,25 @@ class Query:
                 startAt=start_at,
                 expand=",".join(expand),
                 fields="*all",
-                maxResults=result_limit,
+                maxResults=min(result_limit, 100),
             )
             max_results = results.total
-            self._select_count = min(results.total, result_limit)
+            self._query_count = min(results.total, result_limit)
             for result in results:
                 result = cast(Issue, result)
                 if task is not None:
-                    progress.update(task, advance=1, total=self.select_count)
+                    progress.update(task, advance=1, total=self.query_count)
 
-                yield SingleResult(result)
                 start_at += 1
+                yield SingleResult(result)
 
                 # Return early if our result limit has been reached
                 if start_at >= result_limit:
                     return
 
     @property
-    def select_count(self):
-        return self._select_count
+    def query_count(self):
+        return self._query_count
 
     def _process_group_by(
         self, iterator: Generator[SingleResult, None, None], progress: Progress
@@ -205,24 +205,27 @@ class Query:
 
         if not group_fields:
             for row in iterator:
+                self._group_by_count = self.query_count
                 yield row
-                self._group_by_count += 1
             return
 
         task: Optional[TaskID] = None
         if self.progress_bar_enabled:
-            task = progress.add_task("group_by", total=self.select_count)
+            task = progress.add_task("group_by", total=self.query_count)
 
         for row in iterator:
-            row_hash = calculate_result_hash(row, group_fields, self._functions,)
+            if task is not None:
+                progress.update(task, total=self.query_count)
+
+            row_hash = calculate_result_hash(row, group_fields, self.functions,)
             if row_hash not in groups:
-                groups[row_hash] = GroupedResult()
                 self._group_by_count += 1
+                groups[row_hash] = GroupedResult()
 
             groups[row_hash].add(row)
 
             if task is not None:
-                progress.update(task, advance=1, total=self.select_count)
+                progress.update(task, advance=1)
 
         for _, value in groups.items():
             yield value
@@ -246,18 +249,23 @@ class Query:
             task = progress.add_task("having", total=self.group_by_count)
 
         for row in iterator:
+            if task is not None:
+                progress.update(task, total=self.group_by_count)
+
             include_row = True
             for having in self.definition["having"]:
-                if not get_field_data(row, having, self._functions):
+                if not row.evaluate_expression(
+                    having, self.definition.get("group_by"), self.functions,
+                ):
                     include_row = False
                     break
 
             if include_row:
-                yield row
                 self._having_count += 1
+                yield row
 
             if task is not None:
-                progress.update(task, advance=1, total=self.group_by_count)
+                progress.update(task, advance=1)
 
     @property
     def having_count(self):
@@ -266,8 +274,11 @@ class Query:
     def _process_sort_by(
         self, iterator: Generator[Result, None, None], progress: Progress
     ) -> Generator[Result, None, None]:
+        self._sort_by_count = 0
         if not self.definition.get("sort_by", []):
-            yield from iterator
+            for row in iterator:
+                self._sort_by_count = self.having_count
+                yield row
             return
 
         task: Optional[TaskID] = None
@@ -280,13 +291,16 @@ class Query:
         rows = list(iterator)
         if task is not None:
             progress.update(task, total=len(rows))
+        self._sort_by_count = len(rows)
 
         # Now, sort by each of the ordering expressions in reverse order
         for sort_by in reversed(self.definition["sort_by"]):
             sort_expression, reverse = parse_sort_by_definition(sort_by)
 
             def sort_key(row):
-                result = get_field_data(row, sort_expression, self._functions)
+                result = row.evaluate_expression(
+                    sort_expression, self.definition.get("group_by"), self.functions
+                )
                 if task is not None:
                     progress.update(task, advance=1)
 
@@ -295,6 +309,22 @@ class Query:
             rows = sorted(rows, key=sort_key, reverse=reverse)
 
         yield from rows
+
+    @property
+    def sort_by_count(self):
+        return self._sort_by_count
+
+    def _generate_row_dict(self, row: Result) -> Dict[str, Any]:
+        result: Dict[str, Any] = {}
+
+        for field_defn in self.get_fields():
+            result[field_defn["column"]] = row.evaluate_expression(
+                field_defn["expression"],
+                self.definition.get("group_by"),
+                self.functions,
+            )
+
+        return result
 
     def _get_iterator(self, progress: Progress) -> Generator[Result, None, None]:
         source = self.definition["from"]
@@ -313,5 +343,12 @@ class Query:
 
     def __iter__(self) -> Generator[Dict[str, Any], None, None]:
         with Progress(auto_refresh=self.progress_bar_enabled) as progress:
+            task: Optional[TaskID] = None
+            if self.progress_bar_enabled:
+                task = progress.add_task("select", total=self.sort_by_count)
             for row in self._get_iterator(progress):
+                if task is not None:
+                    progress.update(task, total=self.sort_by_count)
                 yield self._generate_row_dict(row)
+                if task is not None:
+                    progress.update(task, advance=1)
