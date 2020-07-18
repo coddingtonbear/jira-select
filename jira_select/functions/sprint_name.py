@@ -23,8 +23,10 @@ class Function(BaseFunction):
 
         return self.CACHE[id]
 
-    def process(self, sprint_name: Optional[str]) -> Optional[str]:  # type: ignore[override]
-        if sprint_name is None:
+    def process(self, sprint_id: Optional[str]) -> Optional[str]:  # type: ignore[override]
+        """ Returns the name of the sprint matching the provided ID."""
+
+        if sprint_id is None:
             return None
 
-        return self.get_sprint_name(sprint_name)
+        return self.get_sprint_name(sprint_id)

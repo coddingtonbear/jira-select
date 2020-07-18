@@ -143,5 +143,5 @@ def get_field_data(
         return simple_eval(
             expression, names={"_": row, **row.as_dict()}, functions=functions
         )
-    except AttributeDoesNotExist:
+    except (AttributeDoesNotExist, KeyError, IndexError, TypeError):
         return None

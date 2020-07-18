@@ -14,6 +14,17 @@ class Function(BaseFunction):
         return self.FIELDS
 
     def process(self, row: Result, name: str) -> Optional[Any]:  # type: ignore[override]
+        """ Returns value in row for field having the specified human-readable name.
+
+        Note that jira-select provides the row under the variable name `_`.
+
+        E.g::
+
+            select
+                - field_by_name(_, "Story Points")
+            from: issues
+
+        """
         fields = self.get_fields()
 
         for field in fields:
