@@ -44,6 +44,13 @@ def main():
             "'store-password' or 'configure' command instead."
         ),
     )
+    parser.add_argument(
+        "--debugger",
+        action="store_true",
+        help=(
+            "Wait for debugger connection before processing command (requires debugpy)."
+        ),
+    )
     subparsers = parser.add_subparsers(dest="command")
     subparsers.required = True
 
@@ -58,6 +65,14 @@ def main():
         cmd_class.add_arguments(subparser)
 
     args = parser.parse_args()
+
+    if args.debugger:
+        import debugpy
+
+        debugpy.listen(("0.0.0.0", 5678))
+
+        # Pause the program until a remote debugger is attached
+        debugpy.wait_for_client()
 
     config = get_config(path=args.config)
 
