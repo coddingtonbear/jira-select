@@ -133,6 +133,14 @@ def get_row_dict(row: Any) -> Dict[str, Any]:
     return names
 
 
+def evaluate_expression(
+    expression: str,
+    names: Dict[str, Any],
+    functions: Optional[Dict[str, Callable]] = None,
+) -> Any:
+    return simple_eval(expression, names=names, functions=functions)
+
+
 def get_field_data(
     row: Result, expression: str, functions: Optional[Dict[str, Callable]] = None
 ) -> Any:

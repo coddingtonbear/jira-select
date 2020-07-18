@@ -257,8 +257,5 @@ class BaseFunction(metaclass=ABCMeta):
         return self._jira
 
     @abstractmethod
-    def process(self, *args, **kwargs) -> Optional[Any]:
-        ...
-
     def __call__(self, *args, **kwargs) -> Optional[Any]:
-        return self.process(*args, **kwargs)
+        ...

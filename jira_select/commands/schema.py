@@ -8,7 +8,7 @@ from simpleeval import NameNotDefined
 from ..exceptions import JiraSelectError
 from ..plugin import BaseCommand, get_installed_functions
 from ..types import SchemaRow
-from ..utils import get_field_data
+from ..utils import evaluate_expression
 
 
 class Command(BaseCommand):
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         )
 
     def evaluate_expression(self, row: Any, expression: str) -> Any:
-        return get_field_data(row, expression, functions=self.functions)
+        return evaluate_expression(expression, row, functions=self.functions)
 
     def get_field_data(self, row: Any, expression: str) -> str:
         result = self.evaluate_expression(row, expression)

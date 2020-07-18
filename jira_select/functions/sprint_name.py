@@ -5,6 +5,8 @@ from ..plugin import BaseFunction
 
 
 class Function(BaseFunction):
+    """ Returns the name of the sprint matching the provided ID."""
+
     CACHE: Dict[int, str] = {}
 
     def get_sprint_name(self, representation: str):
@@ -23,9 +25,7 @@ class Function(BaseFunction):
 
         return self.CACHE[id]
 
-    def process(self, sprint_id: Optional[str]) -> Optional[str]:  # type: ignore[override]
-        """ Returns the name of the sprint matching the provided ID."""
-
+    def __call__(self, sprint_id: Optional[str]) -> Optional[str]:  # type: ignore[override]
         if sprint_id is None:
             return None
 
