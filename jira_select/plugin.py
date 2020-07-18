@@ -16,7 +16,7 @@ from rich.console import Console
 from .constants import APP_NAME
 from .exceptions import ConfigurationError
 from .types import ConfigDict
-from .utils import save_config
+from .utils import save_config, get_functions_for_module
 
 if TYPE_CHECKING:
     from .query import Query
@@ -50,21 +50,26 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     "tuple": tuple,
     "zip": zip,
     # Statistics
-    "fmean": statistics.fmean,
-    "geometric_mean": statistics.geometric_mean,
-    "harmonic_mean": statistics.harmonic_mean,
-    "mean": statistics.mean,
-    "median": statistics.median,
-    "median_grouped": statistics.median_grouped,
-    "median_high": statistics.median_high,
-    "median_low": statistics.median_low,
-    "mode": statistics.mode,
-    "multimode": statistics.multimode,
-    "pstdev": statistics.pstdev,
-    "pvariance": statistics.pvariance,
-    "quantiles": statistics.quantiles,
-    "stdev": statistics.stdev,
-    "variance": statistics.variance,
+    **get_functions_for_module(
+        statistics,
+        [
+            "fmean",
+            "geometric_mean",
+            "harmonic_mean",
+            "mean",
+            "median",
+            "median_grouped",
+            "median_high",
+            "median_low",
+            "mode",
+            "multimode",
+            "pstdev",
+            "pvariance",
+            "quantiles",
+            "stdev",
+            "variance",
+        ],
+    ),
 }
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 

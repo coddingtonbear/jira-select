@@ -4,7 +4,8 @@ import hashlib
 import logging
 import os
 import re
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from appdirs import user_config_dir
 from simpleeval import AttributeDoesNotExist, simple_eval
@@ -46,6 +47,24 @@ def save_config(data: ConfigDict, path: str = None) -> None:
 
     with open(path, "w") as outf:
         safe_dump(data, outf)
+
+
+def get_functions_for_module(
+    module: ModuleType, names: List[str]
+) -> Dict[str, Callable]:
+    """ Return functions in module matching the specified name.
+
+    This exists because some functions we want to publish as available
+    functions are available only on Python >= 3.8.
+
+    """
+    functions: Dict[str, Callable] = {}
+
+    for name in names:
+        if hasattr(module, name):
+            functions[name] = getattr(module, name)
+
+    return functions
 
 
 def clean_query_definition(query: QueryDefinition) -> QueryDefinition:
