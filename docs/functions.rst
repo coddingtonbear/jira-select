@@ -1,5 +1,5 @@
-Functions
-=========
+Query Functions
+===============
 
 Jira-select provides a long list of functions out-of-the-box, and you can
 add your own if these are not enough.
