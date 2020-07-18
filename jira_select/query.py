@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
+from functools import total_ordering
 from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
 from jira import JIRA, Issue
@@ -17,6 +18,29 @@ from .utils import (
     parse_sort_by_definition,
     parse_select_definition,
 )
+
+
+@total_ordering
+class NullAcceptableSort:
+    def __init__(self, value: Any):
+        self._value = value
+
+    def __le__(self, other):
+        if other._value is None:
+            return True
+        if self._value is None:
+            return False
+
+        return self._value < other._value
+
+    def __eq__(self, other):
+        if self._value is other._value:
+            return True
+
+        return self._value == other._value
+
+    def __str__(self):
+        return str(self._value)
 
 
 class Result(metaclass=ABCMeta):
@@ -304,7 +328,7 @@ class Query:
                 if task is not None:
                     progress.update(task, advance=1)
 
-                return result
+                return NullAcceptableSort(result)
 
             rows = sorted(rows, key=sort_key, reverse=reverse)
 

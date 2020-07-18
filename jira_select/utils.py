@@ -201,7 +201,13 @@ def get_field_data(
         return simpleeval.simple_eval(
             expression, names={"_": row, **row.as_dict()}, functions=functions
         )
-    except (simpleeval.AttributeDoesNotExist, KeyError, IndexError, TypeError):
+    except (
+        simpleeval.AttributeDoesNotExist,
+        KeyError,
+        IndexError,
+        TypeError,
+        AttributeError,
+    ):
         if not error_returns_null:
             raise
         return None
