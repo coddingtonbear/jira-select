@@ -4,14 +4,14 @@ import hashlib
 import logging
 import os
 import re
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Union
 
 from appdirs import user_config_dir
 from simpleeval import AttributeDoesNotExist, simple_eval
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
-from .types import ConfigDict, SelectFieldDefinition
+from .types import ConfigDict, QueryDefinition, SelectFieldDefinition
 
 if TYPE_CHECKING:
     from .query import Result
@@ -48,6 +48,35 @@ def save_config(data: ConfigDict, path: str = None) -> None:
         safe_dump(data, outf)
 
 
+def clean_query_definition(query: QueryDefinition) -> QueryDefinition:
+    cleaned_query: QueryDefinition = {
+        "select": [],
+        "from": query["from"],
+    }
+
+    for select in query["select"]:
+        if isinstance(select, dict):
+            cleaned_query["select"].append(select)
+        else:
+            cleaned_query["select"].append(str(select))
+
+    for section in (
+        "where",
+        "having",
+        "group_by",
+        "order_by",
+        "expand",
+    ):
+        if section in query:
+            # I'm not sure I understand why the typing checks here are failing
+            cleaned_query[section] = [str(line) for line in query[section]]  # type: ignore
+
+    if "limit" in query:
+        cleaned_query["limit"] = query["limit"]
+
+    return cleaned_query
+
+
 def parse_select_definition(
     expression: Union[str, SelectFieldDefinition]
 ) -> SelectFieldDefinition:
@@ -75,10 +104,11 @@ def parse_order_by_definition(expression: str):
     return expression
 
 
-def calculate_result_hash(row: Any, group_fields: List[str]) -> int:
-    computed = get_row_dict(row)
-
-    params = [str(computed.get(group_field)) for group_field in group_fields]
+def calculate_result_hash(row: Result, functions: Dict[str, Callable]) -> int:
+    params = [
+        str(get_field_data(row, group_field, functions))
+        for group_field in row.value_fields
+    ]
 
     return int(hashlib.sha1(":".join(params).encode("UTF-8")).hexdigest(), 16)
 

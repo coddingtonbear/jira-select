@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Callable, Dict, Generator, List, Optional
 
 from jira import JIRA, Issue
@@ -5,9 +7,10 @@ from rich.progress import Progress, TaskID
 
 from .exceptions import UserError
 from .plugin import get_installed_functions
-from .types import QueryDefinition, SelectFieldDefinition
+from .types import ExpressionList, QueryDefinition, SelectFieldDefinition
 from .utils import (
     calculate_result_hash,
+    clean_query_definition,
     get_field_data,
     get_row_dict,
     parse_order_by_definition,
@@ -16,10 +19,23 @@ from .utils import (
 
 
 class Result:
-    def __init__(self, group_fields: List[str] = None):
+    def __init__(
+        self, query: Query, group_fields: ExpressionList = None, rows: List[Any] = None,
+    ):
         super().__init__()
-        self._rows: List[Any] = []
-        self._group_fields = group_fields if group_fields else []
+        self._rows: List[Any] = rows if rows is not None else []
+        self._group_fields: ExpressionList = group_fields if group_fields else []
+        self._query: Query = query
+
+    @classmethod
+    def for_row(
+        cls, query: Query, group_fields: List[str] = None, row: Any = None
+    ) -> Result:
+        return cls(query, group_fields, [row])
+
+    @property
+    def query(self):
+        return self._query
 
     @property
     def rows(self):
@@ -57,7 +73,11 @@ class Result:
         first = get_row_dict(self._rows[0])
 
         for field in self.value_fields:
-            result[field] = first[field]
+            result[field] = get_field_data(
+                Result.for_row(self.query, row=first),
+                field,
+                self.query.get_functions(),
+            )
 
         scalar_fields = self.scalar_fields
 
@@ -94,7 +114,7 @@ class Query:
     def __init__(
         self, jira: JIRA, definition: QueryDefinition, progress_bar: bool = False
     ):
-        self._definition: QueryDefinition = definition
+        self._definition: QueryDefinition = clean_query_definition(definition)
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
         self._progress_bar = progress_bar
@@ -110,6 +130,9 @@ class Query:
     @property
     def definition(self) -> QueryDefinition:
         return self._definition
+
+    def get_functions(self) -> Dict[str, Callable]:
+        return self._functions
 
     def get_fields(self) -> List[SelectFieldDefinition]:
         fields: List[SelectFieldDefinition] = []
@@ -178,9 +201,7 @@ class Query:
 
         if not group_fields:
             for row in iterator:
-                result = Result()
-                result.add(row)
-                yield result
+                yield Result.for_row(self, row=row)
             return
 
         task: Optional[TaskID] = None
@@ -188,9 +209,14 @@ class Query:
             task = progress.add_task("group_by", total=1)
 
         for row in iterator:
-            row_hash = calculate_result_hash(row, group_fields)
+            row_hash = calculate_result_hash(
+                # We only need this particular Row instance for long
+                # enough to calculate expression results
+                Result.for_row(self, group_fields, row),
+                self._functions,
+            )
             if row_hash not in groups:
-                groups[row_hash] = Result(group_fields)
+                groups[row_hash] = Result(self, group_fields)
 
             groups[row_hash].add(row)
 
