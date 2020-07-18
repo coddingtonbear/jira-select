@@ -44,12 +44,10 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     "reversed": reversed,
     "round": round,
     "set": set,
-    "slice": slice,
     "sorted": sorted,
     "str": str,
     "sum": sum,
     "tuple": tuple,
-    "zip": zip,
     # Statistics
     **get_functions_for_module(
         statistics,
