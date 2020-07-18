@@ -134,8 +134,26 @@ group_by:
 You'll receive just a single result row for each status, and a count
 of how many records shared that status in the second column.
 
+### Ordering
+
+You can order your entries using any expression, too:
+
+```yaml
+select:
+  - status
+  - count(key)
+from: issues
+group_by:
+  - status
+order_by:
+  - count(key) desc
+```
+
+This will order all tickets, grouped by status, in descending order
+from the status that has the most tickets to the one that has the
+fewest.
+
 ## Future Goals
 
-- Support for "Order By" expressions
 - SQlite support: Instead of exporting a CSV, exporting an SQLite database.
 - XLSX support: Instead of exporting a CSV, exporing an XLSX document.

@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from .query import Result
 
 FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
+ORDER_BY_DESC_FN = re.compile(r"^(?P<expression>.*) DESC", re.IGNORECASE)
 
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,17 @@ def parse_select_definition(
             column = match_dict["column"]
 
         return {"expression": expression, "column": column}
+    return expression
+
+
+def parse_order_by_definition(expression: str):
+    is_reversed = ORDER_BY_DESC_FN.match(expression)
+
+    if is_reversed:
+        expression = is_reversed.groupdict()["expression"]
+
+        return f"-1 * ({expression})"
+
     return expression
 
 

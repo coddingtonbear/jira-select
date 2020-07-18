@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Generator, Iterable, List, Optional
+from typing import Any, Callable, Dict, Generator, List, Optional
 
 from jira import JIRA, Issue
 from rich.progress import Progress, TaskID
@@ -10,6 +10,7 @@ from .utils import (
     calculate_result_hash,
     get_field_data,
     get_row_dict,
+    parse_order_by_definition,
     parse_select_definition,
 )
 
@@ -61,7 +62,14 @@ class Result:
         scalar_fields = self.scalar_fields
 
         for field in scalar_fields:
-            result[field] = [get_row_dict(row)[field] for row in self._rows]
+            # Exclude empty rows -- in SQL when you run an aggregation
+            # function on a set of rows, NULL rows are skipped, so we
+            # should probably do the same?
+            result[field] = [
+                get_row_dict(row)[field]
+                for row in self._rows
+                if get_row_dict(row).get(field) is not None
+            ]
 
         return result
 
@@ -90,6 +98,10 @@ class Query:
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
         self._progress_bar = progress_bar
+
+    @property
+    def progress_bar_enabled(self):
+        return self._progress_bar
 
     @property
     def jira(self) -> JIRA:
@@ -127,14 +139,18 @@ class Query:
 
         raise UserError(f"Could not generate JQL from {where}.")
 
-    def _get_issues_internal(self) -> Generator[Issue, None, None]:
+    def _get_issues(self, progress: Progress) -> Generator[Issue, None, None]:
         jql = self._get_jql()
 
         expand = self.definition.get("expand", [])
 
         start_at = 0
-        max_results = float("inf")
-        result_limit = self.definition.get("limit", float("inf"))
+        max_results = 2 ** 32
+        result_limit = self.definition.get("limit", 2 ** 32)
+
+        task: Optional[TaskID] = None
+        if self.progress_bar_enabled:
+            task = progress.add_task("select", total=min(max_results, result_limit))
 
         while start_at < max_results:
             results = self.jira.search_issues(
@@ -142,6 +158,10 @@ class Query:
             )
             max_results = results.total
             for result in results:
+                if task is not None:
+                    progress.update(
+                        task, advance=1, total=min(max_results, result_limit)
+                    )
 
                 yield result
                 start_at += 1
@@ -150,51 +170,53 @@ class Query:
                 if start_at >= result_limit:
                     return
 
-    def _get_issues(self) -> Generator[Issue, None, None]:
-        resultLimit = self.definition.get("limit", 2 ** 32)
-
-        if self._progress_bar:
-            with Progress() as progress:
-                record_count = self.count()
-                task: Optional[TaskID] = None
-                if self._progress_bar:
-                    task = progress.add_task(
-                        "Processing", total=min(record_count, resultLimit)
-                    )
-                for record in self._get_issues_internal():
-                    if task is not None:
-                        progress.update(task, advance=1)
-                    yield record
-        else:
-            yield from self._get_issues_internal()
-
     def _process_group_by(
-        self, iterator: Iterable[Any]
+        self, iterator: Generator[Result, None, None], progress: Progress
     ) -> Generator[Result, None, None]:
         group_fields = self.definition.get("group_by", [])
         groups: Dict[int, Result] = {}
 
-        for row in iterator:
-            if not group_fields:
+        if not group_fields:
+            for row in iterator:
                 result = Result()
                 result.add(row)
                 yield result
-            else:
-                row_hash = calculate_result_hash(row, group_fields)
-                if row_hash not in groups:
-                    groups[row_hash] = Result(group_fields)
+            return
 
-                groups[row_hash].add(row)
+        task: Optional[TaskID] = None
+        if self.progress_bar_enabled:
+            task = progress.add_task("group_by", total=1)
+
+        for row in iterator:
+            row_hash = calculate_result_hash(row, group_fields)
+            if row_hash not in groups:
+                groups[row_hash] = Result(group_fields)
+
+            groups[row_hash].add(row)
+
+        if task is not None:
+            progress.update(task, completed=0.5)
 
         for _, value in groups.items():
             yield value
 
+        if task is not None:
+            progress.update(task, completed=1)
+
     def _process_having(
-        self, iterator: Iterable[Result]
+        self, iterator: Generator[Result, None, None], progress: Progress
     ) -> Generator[Result, None, None]:
+        if not self.definition.get("having", []):
+            yield from iterator
+            return
+
+        task: Optional[TaskID] = None
+        if self.progress_bar_enabled:
+            task = progress.add_task("having", total=1)
+
         for row in iterator:
             include_row = True
-            for having in self.definition.get("having", []):
+            for having in self.definition["having"]:
                 if not get_field_data(row, having, self._functions):
                     include_row = False
                     break
@@ -202,7 +224,42 @@ class Query:
             if include_row:
                 yield row
 
-    def _get_iterator(self) -> Generator[Any, None, None]:
+        if task is not None:
+            progress.update(task, completed=1)
+
+    def _process_order_by(
+        self, iterator: Generator[Result, None, None], progress: Progress
+    ) -> Generator[Result, None, None]:
+        if not self.definition.get("order_by", []):
+            yield from iterator
+            return
+
+        task: Optional[TaskID] = None
+        if self.progress_bar_enabled:
+            task = progress.add_task(
+                "order_by", total=len(self.definition["order_by"]) + 1
+            )
+
+        # First, materialize our list
+        rows = list(iterator)
+
+        # Now, order by each of the ordering expressions in reverse order
+        for order_by in reversed(self.definition["order_by"]):
+            rows = sorted(
+                rows,
+                key=lambda row: get_field_data(
+                    row, parse_order_by_definition(order_by), self._functions
+                ),
+            )
+            if task is not None:
+                progress.update(task, advance=1)
+
+        yield from rows
+
+        if task is not None:
+            progress.update(task, advance=1)
+
+    def _get_iterator(self, progress: Progress) -> Generator[Any, None, None]:
         source = self.definition["from"]
 
         if source == "issues":
@@ -210,15 +267,14 @@ class Query:
         else:
             raise NotImplementedError(f"No search for source {source} implemented.")
 
-        yield from self._process_having(self._process_group_by(iterator()))
-
-    def count(self) -> int:
-        jql = self._get_jql()
-
-        resultLimit = self.definition.get("limit", float("inf"))
-
-        return min(self.jira.search_issues(jql).total, resultLimit)
+        yield from self._process_order_by(
+            self._process_having(
+                self._process_group_by(iterator(progress), progress), progress
+            ),
+            progress,
+        )
 
     def __iter__(self) -> Generator[Dict[str, Any], None, None]:
-        for row in self._get_iterator():
-            yield self._generate_row_dict(row)
+        with Progress() as progress:
+            for row in self._get_iterator(progress):
+                yield self._generate_row_dict(row)
