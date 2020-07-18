@@ -10,6 +10,7 @@ from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Optional, Type, cast
 
 import pkg_resources
 
+from dateutil.parser import parse as parse_datetime
 import keyring
 from jira import JIRA
 from rich.console import Console
@@ -72,6 +73,8 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     # JSON
     "json_loads": json.loads,
     "json_dumps": json.dumps,
+    # Date Handling
+    "parse_datetime": parse_datetime,
 }
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 

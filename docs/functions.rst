@@ -59,6 +59,24 @@ Jira
         - field_by_name(_, "Story Points") as "Story Points"
       from: issues
 
+Dates
+-----
+
+.. py:function:: parse_datetime(datetime_string: str) -> datetime.datetime
+
+   Parse a date string into a datetime object.
+
+Json
+----
+
+.. py:function:: json_loads(json: str) -> Union[Dict, List]
+
+   Parse a JSON string.
+
+.. py:function:: json_dumps(obj: Union[Dict, List]) -> str
+
+   Encode a dictionary or list into a JSON string.
+
 Math
 ----
 
