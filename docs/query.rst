@@ -37,6 +37,7 @@ but know that in real life, you're very unlikely to use them all at once:
    sort_by:
    - len(key) desc
    limit: 100
+   cap: 10
 
 Below, we'll go over what each of these sections are for in detail.
 
@@ -172,7 +173,18 @@ You **can** use custom functions in this section.
 ``limit``
 ~~~~~~~~~
 
-This sets a limit on how many rows will be returned.
+This sets a limit on how many rows will be returned from Jira.
+See :ref:`Query Lifecycle` to understand where this fits in the query lifecycle.
+
+If you would like to limit the count of rows *after* ``group_by`` and
+``having`` have reduced the count of rows, use ``cap`` instead.
+
+.. note::
+
+   ``limit`` is handled by Jira itself, so if you would like to
+   instead limit the number of rows returned after ``having``
+   and ``grouping`` expressions have reduced the row count,
+   use ``cap`` instead.
 
 Unusual
 -------
@@ -186,3 +198,16 @@ that won't actually return quite all of the data.
 You can find more information about what data this will return
 by reading `the Jira documentation covering
 "Search for issues using JQL (GET)" <https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-get>`_.
+
+
+``cap``
+~~~~~~~
+
+This sets a limit on how many rows will be returned,
+but unlike ``limit`` is evaluated locally.
+
+This can be used if you want your ``having`` or ``group_by``
+statements to have access to as much data as possible
+(and thus do not want to use ``limit``
+to reduce the number of rows returned from Jira),
+but still want to limit the number of rows in your final document.

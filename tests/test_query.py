@@ -109,3 +109,15 @@ class TestQuery(JiraSelectTestCase):
         ]
 
         assert expected_results == actual_results
+
+    def test_cap(self):
+        query: QueryDefinition = {
+            "select": ["key"],
+            "from": "issues",
+            "cap": 1,
+        }
+
+        query = Executor(self.mock_jira, query)
+
+        actual_results = list(query)
+        assert len(actual_results) == 1

@@ -37,6 +37,7 @@ QueryDefinition = TypedDict(
         "sort_by": ExpressionList,
         "expand": List[str],
         "limit": int,
+        "cap": int,
     },
     total=False,
 )

@@ -8,12 +8,14 @@ Query Lifecycle
         req-->where
         subgraph Remote
             where-->order_by
+            order_by-->limit
         end
         subgraph Local
-            order_by-->group_by
+            limit-->group_by
             group_by-->having
             having-->sort_by
-            sort_by-->select
+            sort_by-->cap
+            cap-->select
         end
         result([Display])
         select-->result
@@ -22,13 +24,14 @@ Jira-select queries are evaluated in many steps across two phases:
 
 * Remote
 
-  * JQL Query (``where`` and ``order_by``)
+  * JQL Query (``where``, ``order_by``, and ``limit``)
 
 * Local
 
   * Grouping (``group_by``)
   * Filtering (``having``)
   * Sorting (``sort_by``)
+  * Capping count of results (``cap``)
   * Rendering results (``select``)
 
 The steps in the "Remote" section are accomplished entirely by Jira

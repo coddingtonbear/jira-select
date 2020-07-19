@@ -204,6 +204,10 @@ class Query:
     def limit(self) -> Optional[int]:
         return self._definition.get("limit")
 
+    @property
+    def cap(self) -> Optional[int]:
+        return self._definition.get("cap")
+
 
 class Executor:
     def __init__(
@@ -427,6 +431,7 @@ class Executor:
 
     def __iter__(self) -> Generator[Dict[str, Any], None, None]:
         with Progress(auto_refresh=self.progress_bar_enabled) as progress:
+            row_count = 0
             task: Optional[TaskID] = None
             if self.progress_bar_enabled:
                 task = progress.add_task("select", total=self.sort_by_count)
@@ -436,3 +441,7 @@ class Executor:
                 yield self._generate_row_dict(row)
                 if task is not None:
                     progress.update(task, advance=1)
+
+                row_count += 1
+                if self.query.cap is not None and row_count >= self.query.cap:
+                    break
