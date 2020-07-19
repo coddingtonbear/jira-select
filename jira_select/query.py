@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 from functools import total_ordering
-from typing import Any, Callable, Dict, Generator, List, Optional, cast, Iterable
+from typing import Any, Callable, Dict, Generator, List, Optional, cast, Iterable, Tuple
 
 from jira import JIRA, Issue
 from rich.progress import Progress, TaskID
@@ -178,8 +178,11 @@ class Query:
         return self._ensure_str(self._definition.get("group_by", []))
 
     @property
-    def sort_by(self) -> ExpressionList:
-        return self._ensure_str(self._definition.get("sort_by", []))
+    def sort_by(self) -> List[Tuple[Expression, bool]]:
+        return [
+            parse_sort_by_definition(definition)
+            for definition in self._ensure_str(self._definition.get("sort_by", []))
+        ]
 
     @property
     def expand(self) -> List[str]:
@@ -366,8 +369,7 @@ class Executor:
         self._sort_by_count = len(rows)
 
         # Now, sort by each of the ordering expressions in reverse order
-        for sort_by in reversed(self.query.sort_by):
-            sort_expression, reverse = parse_sort_by_definition(sort_by)
+        for sort_expression, reverse in reversed(self.query.sort_by):
 
             def sort_key(row):
                 result = row.evaluate_expression(
