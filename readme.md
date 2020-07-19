@@ -7,7 +7,7 @@
 Jira-select is a command-line tool and library that helps you
 generate the useful insights you need out of Jira.
 
-Jira has its own query language -- it's called JQL --
+Jira has its own query language
 but there are many limitations in what is possible via JQL.
 Some data is returned in arcane formats (e.g. sprint information),
 data cannot be grouped (there's nothing like SQL's `GROUP BY` statement),
