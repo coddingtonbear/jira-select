@@ -145,36 +145,6 @@ class TestGetRowDict(JiraSelectTestCase):
 
         assert actual == expected
 
-    def test_does_not_copy_top_level_nonlowercase(self):
-        field_data = {
-            "one": 1,
-        }
-        issue = self.get_jira_issue(field_data)
-        issue.update({"NOPE": 1})
-
-        expected = {
-            "key": ANY,
-            "one": 1,
-        }
-        actual = utils.get_row_dict(issue)
-
-        assert actual == expected
-
-    def test_does_not_copy_top_level_object(self):
-        field_data = {
-            "one": 1,
-        }
-        issue = self.get_jira_issue(field_data)
-        issue.update({"nope": object()})
-
-        expected = {
-            "key": ANY,
-            "one": 1,
-        }
-        actual = utils.get_row_dict(issue)
-
-        assert actual == expected
-
 
 class TestEvaluateExpression(JiraSelectTestCase):
     def test_simple(self):

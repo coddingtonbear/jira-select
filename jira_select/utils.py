@@ -121,27 +121,18 @@ def calculate_result_hash(
     return int(hashlib.sha1(":".join(params).encode("UTF-8")).hexdigest(), 16)
 
 
-def field_name_is_public(key: str) -> bool:
-    if key.lower() == key and key != "fields" and not key.startswith("_"):
-        return True
-
-    return False
-
-
 def get_row_dict(row: Any) -> Dict[str, Any]:
     names: Dict[str, Any] = {}
 
     if hasattr(row, "fields"):
         for field_name in dir(row.fields):
-            if field_name_is_public(field_name):
+            if not field_name.startswith("_"):
                 names[field_name] = getattr(row.fields, field_name)
 
     # Gather any top-level keys, too, to make sure we fetch any expansions
     for key in dir(row):
         value = getattr(row, key)
-        if field_name_is_public(key) and isinstance(
-            value, (str, bool, float, int, list, dict)
-        ):
+        if not key.startswith("_") and key != "fields" and not callable(value):
             names[key] = getattr(row, key)
 
     return names
