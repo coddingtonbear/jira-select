@@ -63,7 +63,7 @@ class Command(BaseCommand):
             "limit",
         ]
         function_completions = list(get_installed_functions(self.jira).keys())
-        field_completions = [field["key"] for field in self.jira.fields()]
+        field_completions = [field["id"] for field in self.jira.fields()]
 
         return WordCompleter(sql_completions + function_completions + field_completions)
 

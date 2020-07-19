@@ -43,7 +43,7 @@ QueryDefinition = TypedDict(
 
 
 class SchemaRow(TypedDict, total=False):
-    key: str
+    id: str
     type: str
     description: str
     raw: Any

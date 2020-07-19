@@ -1,5 +1,7 @@
 # Jira-Select: Easily export issues from Jira to CSV
 
+![](https://coddingtonbear-public.s3-us-west-2.amazonaws.com/github/jira-select/demo.2.gif)
+
 Jira-select is a command-line tool and library that helps you
 generate the useful insights you need out of Jira.
 

@@ -56,7 +56,7 @@ class Command(BaseCommand):
             except NameNotDefined:
                 type = ""
             data: SchemaRow = {
-                "key": str(self.get_field_data(DotMap(column), "key")),
+                "id": str(self.get_field_data(DotMap(column), "id")),
                 "type": type,
                 "description": str(self.get_field_data(DotMap(column), "name")),
                 "raw": DotMap(column),
@@ -76,7 +76,7 @@ class Command(BaseCommand):
             )
 
         table = Table(title=self.options.source)
-        table.add_column(header="key", style="green")
+        table.add_column(header="id", style="green")
         table.add_column(header="type", style="cyan")
         table.add_column(header="description", style="bright_cyan")
 
@@ -94,7 +94,7 @@ class Command(BaseCommand):
                     continue
 
             table.add_row(
-                row["key"], row["type"], row["description"],
+                row["id"], row["type"], row["description"],
             )
 
         self.console.print(table)
