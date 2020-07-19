@@ -4,18 +4,21 @@
 
 ![](https://coddingtonbear-public.s3-us-west-2.amazonaws.com/github/jira-select/demo.2.gif)
 
-Jira-select is a command-line tool and library that helps you
-generate the useful insights you need out of Jira.
+Jira-select is a command-line tool and library that lets you run SQL-like
+queries against your Jira instance that are far beyond what Jira's built-in
+query language can provide.
 
 Jira has its own query language
-but there are many limitations in what is possible via JQL.
-Some data is returned in arcane formats (e.g. sprint information),
+but there are many limitations around what JQL is capable of.
+Some data is returned in arcane formats
+(e.g. sprint names are returned as a string looking something like
+``com.atlassian.greenhopper.service.sprint.Sprint@14b1c359[id=436...``),
 data cannot be grouped (there's nothing like SQL's `GROUP BY` statement),
 and because of that lack of grouping, there are no aggregation functions --
-no `SUM`-ing story points or estimates for you,
-and if you want to write a custom function for processing a field,
+no `SUM`-ing story points or estimates per-assignee for you.
+And if you want to write a custom function for processing a field,
 well, I'm not even sure where you'd begin.
-Jira-select makes those things possible and easy.
+Jira-select makes those things easy.
 
 If you've ever found yourself held back by the limitations of Jira's
 built-in query language, this tool may make your life easier.
