@@ -98,48 +98,48 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 .. py:function:: abs(value: float) -> str
 
-.. py:function:: max(*values: Any) -> Any
+.. py:function:: max(values: List[Any]) -> Any
 
-.. py:function:: min(*values: Any) -> Any
+.. py:function:: min(values: List[Any]) -> Any
 
 .. py:function:: pow(base: float, exponent: float, mod: Optional[int]) -> float
 
 .. py:function:: round(value: float, ndigits: int = 0) -> float
 
-.. py:function:: sum(*values: Any) -> Any
+.. py:function:: sum(values: List[Any]) -> Any
 
 Averages & measures of central location
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 See more in information in `Python's Documentation <https://docs.python.org/3/library/statistics.html>`_.
 
-.. py:function:: mean(*values: Any) -> Any
+.. py:function:: mean(values: List[Any]) -> Any
 
-.. py:function:: fmean(*values: Any) -> float
-
-   Requires Python 3.8
-
-.. py:function:: geometric_mean(*values: Any) -> float
+.. py:function:: fmean(values: List[Any]) -> float
 
    Requires Python 3.8
 
-.. py:function:: harmonic_mean(*values: Any) -> Any
-
-.. py:function:: median(*values: Any) -> Any
-
-.. py:function:: median_low(*values: Any) -> Any
-
-.. py:function:: median_high(*values: Any) -> Any
-
-.. py:function:: median_grouped(*values: Any, interval: int = 1) -> Any
-
-.. py:function:: mode(*values: Any) -> Any
-
-.. py:function:: multimode(*values: Any) -> List[Any]
+.. py:function:: geometric_mean(values: List[Any]) -> float
 
    Requires Python 3.8
 
-.. py:function:: quantiles(*values: Any, n=4, method=Literal["exclusive", "inclusive"]) -> Iterable[Iterable[Any]]
+.. py:function:: harmonic_mean(values: List[Any]) -> Any
+
+.. py:function:: median(values: List[Any]) -> Any
+
+.. py:function:: median_low(values: List[Any]) -> Any
+
+.. py:function:: median_high(values: List[Any]) -> Any
+
+.. py:function:: median_grouped(values: List[Any], interval: int = 1) -> Any
+
+.. py:function:: mode(values: List[Any]) -> Any
+
+.. py:function:: multimode(values: List[Any]) -> List[Any]
+
+   Requires Python 3.8
+
+.. py:function:: quantiles(values: List[Any], n=4, method=Literal["exclusive", "inclusive"]) -> Iterable[Iterable[Any]]
 
    Requires Python 3.8
 
@@ -148,13 +148,13 @@ Measures of spread
 
 See more in information in `Python's Documentation <https://docs.python.org/3/library/statistics.html>`_.
 
-.. py:function:: pstdev(*values: Any, mu=Optional[float]) -> Any
+.. py:function:: pstdev(values: List[Any], mu=Optional[float]) -> Any
 
-.. py:function:: pvariance(*values: Any, mu=Optional[float]) -> Any
+.. py:function:: pvariance(values: List[Any], mu=Optional[float]) -> Any
 
-.. py:function:: stdev(*values: Any, xbar=Optional[float]) -> Any
+.. py:function:: stdev(values: List[Any], xbar=Optional[float]) -> Any
 
-.. py:function:: variance(*values: Any, xbar=Optional[float]) -> Any
+.. py:function:: variance(values: List[Any], xbar=Optional[float]) -> Any
 
 
 Numeric Representation
@@ -186,6 +186,14 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 .. py:function:: tuple(value: Any) -> tuple
 
 
+Sorting
+-------
+
+.. py:function:: reversed(iterable: List[Any]) -> Iterable[List[Any]]
+
+.. py:function:: sorted(iterable: List[Any]) -> Iterable[List[Any]]
+
+
 Logic Shortcuts
 ---------------
 
@@ -195,15 +203,17 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 .. py:function:: any(iterable: List[Any]) -> bool
 
+Counting
+--------
+
 .. py:function:: len(iterable: List[Any]) -> int
 
    You might be tempted to use ``count()`` given how we share many
    patterns with SQL, but *this* is what you actually want to use.
 
+Ranges
+------
+
 .. py:function:: range(stop: int) -> Iterable[int]
 .. py:function:: range(start: int, stop: int) -> Iterable[int]
 .. py:function:: range(start: int, stop: int, step: int) -> Iterable[int]
-
-.. py:function:: reversed(iterable: List[Any]) -> Iterable[List[Any]]
-
-.. py:function:: sorted(iterable: List[Any]) -> Iterable[List[Any]]
