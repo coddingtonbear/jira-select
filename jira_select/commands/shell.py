@@ -72,6 +72,7 @@ class Command(BaseCommand):
             "sort_by",
             "expand",
             "limit",
+            "cap",
         ]
         function_completions = list(get_installed_functions(self.jira).keys())
         field_completions = [field["id"] for field in self.jira.fields()]
