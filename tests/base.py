@@ -5,7 +5,7 @@ from typing import List, Dict, Optional, Any
 from dotmap import DotMap
 
 from jira_select.types import QueryDefinition
-from jira_select.query import Query
+from jira_select.query import Executor
 
 
 class JiraSelectTestCase(TestCase):
@@ -15,7 +15,7 @@ class JiraSelectTestCase(TestCase):
         self._issue_counter = 0
 
     def get_query(self, issues: List[Dict], query: QueryDefinition):
-        return Query(Mock(search_issues=Mock(return_value=issues)), query)
+        return Executor(Mock(search_issues=Mock(return_value=issues)), query)
 
     def get_jira_issue(self, fields: Optional[Dict[str, Any]] = None):
         self._issue_counter += 1

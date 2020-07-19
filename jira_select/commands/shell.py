@@ -17,7 +17,7 @@ from .. import __version__
 from ..exceptions import QueryError
 from ..formatters.csv import Formatter as CsvFormatter
 from ..plugin import BaseCommand, get_installed_functions
-from ..query import Query
+from ..query import Executor
 from ..types import QueryDefinition
 from ..utils import get_config_dir
 
@@ -48,7 +48,7 @@ class Command(BaseCommand):
 
         try:
             query_definition: QueryDefinition = safe_load(result)
-            query = Query(self.jira, query_definition, progress_bar=True)
+            query = Executor(self.jira, query_definition, progress_bar=True)
         except Exception as e:
             raise QueryParseError(e)
 

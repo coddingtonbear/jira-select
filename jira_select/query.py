@@ -132,7 +132,7 @@ class GroupedResult(Result):
         return result
 
 
-class Query:
+class Executor:
     def __init__(
         self, jira: JIRA, definition: QueryDefinition, progress_bar: bool = False
     ):

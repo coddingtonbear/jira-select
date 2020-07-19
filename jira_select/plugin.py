@@ -21,7 +21,7 @@ from .types import ConfigDict, InstanceDefinition
 from .utils import save_config, get_functions_for_module
 
 if TYPE_CHECKING:
-    from .query import Query
+    from .query import Executor
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +209,7 @@ def get_installed_formatters() -> Dict[str, Type[BaseFormatter]]:
 
 
 class BaseFormatter(metaclass=ABCMeta):
-    def __init__(self, query: Query, stream: IO[str]):
+    def __init__(self, query: Executor, stream: IO[str]):
         self._query = query
         self._stream = stream
 

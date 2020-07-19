@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from dotmap import DotMap
 
 from jira_select.types import QueryDefinition
-from jira_select.query import Query
+from jira_select.query import Executor
 
 from .base import JiraSelectTestCase
 
@@ -63,7 +63,7 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
 
-        query = Query(self.mock_jira, query)
+        query = Executor(self.mock_jira, query)
 
         actual_results = list(query)
         expected_results = [
@@ -81,7 +81,7 @@ class TestQuery(JiraSelectTestCase):
             "sort_by": ["story_points desc", "key"],
         }
 
-        query = Query(self.mock_jira, query)
+        query = Executor(self.mock_jira, query)
 
         actual_results = list(query)
         expected_results = [
@@ -100,7 +100,7 @@ class TestQuery(JiraSelectTestCase):
             "sort_by": ["len(key)"],
         }
 
-        query = Query(self.mock_jira, query)
+        query = Executor(self.mock_jira, query)
 
         actual_results = list(query)
         expected_results = [

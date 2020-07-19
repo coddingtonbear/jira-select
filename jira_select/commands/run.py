@@ -8,7 +8,7 @@ from yaml import safe_load
 
 from ..exceptions import UserError
 from ..plugin import BaseCommand, get_installed_formatters
-from ..query import Query
+from ..query import Executor
 from ..types import QueryDefinition
 
 
@@ -66,7 +66,7 @@ class Command(BaseCommand):
             )
             output_file = output.name
 
-        query = Query(
+        query = Executor(
             self.jira, query_definition, progress_bar=output is not sys.stdout
         )
         with formatter_cls(query, output) as formatter:
