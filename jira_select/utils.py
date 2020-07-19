@@ -31,9 +31,15 @@ SORT_BY_ASC_FN = re.compile(r"^(?P<expression>.*) ASC", re.IGNORECASE)
 logger = logging.getLogger(__name__)
 
 
-def get_default_config_path() -> str:
+def get_config_dir() -> str:
     root_path = user_config_dir(APP_NAME, "coddingtonbear")
     os.makedirs(root_path, exist_ok=True)
+
+    return root_path
+
+
+def get_default_config_path() -> str:
+    root_path = get_config_dir()
     return os.path.join(root_path, "config.yaml",)
 
 

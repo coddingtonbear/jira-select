@@ -54,8 +54,13 @@ class ViewerDefinitionDict(TypedDict, total=False):
     csv: str
 
 
+class ShellConfigDict(TypedDict, total=False):
+    vi_mode: bool
+
+
 class ConfigDict(TypedDict, total=False):
     instance_url: str
     username: str
     password: str
+    shell: ShellConfigDict
     viewers: ViewerDefinitionDict
