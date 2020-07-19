@@ -13,6 +13,7 @@ from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers.data import YamlLexer
 from yaml import safe_load
 
+from .. import __version__
 from ..exceptions import QueryError
 from ..formatters.csv import Formatter as CsvFormatter
 from ..plugin import BaseCommand, get_installed_functions
@@ -41,8 +42,8 @@ class Command(BaseCommand):
 
         result = session.prompt("Query > ")
 
-        query_definition: QueryDefinition = safe_load(result)
         try:
+            query_definition: QueryDefinition = safe_load(result)
             query = Query(self.jira, query_definition, progress_bar=True)
         except Exception:
             self.console.print("[red]Your query could not be parsed[/red]")
@@ -82,9 +83,24 @@ class Command(BaseCommand):
         return WordCompleter(sql_completions + function_completions + field_completions)
 
     def handle(self) -> None:
+        self.console.print(
+            f"[bold]Jira-select[/bold] Shell v{__version__}",
+            style="dodger_blue1 blink",
+        )
         vi_mode = not self.config.get("shell", {}).get("emacs_mode", False)
         if self.options.editor_mode:
             vi_mode = self.options.editor_mode
+        if vi_mode:
+            self.console.print(
+                " [Press ESC followed by ENTER to run query.]",
+                style="deep_sky_blue4",
+                markup=False,
+            )
+            self.console.print(
+                " [Press CTRL+D from an empty prompt to exit.]",
+                style="grey30",
+                markup=False,
+            )
 
         completions = self.build_completions()
         session = PromptSession(
@@ -95,6 +111,7 @@ class Command(BaseCommand):
             history=FileHistory(os.path.join(get_config_dir(), "shell_history")),
             auto_suggest=AutoSuggestFromHistory(),
             vi_mode=vi_mode,
+            mouse_support=True,
         )
 
         while True:

@@ -108,7 +108,7 @@ class BaseCommand(metaclass=ABCMeta):
     def __init__(self, config: ConfigDict, options: argparse.Namespace):
         self._config: ConfigDict = config
         self._options: argparse.Namespace = options
-        self._console = Console()
+        self._console = Console(highlight=False)
         super().__init__()
 
     @property
