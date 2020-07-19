@@ -129,7 +129,11 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 .. py:function:: multimode(*values: Any) -> List[Any]
 
+   Requires Python 3.8
+
 .. py:function:: quantiles(*values: Any, n=4, method=Literal["exclusive", "inclusive"]) -> Iterable[Iterable[Any]]
+
+   Requires Python 3.8
 
 Measures of spread
 ~~~~~~~~~~~~~~~~~~
@@ -185,8 +189,8 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 .. py:function:: len(iterable: List[Any]) -> int
 
-   You might be tempted to use `count()` given how we share many
-   patterns with SQL, but _this_ is what you actually want to use.
+   You might be tempted to use ``count()`` given how we share many
+   patterns with SQL, but *this* is what you actually want to use.
 
 .. py:function:: range(stop: int) -> Iterable[int]
 .. py:function:: range(start: int, stop: int) -> Iterable[int]
