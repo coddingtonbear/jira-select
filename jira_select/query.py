@@ -149,7 +149,7 @@ class Query:
         return [str(item) for item in iterable]
 
     def _get_all_fields(self):
-        fields = self._jira.fields()
+        fields = [{"id": "key"}, {"id": "id"}] + self._jira.fields()
         for field in fields:
             definition: SelectFieldDefinition = {
                 "expression": field["id"],
