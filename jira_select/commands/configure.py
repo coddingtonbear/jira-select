@@ -23,14 +23,14 @@ class Command(BaseCommand):
     def collect_credentials(self) -> Tuple[str, str, str]:
         instance_url = input_dialog(
             title="Instance URL",
-            text="Please enter your Jira instance URL (e.g. 'https://mycompany.jira.com/')",
+            text="Please enter your Jira instance URL (e.g. 'https://mycompany.jira.com/'):",
         ).run()
         if not instance_url:
             raise UserError("Cancelled")
         username = input_dialog(
             title="Username",
             text=(
-                "Please enter your Jira username:\n\nfor Jira Cloud instances, you may need to generate a new API token to use as a password at https://id.atlassian.com/manage-profile/security/api-tokens"
+                "Please enter your Jira username: \n\n(for Jira Cloud instances, you may need to generate a new API token to use as a password at https://id.atlassian.com/manage-profile/security/api-tokens)"
             ),
         ).run()
         if not username:
