@@ -189,6 +189,8 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 Sorting
 -------
 
+See more in information in `Python's Documentation <https://docs.python.org/3/library/functions.html>`_.
+
 .. py:function:: reversed(iterable: List[Any]) -> Iterable[List[Any]]
 
 .. py:function:: sorted(iterable: List[Any]) -> Iterable[List[Any]]
@@ -206,6 +208,8 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 Counting
 --------
 
+See more in information in `Python's Documentation <https://docs.python.org/3/library/functions.html>`_.
+
 .. py:function:: len(iterable: List[Any]) -> int
 
    You might be tempted to use ``count()`` given how we share many
@@ -213,6 +217,8 @@ Counting
 
 Ranges
 ------
+
+See more in information in `Python's Documentation <https://docs.python.org/3/library/functions.html>`_.
 
 .. py:function:: range(stop: int) -> Iterable[int]
 .. py:function:: range(start: int, stop: int) -> Iterable[int]
