@@ -132,7 +132,12 @@ def get_row_dict(row: Any) -> Dict[str, Any]:
     # Gather any top-level keys, too, to make sure we fetch any expansions
     for key in dir(row):
         value = getattr(row, key)
-        if not key.startswith("_") and key != "fields" and not callable(value):
+        if (
+            key != "fields"
+            and not key.startswith("_")
+            and not key.upper() == key
+            and not callable(value)
+        ):
             names[key] = getattr(row, key)
 
     return names
@@ -180,7 +185,7 @@ def normalize_value(value: Any) -> Any:
         return {
             name: normalize_value(getattr(value, name))
             for name in dir(value)
-            if not name.startswith("_")
+            if not name.startswith("_") and not name.upper() == name
         }
 
     return value
