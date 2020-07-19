@@ -148,12 +148,24 @@ class Query:
     def _ensure_str(self, iterable=Iterable[Any]) -> List[str]:
         return [str(item) for item in iterable]
 
+    def _get_all_fields(self):
+        fields = self._jira.fields()
+        for field in fields:
+            definition: SelectFieldDefinition = {
+                "expression": field["id"],
+                "column": field["id"],
+            }
+            yield definition
+
     @property
     def select(self) -> List[SelectFieldDefinition]:
         fields: List[SelectFieldDefinition] = []
 
         for field in self._definition["select"]:
-            fields.append(parse_select_definition(field))
+            if field == "*":
+                fields.extend(self._get_all_fields())
+            else:
+                fields.append(parse_select_definition(field))
 
         return fields
 

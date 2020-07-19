@@ -175,11 +175,12 @@ def get_field_data(
         functions = {}
 
     try:
-        return simpleeval.simple_eval(
-            expression, names={"_": row, **row.as_dict()}, functions=functions
+        return evaluate_expression(
+            expression, names={"_": row, **row.as_dict()}, functions=functions,
         )
     except (
         simpleeval.AttributeDoesNotExist,
+        simpleeval.NameNotDefined,
         KeyError,
         IndexError,
         TypeError,
@@ -188,5 +189,5 @@ def get_field_data(
         if not error_returns_null:
             raise
         return None
-    except simpleeval.NameNotDefined as e:
+    except Exception as e:
         raise QueryError(str(e))

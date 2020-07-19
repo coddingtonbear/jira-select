@@ -62,6 +62,19 @@ but you can overide that by providing a name using the format ``EXPRESSION as "N
 
     somefunction(my_field) as "My Field Name"
 
+If you would like to return *all* fields values,
+use the expression ``*`` in your search statement:
+
+.. code-block:: yaml
+
+   select:
+   - "*"
+   from: issues
+
+.. important::
+
+   Due to yaml parsing rules, the ``*`` expression must be quoted.
+
 ``from``
 ~~~~~~~~
 
