@@ -12,6 +12,7 @@ import simpleeval
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
+from .exceptions import QueryError
 from .types import (
     ConfigDict,
     ExpressionList,
@@ -217,3 +218,5 @@ def get_field_data(
         if not error_returns_null:
             raise
         return None
+    except simpleeval.NameNotDefined as e:
+        raise QueryError(str(e))

@@ -8,3 +8,7 @@ class ConfigurationError(JiraSelectError):
 
 class UserError(JiraSelectError):
     pass
+
+
+class QueryError(UserError):
+    pass

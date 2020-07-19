@@ -4,6 +4,7 @@ import tempfile
 import subprocess
 from typing import cast
 
+from jira import JIRAError
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
@@ -12,6 +13,7 @@ from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers.data import YamlLexer
 from yaml import safe_load
 
+from ..exceptions import QueryError
 from ..formatters.csv import Formatter as CsvFormatter
 from ..plugin import BaseCommand, get_installed_functions
 from ..query import Query
@@ -40,15 +42,27 @@ class Command(BaseCommand):
         result = session.prompt("Query > ")
 
         query_definition: QueryDefinition = safe_load(result)
-        query = Query(self.jira, query_definition, progress_bar=True)
-        with tempfile.NamedTemporaryFile("w", suffix=".csv") as outf:
-            with CsvFormatter(query, outf) as formatter:
-                for row in query:
-                    formatter.writerow(row)
-            outf.flush()
+        try:
+            query = Query(self.jira, query_definition, progress_bar=True)
+        except Exception:
+            self.console.print("[red]Your query could not be parsed[/red]")
+            return
 
-            proc = subprocess.Popen([viewer, outf.name])
-            proc.wait()
+        try:
+            with tempfile.NamedTemporaryFile("w", suffix=".csv") as outf:
+                with CsvFormatter(query, outf) as formatter:
+                    for row in query:
+                        formatter.writerow(row)
+                outf.flush()
+
+                proc = subprocess.Popen([viewer, outf.name])
+                proc.wait()
+        except JIRAError as e:
+            self.console.print(f"[red][bold]Jira Error:[/bold] {e.text}[/red]")
+        except QueryError as e:
+            self.console.print(f"[red][bold]Query Error:[/bold] {e}[/red]")
+        except Exception:
+            self.console.print_exception()
 
     def build_completions(self) -> WordCompleter:
         sql_completions = [
