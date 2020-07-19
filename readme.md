@@ -40,16 +40,16 @@ pip install -e .
 
 ## Quickstart
 
-First, you need to configure `jira-csv` to connect to your jira instance:
+First, you need to configure `jira-select` to connect to your jira instance:
 
 ```
-jira-csv configure
+jira-select configure
 ```
 
 Then, you can open up your shell:
 
 ```
-jira-csv shell
+jira-select shell
 ```
 
 Now, you can type out your query -- the below will find issues assigned

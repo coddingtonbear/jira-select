@@ -16,7 +16,7 @@ class Command(BaseCommand):
     @classmethod
     def get_help(cls) -> str:
         return (
-            "Interactively allows you to configure jira-csv to connect "
+            "Interactively allows you to configure jira-select to connect "
             "to your Jira instance."
         )
 

@@ -5,13 +5,13 @@ First, install this package::
 
    pip install jira-select
 
-Next you need to configure `jira-csv` to connect to your jira instance::
+Next you need to configure `jira-select` to connect to your jira instance::
 
-   jira-csv configure
+   jira-select configure
 
 Follow the displayed instructions, then, you can open up your shell::
 
-   jira-csv shell
+   jira-select shell
 
 From here, you can type out a jira-select query (See :ref:`Query Format` for details).
 The format is inspired by SQL, but isn't quite the same.
