@@ -8,29 +8,28 @@ First, you need to configure `jira-csv` to connect to your jira instance:
 jira-csv configure
 ```
 
-Then, you'll need to create a yaml file describing your query and save it
-somewhere; example:
+Then, you can open up your shell:
+
+```
+jira-csv shell
+```
+
+Now, you can type out your query -- the below will find issues assigned
+to you:
 
 ```yaml
 select:
   - key
   - summary
-  - timetracking.originalEstimate as "Hours Estimate"
-  - customfield_10048 as "My Important Field"
 from: issues
 where:
-  - labels = "frontend"
-  - assignee = "me@adamcoddington.net"
+  - assignee = "your-email@somecompany.com"
   - resolution is null
 ```
 
-Now you can run your query:
-
-```
-jira-csv run /path/to/query.yaml
-```
-
-& it'll hand you back a CSV document with the fields you've selected.
+After you're ready to submit your query, press `Esc` followed by `Enter`,
+and after a short wait (watch the progressbars), you'll be shown your
+results. Press `q` to exit your results.
 
 See the built-in help (`--help`) for more options.
 
@@ -89,38 +88,6 @@ using standard Jql due to the amount of (potentially) unnecessary data
 transfer involved. It is recommended that you use `having` only when
 your logic cannot be expressed in standard Jql (i.e. in the "where" section).
 
-### Limiting the number of results
-
-You can limit the number of results returned by adding a `limit` to your query:
-
-```yaml
-select:
-  - key
-  - status
-  - summary
-from: issues
-where:
-  - assignee = "me@adamcoddington.net"
-limit: 10
-```
-
-### Expanding Jira fields
-
-You can ask Jira to expand issue fields by adding an `expand` element to your query:
-
-```yaml
-select:
-  - key
-  - status
-  - summary
-from: issues
-expand:
-  - transitions
-```
-
-The meaning of these expansions is defined by Jira; you can find more information
-in [Jira's documentation](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#expansion).
-
 ### Grouping & Aggregation
 
 You can group and/or aggregate your returned rows by using `group_by`:
@@ -156,7 +123,34 @@ This will sort all returned tickets, grouped by status, in descending order
 from the status that has the most tickets to the one that has the
 fewest.
 
-## Future Goals
+### Limiting the number of results
 
-- SQlite support: Instead of exporting a CSV, exporting an SQLite database.
-- XLSX support: Instead of exporting a CSV, exporing an XLSX document.
+You can limit the number of results returned by adding a `limit` to your query:
+
+```yaml
+select:
+  - key
+  - status
+  - summary
+from: issues
+where:
+  - assignee = "me@adamcoddington.net"
+limit: 10
+```
+
+### Expanding Jira fields
+
+You can ask Jira to expand issue fields by adding an `expand` element to your query:
+
+```yaml
+select:
+  - key
+  - status
+  - summary
+from: issues
+expand:
+  - transitions
+```
+
+The meaning of these expansions is defined by Jira; you can find more information
+in [Jira's documentation](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#expansion).
