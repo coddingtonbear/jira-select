@@ -27,9 +27,8 @@ where:
   - resolution is null
 ```
 
-After you're ready to submit your query, press `Esc` followed by `Enter`,
-and after a short wait (watch the progressbars), you'll be shown your
-results. Press `q` to exit your results.
+The editor uses `vi` bindings by default; so once you're ready to submit
+your query, press `Esc` followed by `Enter` and after a short wait (watch the progressbars), you'll be shown your results. Press `q` to exit your results.
 
 See the built-in help (`--help`) for more options.
 

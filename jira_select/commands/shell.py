@@ -68,10 +68,9 @@ class Command(BaseCommand):
         return WordCompleter(sql_completions + function_completions + field_completions)
 
     def handle(self) -> None:
-        vi_mode = bool(
-            self.options.editor_mode == "vi"
-            or self.config.get("shell", {}).get("vi_mode", False)
-        )
+        vi_mode = not self.config.get("shell", {}).get("emacs_mode", False)
+        if self.options.editor_mode:
+            vi_mode = self.options.editor_mode
 
         completions = self.build_completions()
         session = PromptSession(

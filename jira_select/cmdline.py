@@ -5,20 +5,25 @@ from rich.traceback import install as enable_rich_traceback
 
 from .exceptions import UserError
 from .plugin import get_installed_commands
-from .utils import get_config
+from .utils import get_config, get_default_config_path
 
 
 def main():
     enable_rich_traceback()
     commands = get_installed_commands()
 
+    default_config_path = get_default_config_path()
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config",
         "-c",
-        default=None,
+        default=default_config_path,
         type=str,
-        help="Path to configuration file to load.",
+        help=(
+            "Path to configuration file to load; by default configuration "
+            f"will be loaded from {default_config_path}."
+        ),
     )
     parser.add_argument(
         "--instance-url",

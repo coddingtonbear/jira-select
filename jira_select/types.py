@@ -55,7 +55,7 @@ class ViewerDefinitionDict(TypedDict, total=False):
 
 
 class ShellConfigDict(TypedDict, total=False):
-    vi_mode: bool
+    emacs_mode: bool
 
 
 class ConfigDict(TypedDict, total=False):

@@ -11,6 +11,10 @@ This is a lot like the "shell" you might have used for postgres, mysql
 or sqlite. Except that this one syntax highlights your query and has
 tab completion.
 
+By default, this uses `vi` bindings.  You can instead use `emacs` mode
+by setting the configuration variable (see `--help` if you do not
+know where that is) `shell.emacs_mode` to `True`.
+
 `jira-select run FILENAME [--format=csv] [--output=/path/result.csv] [--view]`
 -------------------------------------------------------------------------------
 
