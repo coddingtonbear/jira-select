@@ -264,8 +264,8 @@ class Query:
         self._having_count = 0
         if not self.definition.get("having", []):
             for row in iterator:
+                self._having_count = self.group_by_count
                 yield row
-                self._having_count += 1
             return
 
         task: Optional[TaskID] = None
