@@ -1,3 +1,5 @@
+![](https://github.com/coddingtonbear/jira-select/workflows/Run%20Tests/badge.svg) [![Join the chat at https://gitter.im/coddingtonbear/jira-select](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/coddingtonbear/jira-select?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 # Jira-Select: Easily export issues from Jira to CSV
 
 ![](https://coddingtonbear-public.s3-us-west-2.amazonaws.com/github/jira-select/demo.2.gif)
@@ -19,6 +21,22 @@ If you've ever found yourself held back by the limitations of Jira's
 built-in query language, this tool may make your life easier.
 Using Jira-select you can perform a wide variety of SQL-like query
 operations including grouping, aggregation, custom functions, and more.
+
+## Installation
+
+You can either install from pip:
+
+```
+pip install jira-select
+```
+
+_or_ from source:
+
+```
+git clone https://github.com/coddingtonbear/jira-select.git
+cd jira-select
+pip install -e .
+```
 
 ## Quickstart
 
@@ -49,3 +67,9 @@ where:
 
 The editor uses `vi` bindings by default; so once you're ready to submit
 your query, press `Esc` followed by `Enter` and after a short wait (watch the progressbars), you'll be shown your results. Press `q` to exit your results.
+
+---
+
+- Documentation for Jira-select is available on [ReadTheDocs](http://jira-select.readthedocs.org/).
+- Please post issues on [Github](http://github.com/coddingtonbear/jira-select/issues).
+- Questions? Ask them on [Gitter](https://gitter.im/coddingtonbear/jira-select).
