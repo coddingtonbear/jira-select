@@ -22,6 +22,10 @@ from ..types import QueryDefinition
 from ..utils import get_config_dir
 
 
+class QueryParseError(Exception):
+    pass
+
+
 class Command(BaseCommand):
     @classmethod
     def get_help(cls) -> str:
@@ -45,25 +49,17 @@ class Command(BaseCommand):
         try:
             query_definition: QueryDefinition = safe_load(result)
             query = Query(self.jira, query_definition, progress_bar=True)
-        except Exception:
-            self.console.print("[red]Your query could not be parsed[/red]")
-            return
+        except Exception as e:
+            raise QueryParseError(e)
 
-        try:
-            with tempfile.NamedTemporaryFile("w", suffix=".csv") as outf:
-                with CsvFormatter(query, outf) as formatter:
-                    for row in query:
-                        formatter.writerow(row)
-                outf.flush()
+        with tempfile.NamedTemporaryFile("w", suffix=".csv") as outf:
+            with CsvFormatter(query, outf) as formatter:
+                for row in query:
+                    formatter.writerow(row)
+            outf.flush()
 
-                proc = subprocess.Popen([viewer, outf.name])
-                proc.wait()
-        except JIRAError as e:
-            self.console.print(f"[red][bold]Jira Error:[/bold] {e.text}[/red]")
-        except QueryError as e:
-            self.console.print(f"[red][bold]Query Error:[/bold] {e}[/red]")
-        except Exception:
-            self.console.print_exception()
+            proc = subprocess.Popen([viewer, outf.name])
+            proc.wait()
 
     def build_completions(self) -> WordCompleter:
         sql_completions = [
@@ -117,7 +113,17 @@ class Command(BaseCommand):
         while True:
             try:
                 self._prompt_loop(session)
+            except JIRAError as e:
+                self.console.print(f"[red][bold]Jira Error:[/bold] {e.text}[/red]")
+            except QueryError as e:
+                self.console.print(f"[red][bold]Query Error:[/bold] {e}[/red]")
+            except QueryParseError as e:
+                self.console.print(
+                    f"[red][bold]Parse Error:[/bold] Your query could not be parsed: {e}[/red]"
+                )
             except KeyboardInterrupt:
                 continue
             except EOFError:
                 break
+            except Exception:
+                self.console.print_exception()
