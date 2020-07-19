@@ -26,6 +26,19 @@ def main():
         ),
     )
     parser.add_argument(
+        "--instance-name",
+        "-n",
+        default="default",
+        help=(
+            "Named instance to connect to.  You can define new instances by "
+            'running `jira-select configure --instance-name="my-instance"` '
+            "to set the instance URL, username, and password for later use in "
+            'other commands via providing the `--instance-name="my-instance" '
+            "command-line argument.  By default the 'default' instance name "
+            "will be used."
+        ),
+    )
+    parser.add_argument(
         "--instance-url",
         "-i",
         default=None,

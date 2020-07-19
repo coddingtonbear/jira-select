@@ -1,5 +1,4 @@
-from typing import Any, List, Union
-
+from typing import Any, List, Union, Dict
 from typing_extensions import TypedDict, Literal
 
 DataSource = Literal["issues", "boards"]
@@ -58,9 +57,13 @@ class ShellConfigDict(TypedDict, total=False):
     emacs_mode: bool
 
 
-class ConfigDict(TypedDict, total=False):
-    instance_url: str
+class InstanceDefinition(TypedDict, total=False):
+    url: str
     username: str
     password: str
+
+
+class ConfigDict(TypedDict, total=False):
+    instances: Dict[str, InstanceDefinition]
     shell: ShellConfigDict
     viewers: ViewerDefinitionDict

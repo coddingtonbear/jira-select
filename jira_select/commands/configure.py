@@ -25,9 +25,6 @@ class Command(BaseCommand):
             title="Instance URL",
             text="Jira instance URL (example: 'https://mycompany.jira.com/')",
         ).run()
-        import pdb
-
-        pdb.set_trace()
         username = input_dialog(title="Username", text="Username").run()
         password = input_dialog(
             title="Password", text=f"Password for {username}: ", password=True
@@ -62,8 +59,10 @@ class Command(BaseCommand):
                 if not result:
                     raise UserError("Aborted; configuration not saved.")
 
-        self.config.update({"instance_url": instance_url, "username": username})
-
+        self.config.setdefault("instances", {})[self.options.instance_name] = {
+            "url": instance_url,
+            "username": username,
+        }
         self.save_config()
 
         store_password = yes_no_dialog(

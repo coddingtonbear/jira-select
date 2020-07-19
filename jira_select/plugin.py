@@ -17,7 +17,7 @@ from rich.console import Console
 
 from .constants import APP_NAME
 from .exceptions import ConfigurationError
-from .types import ConfigDict
+from .types import ConfigDict, InstanceDefinition
 from .utils import save_config, get_functions_for_module
 
 if TYPE_CHECKING:
@@ -129,22 +129,32 @@ class BaseCommand(metaclass=ABCMeta):
     @property
     def jira(self) -> JIRA:
         if self._jira is None:
-            instance_url = self.config.get("instance_url") or self.options.instance_url
+            instance: Dict[InstanceDefinition] = cast(  # type: ignore
+                InstanceDefinition,
+                self.config.get("instances", {}).get(self.options.instance_name, {}),
+            )
+
+            instance_url = self.options.instance_url or instance.get("url")
             if not instance_url:
-                raise ConfigurationError("instance_url not set")
+                raise ConfigurationError(
+                    "instance_url not set; please run `jira-select configure`."
+                )
 
-            username = self.config.get("username") or self.options.username
+            username = self.options.username or instance.get("username")
             if not username:
-                raise ConfigurationError("username not set")
+                raise ConfigurationError(
+                    "username not set; please run `jira-select configure`."
+                )
 
-            password = self.config.get("password") or self.options.password
+            password = self.options.password or instance.get("password")
             if not password:
                 password = keyring.get_password(APP_NAME, instance_url + username)
                 if not password:
                     raise ConfigurationError(
                         f"Password not stored for {instance_url} user {username}; "
-                        f"use the 'store-password' command to store the password "
-                        f"for this user account in your system keyring."
+                        "use the 'store-password' command to store the password "
+                        "for this user account in your system keyring or use "
+                        "`jira-select configure`."
                     )
             self._jira = JIRA(
                 server=instance_url,
