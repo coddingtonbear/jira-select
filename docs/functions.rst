@@ -43,8 +43,8 @@ Jira
    .. note::
 
       You will almost certainly want to provide the parameter named ``_``
-      as the first argument to this function.  Jira-select provides the
-      raw row data under this variable name.
+      (an underscore) as the first argument to this function.
+      Jira-select provides the raw row data to functions under this variable name.
 
    In Jira, custom fields are usually named something like ``customfield_10024``
    which is, for most people, somewhat difficult to remember.  You can use
