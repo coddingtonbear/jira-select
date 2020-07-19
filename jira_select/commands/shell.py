@@ -51,10 +51,21 @@ class Command(BaseCommand):
             proc.wait()
 
     def build_completions(self) -> WordCompleter:
-        function_completions = get_installed_functions(self.jira).keys()
+        sql_completions = [
+            "select",
+            "from",
+            "where",
+            "order_by",
+            "having",
+            "group_by",
+            "sort_by",
+            "expand",
+            "limit",
+        ]
+        function_completions = list(get_installed_functions(self.jira).keys())
         field_completions = [field["key"] for field in self.jira.fields()]
 
-        return WordCompleter(function_completions | field_completions)
+        return WordCompleter(sql_completions + function_completions + field_completions)
 
     def handle(self) -> None:
         vi_mode = bool(

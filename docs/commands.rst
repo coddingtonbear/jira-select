@@ -1,6 +1,16 @@
 Command-Line
 ============
 
+`jira-select shell [--editor-mode='vi'|'emacs']`
+------------------------------------------------
+
+Opens an interactive shell (a.k.a repl) allowing you to interact with Jira
+and see your query results immediately afterward.
+
+This is a lot like the "shell" you might have used for postgres, mysql
+or sqlite. Except that this one syntax highlights your query and has
+tab completion.
+
 `jira-select run FILENAME [--format=csv] [--output=/path/result.csv] [--view]`
 -------------------------------------------------------------------------------
 
