@@ -8,6 +8,7 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Tuple
 
 from appdirs import user_config_dir
+from jira.resources import Resource
 import simpleeval
 from yaml import safe_dump, safe_load
 
@@ -16,7 +17,6 @@ from .exceptions import QueryError
 from .types import (
     ConfigDict,
     ExpressionList,
-    QueryDefinition,
     SelectFieldDefinition,
     Expression,
 )
@@ -165,6 +165,36 @@ def evaluate_expression(
     return simpleeval.simple_eval(expression, names=names, functions=functions)
 
 
+def normalize_value(value: Any) -> Any:
+    if isinstance(value, (str, bool, float, int)):
+        return value
+    elif isinstance(value, list):
+        return [normalize_value(v) for v in value]
+    elif isinstance(value, Dict):
+        return {k: normalize_value(v) for k, v in value.items()}
+    elif isinstance(value, Resource):
+        display = str(value)
+        if display.startswith("<JIRA"):
+            # If the display value starts with "<JIRA", we know
+            # the library couldn't find a pretty way of printing
+            # this field; let's just return the raw dictionary
+            # in that case
+            return value.raw
+        return display
+    elif "PropertyHolder" in str(value):
+        # Yes; this LOOKS ridiculous, but in older versions
+        # of the Jira library, the PropertyHolder class is
+        # created a runtime :facepalm:.  I think this is
+        # the only way to find them :shrug:
+        return {
+            name: normalize_value(getattr(value, name))
+            for name in dir(value)
+            if not name.startswith("_")
+        }
+
+    return value
+
+
 def get_field_data(
     row: Result,
     expression: str,
@@ -175,8 +205,10 @@ def get_field_data(
         functions = {}
 
     try:
-        return evaluate_expression(
-            expression, names={"_": row, **row.as_dict()}, functions=functions,
+        return normalize_value(
+            evaluate_expression(
+                expression, names={"_": row, **row.as_dict()}, functions=functions,
+            )
         )
     except (
         simpleeval.AttributeDoesNotExist,
