@@ -113,21 +113,26 @@ class BaseCommand(metaclass=ABCMeta):
 
     @property
     def config(self) -> ConfigDict:
+        """ Provides the configuration dictionary."""
         return self._config
 
     def save_config(self) -> None:
+        """ Saves the existing configuration dictionary."""
         save_config(self.config, self.options.config)
 
     @property
     def options(self) -> argparse.Namespace:
+        """ Provides options provided at the command-line."""
         return self._options
 
     @property
     def console(self) -> Console:
+        """ Provides access to the console (see `rich.console.Console`."""
         return self._console
 
     @property
     def jira(self) -> JIRA:
+        """ Provides access to the configured Jira instance."""
         if self._jira is None:
             instance: Dict[InstanceDefinition] = cast(  # type: ignore
                 InstanceDefinition,
@@ -166,14 +171,17 @@ class BaseCommand(metaclass=ABCMeta):
 
     @classmethod
     def get_help(cls) -> str:
+        """ Retuurns help text for this function."""
         return ""
 
     @classmethod
     def add_arguments(cls, parser: argparse.ArgumentParser) -> None:
+        """ Allows adding additional command-line arguments. """
         pass
 
     @abstractmethod
     def handle(self) -> None:
+        """ This is where the work of your function starts. """
         ...
 
 
@@ -238,6 +246,7 @@ class BaseFormatter(metaclass=ABCMeta):
 
 
 def register_function(name: str, fn: Callable):
+    """ Register a callable to be a function available in queries."""
     REGISTERED_FUNCTIONS[name] = fn
 
 

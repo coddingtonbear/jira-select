@@ -37,6 +37,7 @@ operations including grouping, aggregation, custom functions, and more.
    how_to.rst
    query_lifecycle.rst
    commands.rst
+   extending.rst
    appendix.rst
 
 
