@@ -1,8 +1,8 @@
-Advanced Usage
-==============
+How to
+======
 
-Using Functions
----------------
+Use Functions
+-------------
 
 Your ``select``, ``having``, ``group_by``, and ``sort_by`` sections have access
 to a wide range of functions as well as to the full breadth
@@ -12,8 +12,8 @@ them persistently available via a setuptools entrypoint.
 
 See :ref:`Query Functions` for a complete list of built-in functions.
 
-Formatting data
----------------
+Format data using functions
+---------------------------
 
 .. code-block:: yaml
 
@@ -33,8 +33,8 @@ a function:
 - `Sprint Name`: Will show the name of the last sprint associated with
   the displayed issue.
 
-Filtering results
------------------
+Filter results using functions
+------------------------------
 
 .. code-block:: yaml
 
@@ -61,8 +61,8 @@ sprint associated with the displayed issue will not be written to your output.
    transfer involved. It is recommended that you use ``having`` only when
    your logic cannot be expressed in standard Jql (i.e. in the ``where`` section).
 
-Grouping & Aggregation
-----------------------
+Group results & calculate aggregates
+------------------------------------
 
 You can group and/or aggregate your returned rows by using ``group_by``:
 
@@ -78,8 +78,8 @@ You can group and/or aggregate your returned rows by using ``group_by``:
 You'll receive just a single result row for each status, and a count
 of how many records shared that status in the second column.
 
-Sorting
--------
+Sort results using functions
+----------------------------
 
 You can order your entries using any expression, too:
 
@@ -104,8 +104,8 @@ fewest.
    server.  In situations where your expression can be evaluated in Jql,
    you will have faster performance using the ``order_by`` section.
 
-Limiting the number of returned results
----------------------------------------
+Limit the number of returned results
+------------------------------------
 
 You can limit the number of results returned by adding a ``limit`` to your query:
 
@@ -124,8 +124,8 @@ Be aware that this limit is handled by Jira;
 so only the first N records will be available for downstream steps
 in the :ref:`Query Lifecycle`.
 
-Expanding Jira Issue Fields
----------------------------
+Expand Jira Issue Fields
+------------------------
 
 You can ask Jira to expand issue fields by adding an ``expand`` element to your query:
 
