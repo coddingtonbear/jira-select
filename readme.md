@@ -1,6 +1,6 @@
 ![](https://github.com/coddingtonbear/jira-select/workflows/Run%20Tests/badge.svg) [![Join the chat at https://gitter.im/coddingtonbear/jira-select](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/coddingtonbear/jira-select?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# Jira-Select: Easily export issues from Jira to CSV
+# Jira-Select: Get the data you want to see out of Jira
 
 ![](https://coddingtonbear-public.s3-us-west-2.amazonaws.com/github/jira-select/demo.2.gif)
 
