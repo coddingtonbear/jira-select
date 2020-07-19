@@ -59,6 +59,14 @@ Jira
         - field_by_name(_, "Story Points") as "Story Points"
       from: issues
 
+.. py:function:: estimate_to_days(estimate_string: str, day_hour_count=8) -> Optional[float]
+
+   Converts a string estimation (typically stored in ``timetracking.originalEstimate``)
+   into an integer count of days.
+
+   The ``timetracking.originalEstimate`` field contains values like ``1d 2h 3m``;
+   using this function will transform such a value into ``1.25625``.
+
 Dates
 -----
 
