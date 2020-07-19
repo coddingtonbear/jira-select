@@ -2,7 +2,7 @@
 
 # Jira-Select: Get the data you want to see out of Jira
 
-![](https://coddingtonbear-public.s3-us-west-2.amazonaws.com/github/jira-select/demo.2.gif)
+![](https://coddingtonbear-public.s3-us-west-2.amazonaws.com/github/jira-select/demo.3.gif)
 
 Jira-select is a command-line tool and library that lets you run SQL-like
 queries against your Jira instance that are far beyond what Jira's built-in
