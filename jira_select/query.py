@@ -2,16 +2,21 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 from functools import total_ordering
-from typing import Any, Callable, Dict, Generator, List, Optional, cast
+from typing import Any, Callable, Dict, Generator, List, Optional, cast, Iterable
 
 from jira import JIRA, Issue
 from rich.progress import Progress, TaskID
 
 from .plugin import get_installed_functions
-from .types import ExpressionList, QueryDefinition, SelectFieldDefinition, Expression
+from .types import (
+    ExpressionList,
+    JqlList,
+    QueryDefinition,
+    SelectFieldDefinition,
+    Expression,
+)
 from .utils import (
     calculate_result_hash,
-    clean_query_definition,
     expression_includes_group_by,
     get_field_data,
     get_row_dict,
@@ -37,7 +42,10 @@ class NullAcceptableSort:
         if self._value is other._value:
             return True
 
-        return self._value == other._value
+        try:
+            return self._value == other._value
+        except Exception:
+            return False
 
     def __str__(self):
         return str(self._value)
@@ -132,11 +140,62 @@ class GroupedResult(Result):
         return result
 
 
+class Query:
+    def __init__(self, jira: JIRA, definition: QueryDefinition):
+        self._jira = jira
+        self._definition = definition
+
+    def _ensure_str(self, iterable=Iterable[Any]) -> List[str]:
+        return [str(item) for item in iterable]
+
+    @property
+    def select(self) -> List[SelectFieldDefinition]:
+        fields: List[SelectFieldDefinition] = []
+
+        for field in self._definition["select"]:
+            fields.append(parse_select_definition(field))
+
+        return fields
+
+    @property
+    def from_(self) -> str:
+        return self._definition["from"]
+
+    @property
+    def where(self) -> JqlList:
+        return self._ensure_str(self._definition.get("where", []))
+
+    @property
+    def order_by(self) -> JqlList:
+        return self._ensure_str(self._definition.get("order_by", []))
+
+    @property
+    def having(self) -> ExpressionList:
+        return self._ensure_str(self._definition.get("having", []))
+
+    @property
+    def group_by(self) -> ExpressionList:
+        return self._ensure_str(self._definition.get("group_by", []))
+
+    @property
+    def sort_by(self) -> ExpressionList:
+        return self._ensure_str(self._definition.get("sort_by", []))
+
+    @property
+    def expand(self) -> List[str]:
+        return self._ensure_str(self._definition.get("expand", []))
+
+    @property
+    def limit(self) -> Optional[int]:
+        return self._definition.get("limit")
+
+
 class Executor:
     def __init__(
         self, jira: JIRA, definition: QueryDefinition, progress_bar: bool = False
     ):
-        self._definition: QueryDefinition = clean_query_definition(definition)
+        self._query: Query = Query(jira, definition)
+        # self._definition: QueryDefinition = clean_query_definition(definition)
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
         self._progress_bar = progress_bar
@@ -157,24 +216,16 @@ class Executor:
         return self._jira
 
     @property
-    def definition(self) -> QueryDefinition:
-        return self._definition
+    def query(self) -> Query:
+        return self._query
 
     @property
     def functions(self) -> Dict[str, Callable]:
         return self._functions
 
-    def get_fields(self) -> List[SelectFieldDefinition]:
-        fields: List[SelectFieldDefinition] = []
-
-        for field in self.definition["select"]:
-            fields.append(parse_select_definition(field))
-
-        return fields
-
     def _get_jql(self) -> str:
-        query = " AND ".join(self.definition.get("where", []))
-        order_by_fields = ", ".join(self.definition.get("order_by", []))
+        query = " AND ".join(self.query.where)
+        order_by_fields = ", ".join(self.query.order_by)
 
         if order_by_fields:
             query = f"{query} ORDER BY {order_by_fields}"
@@ -184,11 +235,9 @@ class Executor:
     def _get_issues(self, progress: Progress) -> Generator[SingleResult, None, None]:
         jql = self._get_jql()
 
-        expand = self.definition.get("expand", [])
-
         start_at = 0
         max_results = 2 ** 32
-        result_limit = self.definition.get("limit", 2 ** 32)
+        result_limit = self.query.limit or 2 ** 32
 
         task: Optional[TaskID] = None
         if self.progress_bar_enabled:
@@ -198,7 +247,7 @@ class Executor:
             results = self.jira.search_issues(
                 jql,
                 startAt=start_at,
-                expand=",".join(expand),
+                expand=",".join(self.query.expand),
                 fields="*all",
                 maxResults=min(result_limit, 100),
             )
@@ -223,11 +272,10 @@ class Executor:
     def _process_group_by(
         self, iterator: Generator[SingleResult, None, None], progress: Progress
     ) -> Generator[Result, None, None]:
-        group_fields = self.definition.get("group_by", [])
         groups: Dict[int, GroupedResult] = {}
         self._group_by_count = 0
 
-        if not group_fields:
+        if not self.query.group_by:
             for row in iterator:
                 self._group_by_count = self.jira_count
                 yield row
@@ -241,7 +289,7 @@ class Executor:
             if task is not None:
                 progress.update(task, total=self.jira_count)
 
-            row_hash = calculate_result_hash(row, group_fields, self.functions,)
+            row_hash = calculate_result_hash(row, self.query.group_by, self.functions,)
             if row_hash not in groups:
                 self._group_by_count += 1
                 groups[row_hash] = GroupedResult()
@@ -262,7 +310,7 @@ class Executor:
         self, iterator: Generator[Result, None, None], progress: Progress
     ) -> Generator[Result, None, None]:
         self._having_count = 0
-        if not self.definition.get("having", []):
+        if not self.query.having:
             for row in iterator:
                 self._having_count = self.group_by_count
                 yield row
@@ -277,9 +325,9 @@ class Executor:
                 progress.update(task, total=self.group_by_count)
 
             include_row = True
-            for having in self.definition["having"]:
+            for having in self.query.having:
                 if not row.evaluate_expression(
-                    having, self.definition.get("group_by"), self.functions,
+                    having, self.query.group_by, self.functions,
                 ):
                     include_row = False
                     break
@@ -299,7 +347,7 @@ class Executor:
         self, iterator: Generator[Result, None, None], progress: Progress
     ) -> Generator[Result, None, None]:
         self._sort_by_count = 0
-        if not self.definition.get("sort_by", []):
+        if not self.query.sort_by:
             for row in iterator:
                 self._sort_by_count = self.having_count
                 yield row
@@ -308,7 +356,7 @@ class Executor:
         task: Optional[TaskID] = None
         if self.progress_bar_enabled:
             task = progress.add_task(
-                "sort_by", total=len(self.definition["sort_by"]) * self.having_count
+                "sort_by", total=len(self.query.sort_by) * self.having_count
             )
 
         # First, materialize our list
@@ -318,12 +366,12 @@ class Executor:
         self._sort_by_count = len(rows)
 
         # Now, sort by each of the ordering expressions in reverse order
-        for sort_by in reversed(self.definition["sort_by"]):
+        for sort_by in reversed(self.query.sort_by):
             sort_expression, reverse = parse_sort_by_definition(sort_by)
 
             def sort_key(row):
                 result = row.evaluate_expression(
-                    sort_expression, self.definition.get("group_by"), self.functions
+                    sort_expression, self.query.group_by, self.functions
                 )
                 if task is not None:
                     progress.update(task, advance=1)
@@ -341,22 +389,20 @@ class Executor:
     def _generate_row_dict(self, row: Result) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
 
-        for field_defn in self.get_fields():
+        for field_defn in self.query.select:
             result[field_defn["column"]] = row.evaluate_expression(
-                field_defn["expression"],
-                self.definition.get("group_by"),
-                self.functions,
+                field_defn["expression"], self.query.group_by, self.functions,
             )
 
         return result
 
     def _get_iterator(self, progress: Progress) -> Generator[Result, None, None]:
-        source = self.definition["from"]
-
-        if source == "issues":
+        if self.query.from_ == "issues":
             iterator = self._get_issues
         else:
-            raise NotImplementedError(f"No search for source {source} implemented.")
+            raise NotImplementedError(
+                f"No search for source {self.query.from_} implemented."
+            )
 
         yield from self._process_sort_by(
             self._process_having(

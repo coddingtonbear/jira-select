@@ -81,36 +81,6 @@ def get_functions_for_module(
     return functions
 
 
-def clean_query_definition(query: QueryDefinition) -> QueryDefinition:
-    cleaned_query: QueryDefinition = {
-        "select": [],
-        "from": query["from"],
-    }
-
-    for select in query["select"]:
-        if isinstance(select, dict):
-            cleaned_query["select"].append(select)
-        else:
-            cleaned_query["select"].append(str(select))
-
-    for section in (
-        "where",
-        "order_by",
-        "having",
-        "group_by",
-        "sort_by",
-        "expand",
-    ):
-        if section in query:
-            # I'm not sure I understand why the typing checks here are failing
-            cleaned_query[section] = [str(line) for line in query[section]]  # type: ignore
-
-    if "limit" in query:
-        cleaned_query["limit"] = query["limit"]
-
-    return cleaned_query
-
-
 def parse_select_definition(
     expression: Union[str, SelectFieldDefinition]
 ) -> SelectFieldDefinition:

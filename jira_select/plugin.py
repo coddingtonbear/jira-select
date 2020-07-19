@@ -209,8 +209,8 @@ def get_installed_formatters() -> Dict[str, Type[BaseFormatter]]:
 
 
 class BaseFormatter(metaclass=ABCMeta):
-    def __init__(self, query: Executor, stream: IO[str]):
-        self._query = query
+    def __init__(self, executor: Executor, stream: IO[str]):
+        self._executor = executor
         self._stream = stream
 
     @classmethod
@@ -219,8 +219,8 @@ class BaseFormatter(metaclass=ABCMeta):
         ...
 
     @property
-    def query(self):
-        return self._query
+    def executor(self):
+        return self._executor
 
     @property
     def stream(self):

@@ -14,7 +14,7 @@ class Formatter(BaseFormatter):
     def _generate_fieldnames(self) -> List[str]:
         fields = []
 
-        for field in self.query.get_fields():
+        for field in self.executor.query.select:
             fields.append(field["column"])
 
         return fields
@@ -23,7 +23,7 @@ class Formatter(BaseFormatter):
         super().open()
         self.table = Table()
 
-        for field in self.query.get_fields():
+        for field in self.executor.query.select:
             self.table.add_column(field["column"])
 
     def close(self):
@@ -32,5 +32,5 @@ class Formatter(BaseFormatter):
         super().close()
 
     def writerow(self, row: Dict[str, Any]):
-        fields = [str(row.get(field["column"])) for field in self.query.get_fields()]
+        fields = [str(row.get(field["column"])) for field in self.executor.query.select]
         self.table.add_row(*fields)

@@ -4,41 +4,9 @@ from unittest.mock import ANY, Mock, patch
 import simpleeval
 
 from jira_select import utils, query
-from jira_select.types import QueryDefinition, SelectFieldDefinition
+from jira_select.types import SelectFieldDefinition
 
 from .base import JiraSelectTestCase
-
-
-class TestCleanQueryDefinition(JiraSelectTestCase):
-    def test_stringifies_boolean(self):
-        query: QueryDefinition = {
-            "select": ["whatever"],
-            "from": "issues",
-            "group_by": [True],
-        }
-
-        actual = utils.clean_query_definition(query)
-        expected: QueryDefinition = {
-            "select": ["whatever"],
-            "from": "issues",
-            "group_by": ["True"],
-        }
-
-        assert expected == actual
-
-    def test_does_not_break_select_field_definitions(self):
-        query: QueryDefinition = {
-            "select": [{"expression": "arbitrary", "column": "whatever",}],
-            "from": "issues",
-        }
-
-        actual = utils.clean_query_definition(query)
-        expected: QueryDefinition = {
-            "select": [{"expression": "arbitrary", "column": "whatever",}],
-            "from": "issues",
-        }
-
-        assert expected == actual
 
 
 class TestParseSelectDefinition(JiraSelectTestCase):

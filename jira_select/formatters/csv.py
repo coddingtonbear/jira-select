@@ -12,7 +12,7 @@ class Formatter(BaseFormatter):
     def _generate_fieldnames(self) -> List[str]:
         fields = []
 
-        for field in self.query.get_fields():
+        for field in self.executor.query.select:
             fields.append(field["column"])
 
         return fields
