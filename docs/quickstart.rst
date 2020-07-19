@@ -1,7 +1,11 @@
 Quickstart
 ==========
 
-First, you need to configure `jira-csv` to connect to your jira instance::
+First, install this package::
+
+   pip install jira-select
+
+Next you need to configure `jira-csv` to connect to your jira instance::
 
    jira-csv configure
 
