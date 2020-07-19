@@ -44,7 +44,7 @@ class Command(BaseCommand):
     def _prompt_loop(self, session: PromptSession):
         viewer: str = cast(str, self.config.get("viewers", {}).get("csv")) or "vd"
 
-        result = session.prompt("Query > ")
+        result = session.prompt(">>> ")
 
         try:
             query_definition: QueryDefinition = safe_load(result)
@@ -88,14 +88,13 @@ class Command(BaseCommand):
             vi_mode = self.options.editor_mode
         if vi_mode:
             self.console.print(
-                " [Press ESC followed by ENTER to run query.]",
-                style="deep_sky_blue4",
-                markup=False,
+                " | [bold]Run:[/bold]\t\tESC->ENTER", style="deep_sky_blue4",
             )
             self.console.print(
-                " [Press CTRL+D from an empty prompt to exit.]",
-                style="grey30",
-                markup=False,
+                " | [bold]Clear:[/bold]\tCTRL+C", style="deep_sky_blue4",
+            )
+            self.console.print(
+                " | [bold]Exit:[/bold]\tCTRL+D", style="deep_sky_blue4",
             )
 
         completions = self.build_completions()
