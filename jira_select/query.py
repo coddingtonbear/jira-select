@@ -143,7 +143,7 @@ class Query:
 
         # Set a high ceiling at the start so the progressbar does not
         # start "full"
-        self._query_count = 2 ** 32
+        self._jira_count = 2 ** 32
         self._group_by_count = 2 ** 32
         self._having_count = 2 ** 32
         self._sort_by_count = 2 ** 32
@@ -192,7 +192,7 @@ class Query:
 
         task: Optional[TaskID] = None
         if self.progress_bar_enabled:
-            task = progress.add_task("query", total=self.query_count)
+            task = progress.add_task("jira", total=self.jira_count)
 
         while start_at < max_results:
             results = self.jira.search_issues(
@@ -203,11 +203,11 @@ class Query:
                 maxResults=min(result_limit, 100),
             )
             max_results = results.total
-            self._query_count = min(results.total, result_limit)
+            self._jira_count = min(results.total, result_limit)
             for result in results:
                 result = cast(Issue, result)
                 if task is not None:
-                    progress.update(task, advance=1, total=self.query_count)
+                    progress.update(task, advance=1, total=self.jira_count)
 
                 start_at += 1
                 yield SingleResult(result)
@@ -217,8 +217,8 @@ class Query:
                     return
 
     @property
-    def query_count(self):
-        return self._query_count
+    def jira_count(self):
+        return self._jira_count
 
     def _process_group_by(
         self, iterator: Generator[SingleResult, None, None], progress: Progress
@@ -229,17 +229,17 @@ class Query:
 
         if not group_fields:
             for row in iterator:
-                self._group_by_count = self.query_count
+                self._group_by_count = self.jira_count
                 yield row
             return
 
         task: Optional[TaskID] = None
         if self.progress_bar_enabled:
-            task = progress.add_task("group_by", total=self.query_count)
+            task = progress.add_task("group_by", total=self.jira_count)
 
         for row in iterator:
             if task is not None:
-                progress.update(task, total=self.query_count)
+                progress.update(task, total=self.jira_count)
 
             row_hash = calculate_result_hash(row, group_fields, self.functions,)
             if row_hash not in groups:
