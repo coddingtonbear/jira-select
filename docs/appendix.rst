@@ -1,5 +1,5 @@
-Appendix
-========
+Reference
+=========
 
 .. toctree::
    :maxdepth: 4
