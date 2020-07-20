@@ -26,7 +26,7 @@ Summing the number of story points assigned in a particular sprint
    group_by:
    - True
    having:
-   - "My Sprint Name" in sprint_name(field_by_name(_, "Sprint")[-1])
+   - '"My Sprint Name" in sprint_name(field_by_name(_, "Sprint")[-1])'
 
 In Jira, your "Story Points" and "Sprint" fields may have any number of names
 since they're "Custom Fields".
@@ -46,6 +46,11 @@ that takes the last sprint associated with each returned issue,
 looks up that sprint's name and compares it with the sprint name you are looking for.
 We're using the ``in`` python expression here because I can't remember the full name,
 but I can remember part of it.
+You'll notice that the line is quoted;
+that's necessary only because the yaml parser interprets
+a line starting with a double-quote
+a little differently from one that does not.
+Try running the query without quoting the string to see what I mean.
 
 Summing the total estimated size of issues per-person for a given sprint
 ------------------------------------------------------------------------
@@ -61,7 +66,7 @@ Summing the total estimated size of issues per-person for a given sprint
    group_by:
    - assignee
    having:
-   - "My Sprint Name" in sprint_name(field_by_name(_, "Sprint")[-1])
+   - '"My Sprint Name" in sprint_name(field_by_name(_, "Sprint")[-1])'
 
 See :ref:`Summing the number of story points assigned in a particular sprint` for
 an explanation of the ``having`` section here.
