@@ -50,6 +50,8 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     "str": str,
     "sum": sum,
     "tuple": tuple,
+    "map": map,
+    "filter": filter,
     # Statistics
     **get_functions_for_module(
         statistics,

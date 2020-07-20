@@ -67,6 +67,25 @@ Jira
    The ``timetracking.originalEstimate`` field contains values like ``1d 2h 3m``;
    using this function will transform such a value into ``1.25625``.
 
+Data Traversal
+--------------
+
+.. _extract function:
+
+.. py:function:: extract(field: Iterable[Any], dotpath: str) -> Iterable[Any]
+
+   For every member of ``field``, walk through dictionary keys or object
+   attributes described by ``dotpath`` and return all non-null results as
+   an array.
+
+   This is particularly useful for traversing into dictionaries and objects
+   returned by grouped rows; for example, to fetch all estimates for grouped
+   rows, you could use::
+
+      extract(timetracking, "originalEstimate")
+
+   This function works for both dictionaries and objects.
+
 Dates
 -----
 
@@ -195,6 +214,14 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 .. py:function:: sorted(iterable: List[Any]) -> Iterable[List[Any]]
 
+Filtering & Mapping
+-------------------
+
+See more in information in `Python's Documentation <https://docs.python.org/3/library/functions.html>`_.
+
+.. py:function:: filter(callable: Callable, Iterable[Any]) -> Iterable[Any]
+
+.. py:function:: map(callable: Callable, Iterable[Any]) -> Iterable[Any]
 
 Logic Shortcuts
 ---------------
