@@ -55,7 +55,7 @@ Entrypoint
 1. Create a class that is a subclass of ``jira_select.plugin.Function``.
    This command:
 
-   - Must implement a ``__handle__`` function.
+   - Must implement a ``__call__`` function.
 
 2. Register that class via a setuptools entrypoint.
 

@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Tu
 from appdirs import user_config_dir
 from jira.resources import Resource
 import simpleeval
+from simpleeval import EvalWithCompoundTypes
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
@@ -158,7 +159,7 @@ def evaluate_expression(
     names: Dict[str, Any],
     functions: Optional[Dict[str, Callable]] = None,
 ) -> Any:
-    return simpleeval.simple_eval(expression, names=names, functions=functions)
+    return EvalWithCompoundTypes(names=names, functions=functions).eval(expression)
 
 
 def normalize_value(value: Any) -> Any:

@@ -40,6 +40,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--editor-mode", "-m", choices=["emacs", "vi"], default=None,
         )
+        parser.add_argument(
+            "--disable-progressbars",
+            action="store_false",
+            default=True,
+            dest="enable_progressbars",
+        )
 
     def _prompt_loop(self, session: PromptSession):
         viewer: str = cast(str, self.config.get("viewers", {}).get("csv")) or "vd"
@@ -48,7 +54,11 @@ class Command(BaseCommand):
 
         try:
             query_definition: QueryDefinition = safe_load(result)
-            query = Executor(self.jira, query_definition, progress_bar=True)
+            query = Executor(
+                self.jira,
+                query_definition,
+                progress_bar=self.options.enable_progressbars,
+            )
         except Exception as e:
             raise QueryParseError(e)
 

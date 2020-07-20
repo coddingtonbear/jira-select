@@ -50,6 +50,8 @@ Allows you to store a password for USERNAME in your system keychain.
 
 * ``USERNAME``: The username to store a password for.
 
+.. _functions subcommand:
+
 `jirafs-select functions [--having=EXPRESSION] [SEARCH_TERM [SEARCH_TERM...]]`
 ------------------------------------------------------------------------------
 
@@ -60,6 +62,8 @@ Displays functions available for use in a query.
 * ``SEARCH_TERM``: A search term to use for filtering results.  The term
   is case-insensitive and must be present in either the function name or
   description to be displayed.
+
+.. _schema subcommand:
 
 `jira-select schema issues [--having=EXPRESSION] [SEARCH_TERM [SEARCH_TERM...]]`
 --------------------------------------------------------------------------------
