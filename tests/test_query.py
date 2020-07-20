@@ -121,3 +121,68 @@ class TestQuery(JiraSelectTestCase):
 
         actual_results = list(query)
         assert len(actual_results) == 1
+
+    def test_simple_wprogress(self):
+        query: QueryDefinition = {
+            "select": ["key"],
+            "from": "issues",
+        }
+
+        query = Executor(self.mock_jira, query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"key": "ALPHA-1",},
+            {"key": "ALPHA-3",},
+            {"key": "ALPHA-2",},
+        ]
+
+        assert expected_results == actual_results
+
+    def test_sort_by_wprogress(self):
+        query: QueryDefinition = {
+            "select": ["key"],
+            "from": "issues",
+            "sort_by": ["story_points desc", "key"],
+        }
+
+        query = Executor(self.mock_jira, query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"key": "ALPHA-3",},
+            {"key": "ALPHA-1",},
+            {"key": "ALPHA-2",},
+        ]
+
+        assert expected_results == actual_results
+
+    def test_group_by_aggregation_wprogress(self):
+        query: QueryDefinition = {
+            "select": ["issuetype", "len(key)"],
+            "from": "issues",
+            "group_by": ["issuetype"],
+            "sort_by": ["len(key)"],
+        }
+
+        query = Executor(self.mock_jira, query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"issuetype": "Bug", "len(key)": 1,},
+            {"issuetype": "Issue", "len(key)": 2,},
+        ]
+
+        assert expected_results == actual_results
+
+    def test_cap_wprogress(self):
+        query: QueryDefinition = {
+            "select": ["key"],
+            "from": "issues",
+            "cap": 1,
+        }
+
+        query = Executor(self.mock_jira, query, True)
+
+        actual_results = list(query)
+        assert len(actual_results) == 1
