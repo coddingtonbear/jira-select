@@ -18,6 +18,8 @@ from typing import (
 
 from jira import JIRA, Issue
 from rich.progress import Progress, TaskID
+from diskcache import Cache
+
 
 from .plugin import get_installed_functions
 from .types import (
@@ -30,6 +32,7 @@ from .types import (
 from .utils import (
     calculate_result_hash,
     expression_includes_group_by,
+    get_cache_path,
     get_field_data,
     get_row_dict,
     parse_sort_by_definition,
@@ -220,6 +223,10 @@ class Query:
     def cap(self) -> Optional[int]:
         return self._definition.get("cap")
 
+    @property
+    def cache(self) -> Optional[int]:
+        return self._definition.get("cache")
+
 
 class NullProgressbar:
     def update(self, *args, **kwargs):
@@ -228,6 +235,9 @@ class NullProgressbar:
     def add_task(self, *args, **kwargs) -> TaskID:
         return TaskID(0)
 
+    def remove_task(self, *args, **kwargs):
+        pass
+
     def __enter__(self) -> NullProgressbar:
         return self
 
@@ -235,9 +245,33 @@ class NullProgressbar:
         pass
 
 
+class NullCache:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __getitem__(self, key):
+        raise KeyError(key)
+
+    def get(self, key, default=None, **kwargs):
+        return default
+
+    def touch(self, key, **kwargs):
+        return
+
+    def set(self, key, value, **kwargs):
+        return
+
+    def add(self, key, value, **kwargs):
+        return
+
+
 class Executor:
     def __init__(
-        self, jira: JIRA, definition: QueryDefinition, progress_bar: bool = False
+        self,
+        jira: JIRA,
+        definition: QueryDefinition,
+        enable_cache: bool = True,
+        progress_bar: bool = False,
     ):
         self._query: Query = Query(jira, definition)
         # self._definition: QueryDefinition = clean_query_definition(definition)
@@ -252,9 +286,17 @@ class Executor:
         self._having_count = 2 ** 32
         self._sort_by_count = 2 ** 32
 
+        self._cache: Union[Cache, NullCache] = NullCache()
+        if enable_cache:
+            self._cache = Cache(get_cache_path())
+
     @property
     def jira(self) -> JIRA:
         return self._jira
+
+    @property
+    def cache(self) -> Union[Cache, NullCache]:
+        return self._cache
 
     @property
     def query(self) -> Query:
@@ -275,12 +317,26 @@ class Executor:
 
     def _get_issues(self, task: TaskID) -> Generator[SingleResult, None, None]:
         jql = self._get_jql()
+        cache_key = f"{jql}:{','.join(self.query.order_by)}:{self.query.limit}"
 
         start_at = 0
         max_results = 2 ** 32
         result_limit = self.query.limit or 2 ** 32
 
-        while start_at < max_results:
+        if self.query.cache:
+            try:
+                cached_results = self.cache[cache_key]
+                self._jira_count = len(cached_results)
+                self.progress.remove_task(task)
+                for result in cached_results:
+                    yield SingleResult(Issue({}, None, result))
+                return
+            except KeyError:
+                pass
+
+        cache = []
+
+        while start_at < min(max_results, result_limit):
             results = self.jira.search_issues(
                 jql,
                 startAt=start_at,
@@ -294,12 +350,18 @@ class Executor:
                 result = cast(Issue, result)
                 self.progress.update(task, advance=1, total=self.jira_count)
 
+                if self.query.cache:
+                    cache.append(result.raw)
+
                 start_at += 1
                 yield SingleResult(result)
 
                 # Return early if our result limit has been reached
                 if start_at >= result_limit:
-                    return
+                    break
+
+        if self.query.cache:
+            self.cache.set(cache_key, cache, expire=self.query.cache)
 
     @property
     def jira_count(self):

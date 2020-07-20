@@ -6,9 +6,11 @@ Query Lifecycle
    graph LR
         req([Request])
         req-->where
-        subgraph Remote
-            where-->order_by
-            order_by-->limit
+        subgraph Cacheable
+          subgraph Remote
+              where-->order_by
+              order_by-->limit
+          end
         end
         subgraph Local
             limit-->group_by
@@ -36,6 +38,8 @@ Jira-select queries are evaluated in many steps across two phases:
 
 The steps in the "Remote" section are accomplished entirely by Jira
 and thus are limited to the capabilities of JQL.
+The result of this part of the query processor can be cached
+by using the ``cache`` query parameter.
 
 The steps in the "Local" section are accomplished on your local machine
 by Jira-select, and thus can use custom functions.

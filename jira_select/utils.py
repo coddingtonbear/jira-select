@@ -40,6 +40,14 @@ def get_config_dir() -> str:
     return root_path
 
 
+def get_cache_path() -> str:
+    config_path = get_config_dir()
+    cache_path = os.path.join(config_path, "cache")
+    os.makedirs(cache_path, exist_ok=True)
+
+    return cache_path
+
+
 def get_default_config_path() -> str:
     root_path = get_config_dir()
     return os.path.join(root_path, "config.yaml",)

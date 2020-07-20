@@ -38,6 +38,7 @@ but know that in real life, you're very unlikely to use them all at once:
    - len(key) desc
    limit: 100
    cap: 10
+   cache: 86400
 
 Below, we'll go over what each of these sections are for in detail.
 
@@ -185,6 +186,17 @@ If you would like to limit the count of rows *after* ``group_by`` and
    instead limit the number of rows returned after ``having``
    and ``grouping`` expressions have reduced the row count,
    use ``cap`` instead.
+
+``cache``
+---------
+
+This will cache the results returned by Jira
+for up to the specified number of sectonds.
+This can be very helpful if you are iterating on changes
+to your ``group_by`` or ``having`` sections
+in that you can make minor changes
+and avoid the slow process of requesting records
+from jira after every change.
 
 Unusual
 -------

@@ -9,3 +9,4 @@
 ``limit``,Remote limiting of the count of results,int,Remote,*n/a*
 ``expand``,Defines Jira issue field expansions,List[str],Remote,*n/a*
 ``cap``,Post-having/group_by limiting of results,int,Local,*n/a*
+``cache``,Defines how long to cache Jira results,int,Local,*n/a*

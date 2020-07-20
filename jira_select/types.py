@@ -38,6 +38,7 @@ QueryDefinition = TypedDict(
         "expand": List[str],
         "limit": int,
         "cap": int,
+        "cache": int,
     },
     total=False,
 )
