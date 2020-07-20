@@ -2,7 +2,19 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 from functools import total_ordering
-from typing import Any, Callable, Dict, Generator, List, Optional, cast, Iterable, Tuple
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    cast,
+    Iterable,
+    Tuple,
+    Type,
+    Union,
+)
 
 from jira import JIRA, Issue
 from rich.progress import Progress, TaskID
@@ -209,6 +221,20 @@ class Query:
         return self._definition.get("cap")
 
 
+class NullProgressbar:
+    def update(self, *args, **kwargs):
+        pass
+
+    def add_task(self, *args, **kwargs) -> TaskID:
+        return TaskID(0)
+
+    def __enter__(self) -> NullProgressbar:
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        pass
+
+
 class Executor:
     def __init__(
         self, jira: JIRA, definition: QueryDefinition, progress_bar: bool = False
@@ -217,7 +243,7 @@ class Executor:
         # self._definition: QueryDefinition = clean_query_definition(definition)
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
-        self._progress_bar = progress_bar
+        self._progress_bar_enabled = progress_bar
 
         # Set a high ceiling at the start so the progressbar does not
         # start "full"
@@ -225,10 +251,6 @@ class Executor:
         self._group_by_count = 2 ** 32
         self._having_count = 2 ** 32
         self._sort_by_count = 2 ** 32
-
-    @property
-    def progress_bar_enabled(self):
-        return self._progress_bar
 
     @property
     def jira(self) -> JIRA:
@@ -251,16 +273,12 @@ class Executor:
 
         return query
 
-    def _get_issues(self, progress: Progress) -> Generator[SingleResult, None, None]:
+    def _get_issues(self, task: TaskID) -> Generator[SingleResult, None, None]:
         jql = self._get_jql()
 
         start_at = 0
         max_results = 2 ** 32
         result_limit = self.query.limit or 2 ** 32
-
-        task: Optional[TaskID] = None
-        if self.progress_bar_enabled:
-            task = progress.add_task("jira", total=self.jira_count)
 
         while start_at < max_results:
             results = self.jira.search_issues(
@@ -274,8 +292,7 @@ class Executor:
             self._jira_count = min(results.total, result_limit)
             for result in results:
                 result = cast(Issue, result)
-                if task is not None:
-                    progress.update(task, advance=1, total=self.jira_count)
+                self.progress.update(task, advance=1, total=self.jira_count)
 
                 start_at += 1
                 yield SingleResult(result)
@@ -289,7 +306,7 @@ class Executor:
         return self._jira_count
 
     def _process_group_by(
-        self, iterator: Generator[SingleResult, None, None], progress: Progress
+        self, iterator: Generator[SingleResult, None, None], task: Optional[TaskID]
     ) -> Generator[Result, None, None]:
         groups: Dict[int, GroupedResult] = {}
         self._group_by_count = 0
@@ -300,13 +317,10 @@ class Executor:
                 yield row
             return
 
-        task: Optional[TaskID] = None
-        if self.progress_bar_enabled:
-            task = progress.add_task("group_by", total=self.jira_count)
+        assert task is not None
 
         for row in iterator:
-            if task is not None:
-                progress.update(task, total=self.jira_count)
+            self.progress.update(task, total=self.jira_count)
 
             row_hash = calculate_result_hash(row, self.query.group_by, self.functions,)
             if row_hash not in groups:
@@ -315,8 +329,7 @@ class Executor:
 
             groups[row_hash].add(row)
 
-            if task is not None:
-                progress.update(task, advance=1)
+            self.progress.update(task, advance=1)
 
         for _, value in groups.items():
             yield value
@@ -326,7 +339,7 @@ class Executor:
         return self._group_by_count
 
     def _process_having(
-        self, iterator: Generator[Result, None, None], progress: Progress
+        self, iterator: Generator[Result, None, None], task: Optional[TaskID]
     ) -> Generator[Result, None, None]:
         self._having_count = 0
         if not self.query.having:
@@ -335,13 +348,10 @@ class Executor:
                 yield row
             return
 
-        task: Optional[TaskID] = None
-        if self.progress_bar_enabled:
-            task = progress.add_task("having", total=self.group_by_count)
+        assert task is not None
 
         for row in iterator:
-            if task is not None:
-                progress.update(task, total=self.group_by_count)
+            self.progress.update(task, total=self.group_by_count)
 
             include_row = True
             for having in self.query.having:
@@ -355,15 +365,14 @@ class Executor:
                 self._having_count += 1
                 yield row
 
-            if task is not None:
-                progress.update(task, advance=1)
+            self.progress.update(task, advance=1)
 
     @property
     def having_count(self):
         return self._having_count
 
     def _process_sort_by(
-        self, iterator: Generator[Result, None, None], progress: Progress
+        self, iterator: Generator[Result, None, None], task: Optional[TaskID],
     ) -> Generator[Result, None, None]:
         self._sort_by_count = 0
         if not self.query.sort_by:
@@ -372,16 +381,11 @@ class Executor:
                 yield row
             return
 
-        task: Optional[TaskID] = None
-        if self.progress_bar_enabled:
-            task = progress.add_task(
-                "sort_by", total=len(self.query.sort_by) * self.having_count
-            )
+        assert task is not None
 
         # First, materialize our list
         rows = list(iterator)
-        if task is not None:
-            progress.update(task, total=len(rows))
+        self.progress.update(task, total=len(rows))
         self._sort_by_count = len(rows)
 
         # Now, sort by each of the ordering expressions in reverse order
@@ -391,8 +395,7 @@ class Executor:
                 result = row.evaluate_expression(
                     sort_expression, self.query.group_by, self.functions
                 )
-                if task is not None:
-                    progress.update(task, advance=1)
+                self.progress.update(task, advance=1)
 
                 return NullAcceptableSort(result)
 
@@ -414,7 +417,19 @@ class Executor:
 
         return result
 
-    def _get_iterator(self, progress: Progress) -> Generator[Result, None, None]:
+    def _get_iterator(self) -> Generator[Dict[str, Any], None, None]:
+        iterator_task = self.progress.add_task("jira", total=2 ** 32)
+        group_by_task: Optional[TaskID] = None
+        if self.query.group_by:
+            group_by_task = self.progress.add_task("group_by", total=2 ** 32)
+        having_task: Optional[TaskID] = None
+        if self.query.having:
+            having_task = self.progress.add_task("having", total=2 ** 32)
+        sort_by_task: Optional[TaskID] = None
+        if self.query.sort_by:
+            sort_by_task = self.progress.add_task("sort_by", total=2 ** 32)
+        select_task = self.progress.add_task("select", total=2 ** 32)
+
         if self.query.from_ == "issues":
             iterator = self._get_issues
         else:
@@ -422,25 +437,32 @@ class Executor:
                 f"No search for source {self.query.from_} implemented."
             )
 
-        yield from self._process_sort_by(
+        for row in self._process_sort_by(
             self._process_having(
-                self._process_group_by(iterator(progress), progress), progress
+                self._process_group_by(iterator(iterator_task), group_by_task),
+                having_task,
             ),
-            progress,
-        )
+            sort_by_task,
+        ):
+            self.progress.update(select_task, total=self.sort_by_count)
+            yield self._generate_row_dict(row)
+            self.progress.update(select_task, advance=1)
+
+    @property
+    def progress(self) -> Union[Progress, NullProgressbar]:
+        return self._progress_bar
 
     def __iter__(self) -> Generator[Dict[str, Any], None, None]:
-        with Progress(auto_refresh=self.progress_bar_enabled) as progress:
+        progress_bar_cls: Union[Type[Progress], Type[NullProgressbar]] = NullProgressbar
+        if self._progress_bar_enabled:
+            progress_bar_cls = Progress
+
+        with progress_bar_cls() as progress:
+            self._progress_bar = progress
+
             row_count = 0
-            task: Optional[TaskID] = None
-            if self.progress_bar_enabled:
-                task = progress.add_task("select", total=self.sort_by_count)
-            for row in self._get_iterator(progress):
-                if task is not None:
-                    progress.update(task, total=self.sort_by_count)
-                yield self._generate_row_dict(row)
-                if task is not None:
-                    progress.update(task, advance=1)
+            for row in self._get_iterator():
+                yield row
 
                 row_count += 1
                 if self.query.cap is not None and row_count >= self.query.cap:
