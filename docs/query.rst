@@ -191,7 +191,7 @@ If you would like to limit the count of rows *after* ``group_by`` and
 ---------
 
 This will cache the results returned by Jira
-for up to the specified number of sectonds.
+for up to the specified number of seconds.
 This can be very helpful if you are iterating on changes
 to your ``group_by`` or ``having`` sections
 in that you can make minor changes
