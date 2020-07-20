@@ -98,11 +98,9 @@ To write your own formatter, you need to:
 
    .. automethod:: get_file_extension
 
-   .. autoproperty:: query
+   .. autoproperty:: executor
 
    .. autoproperty:: stream
-
-   .. automethod:: add_arguments
 
    .. automethod:: open
 
