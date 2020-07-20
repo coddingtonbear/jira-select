@@ -77,7 +77,7 @@ but since we've grouped our rows by assignee,
 instead of a single object holding the ``originalEstimate`` we want.
 To get an array of ``originalEstimate`` objects,
 we will use the ``extract`` function;
-you can read more about what this function does at :ref:`extract function`.
+you can read more about what this function does at :ref:`Data Traversal` .
 
 If we were to stop here, we would receive an array of strings
 looking something like::
