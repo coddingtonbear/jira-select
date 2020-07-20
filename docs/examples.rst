@@ -90,7 +90,9 @@ This will create an array like this::
 
    [1, 0.5, 2, 0.625]
 
-To get the value we want, we use ``sum``.
+An array isn't quite what we want
+-- we want the total number of days --
+so we use the ``sum`` function to get that.
 
 See :ref:`Query Functions` for more information.
 
