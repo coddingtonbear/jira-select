@@ -15,7 +15,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 from typing import Dict
-from jira_select import __version__
 
 
 # -- Project information -----------------------------------------------------
@@ -27,7 +26,7 @@ author = "Adam Coddington"
 # The short X.Y version
 version = ""
 # The full version, including alpha/beta/rc tags
-release = __version__
+release = "1.3.0"
 
 
 # -- General configuration ---------------------------------------------------
