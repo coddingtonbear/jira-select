@@ -223,3 +223,18 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 .. py:function:: range(stop: int) -> Iterable[int]
 .. py:function:: range(start: int, stop: int) -> Iterable[int]
 .. py:function:: range(start: int, stop: int, step: int) -> Iterable[int]
+
+Random
+------
+
+See more in information in `Python's Documentation <https://docs.python.org/3/library/random.html>`_.
+
+.. py:function:: random() -> float
+
+.. py:function:: randrange(stop: int) -> int
+.. py:function:: randrange(start: int, stop: int) -> int
+.. py:function:: randrange(start: int, stop: int, step: int) -> int
+
+.. py:function:: randint(low: int, high: int) -> int
+
+.. py:function:: choice(Sequence[Any]) -> Any

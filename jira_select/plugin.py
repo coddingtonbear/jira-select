@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from abc import ABCMeta, abstractmethod
 import argparse
 import copy
 import json
 import logging
-from abc import ABCMeta, abstractmethod
+import random
 import statistics
 from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Optional, Type, cast
 
@@ -70,6 +71,8 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
             "variance",
         ],
     ),
+    # Random
+    **get_functions_for_module(random, ["random", "randrange", "randint", "choice"],),
     # JSON
     "json_loads": json.loads,
     "json_dumps": json.dumps,
