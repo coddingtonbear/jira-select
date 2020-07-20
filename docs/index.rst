@@ -39,6 +39,7 @@ operations including grouping, aggregation, custom functions, and more.
    examples.rst
    commands.rst
    extending.rst
+   troubleshooting.rst
    appendix.rst
 
 

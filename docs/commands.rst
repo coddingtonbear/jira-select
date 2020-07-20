@@ -17,6 +17,8 @@ tab completion.
   ``False``.  See ``--help`` if you're not sure where your configuration
   file is.
 
+.. _run subcommand:
+
 `jira-select run FILENAME [--format=FORMAT] [--output=PATH] [--view]`
 ---------------------------------------------------------------------
 
