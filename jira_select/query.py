@@ -18,8 +18,8 @@ from typing import (
 
 from jira import JIRA, Issue
 from rich.progress import Progress, TaskID, BarColumn, TimeRemainingColumn
-from diskcache import Cache
 
+from .cache import MinimumRecencyCache
 from .plugin import get_installed_functions
 from .types import (
     ExpressionList,
@@ -227,8 +227,14 @@ class Query:
         return self._definition.get("cap")
 
     @property
-    def cache(self) -> Optional[int]:
-        return self._definition.get("cache")
+    def cache(self) -> Optional[Tuple[Optional[int], Optional[int]]]:
+        value = self._definition.get("cache")
+        if isinstance(value, int):
+            return (
+                value,
+                value,
+            )
+        return value
 
 
 class NullProgressbar:
@@ -258,7 +264,7 @@ class NullCache:
     def __getitem__(self, key):
         raise KeyError(key)
 
-    def get(self, key, default=None, **kwargs):
+    def get(self, key, default=None, **kwargs) -> Optional[Any]:
         return default
 
     def touch(self, key, **kwargs):
@@ -302,16 +308,16 @@ class Executor:
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
         self._progress_bar_enabled = progress_bar
 
-        self._cache: Union[Cache, NullCache] = NullCache()
+        self._cache: Union[MinimumRecencyCache, NullCache] = NullCache()
         if enable_cache:
-            self._cache = Cache(get_cache_path())
+            self._cache = MinimumRecencyCache(get_cache_path())
 
     @property
     def jira(self) -> JIRA:
         return self._jira
 
     @property
-    def cache(self) -> Union[Cache, NullCache]:
+    def cache(self) -> Union[MinimumRecencyCache, NullCache]:
         return self._cache
 
     @property
@@ -343,7 +349,13 @@ class Executor:
 
         if self.query.cache:
             try:
-                cached_results = self.cache[cache_key]
+                min_recency, _ = self.query.cache
+                if min_recency is None:
+                    raise KeyError(cache_key)
+                cached_results = self.cache.get(cache_key, min_recency=min_recency)
+                if not cached_results:
+                    raise KeyError(cache_key)
+
                 out_channel.set(len(cached_results))
                 self.progress.remove_task(task)
                 for result in cached_results:
@@ -383,7 +395,9 @@ class Executor:
                     break
 
         if self.query.cache:
-            self.cache.set(cache_key, cache, expire=self.query.cache)
+            _, max_store = self.query.cache
+            if max_store is not None:
+                self.cache.set(cache_key, cache, expire=max_store)
 
     def _process_filter(
         self,

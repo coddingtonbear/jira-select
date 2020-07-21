@@ -1,4 +1,4 @@
-from typing import Any, List, Union, Dict
+from typing import Any, List, Union, Dict, Tuple, Optional
 from typing_extensions import TypedDict, Literal
 
 DataSource = Literal["issues", "boards"]
@@ -39,7 +39,7 @@ QueryDefinition = TypedDict(
         "expand": List[str],
         "limit": int,
         "cap": int,
-        "cache": int,
+        "cache": Union[int, Tuple[Optional[int], Optional[int]]],
     },
     total=False,
 )

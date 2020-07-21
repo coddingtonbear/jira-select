@@ -200,6 +200,28 @@ in that you can make minor changes
 and avoid the slow process of requesting records
 from jira after every change.
 
+Note that e cache parameter can be in one of two forms:
+
+.. code-block:: yaml
+
+   cache: 86400
+
+In this case, we will cache the results for up to 86400 seconds
+and will also accpet an already-stored cached value
+that is up to that number of seconds old.
+
+.. code-block:: yaml
+
+   cache: (300, 86400)
+
+In this case, we will cache the results for up to 86400 seconds,
+but will only accept a cached value that is 300 seconds old or newer.
+
+You can also pass ``null`` as the second parameter to allow
+reading from the cache, but disallow writing a new cached value,
+or pass ``null`` as the first parameter to disallow using an existing cache,
+but allowing storing a new value.
+
 Unusual
 -------
 
