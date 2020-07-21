@@ -200,7 +200,7 @@ in that you can make minor changes
 and avoid the slow process of requesting records
 from jira after every change.
 
-Note that e cache parameter can be in one of two forms:
+Note that the cache parameter can be in one of two forms:
 
 .. code-block:: yaml
 
@@ -259,6 +259,8 @@ between these two steps.  For example:
 In these cases, you can enter the same sorts of expressions
 you'd use in a ``having`` statement in your ``filter`` statement
 as a sort of local-side equivalent of ``where``.
+
+You **can** use custom functions in this section.
 
 ``cap``
 ~~~~~~~
