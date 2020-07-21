@@ -20,7 +20,11 @@ class Function(BaseFunction):
                         cursor = cursor[part]
                     else:
                         cursor = getattr(cursor, part)
-            except (KeyError, AttributeError):
+            except Exception:
+                # You might think that this should be only catching
+                # AttributeError and KeyError, but I'm afraid the Jira
+                # library returns some really surprising exceptions
+                # sometimes; so let's just be forgiving.
                 continue
 
             if cursor is not None:
