@@ -307,7 +307,7 @@ class Executor:
         return self._functions
 
     def _get_jql(self) -> str:
-        query = " AND ".join(self.query.where)
+        query = " AND ".join(f"({q})" for q in self.query.where)
         order_by_fields = ", ".join(self.query.order_by)
 
         if order_by_fields:
