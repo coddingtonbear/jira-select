@@ -30,6 +30,8 @@ but know that in real life, you're very unlikely to use them all at once:
    - project = "MYPROJECT"
    order_by:
    - created
+   filter:
+   - customfield10010 == 140
    group_by:
    - assignee
    having:
@@ -211,6 +213,26 @@ You can find more information about what data this will return
 by reading `the Jira documentation covering
 "Search for issues using JQL (GET)" <https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-get>`_.
 
+
+``filter``
+~~~~~~~~~~
+
+In most cases, using ``where`` (pre-grouping/having, processed by Jira)
+and ``having`` (post-grouping) are sufficient.
+But there are scenarios where you might want to filter rows
+between these two steps.  For example:
+
+* Jql doesn't provide the functionality you need for filtering your resultset,
+  but you'll be using a ``group_by`` statement, too, and thus can't just use
+  ``having``; because by that point, the field you need to filter on will
+  have been grouped with others.
+* You are using a long cache interval to quickly iterate on your query and
+  do not want to have to update your ``where`` expression since changing that
+  will cause us to not use the cached results.
+
+In these cases, you can enter the same sorts of expressions
+you'd use in a ``having`` statement in your ``filter`` statement
+as a sort of local-side equivalent of ``where``.
 
 ``cap``
 ~~~~~~~

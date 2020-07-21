@@ -32,6 +32,7 @@ QueryDefinition = TypedDict(
         "from": DataSource,
         "where": JqlList,
         "order_by": JqlList,
+        "filter": ExpressionList,
         "having": ExpressionList,
         "group_by": ExpressionList,
         "sort_by": ExpressionList,

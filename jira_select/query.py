@@ -196,6 +196,10 @@ class Query:
         return self._ensure_str(self._definition.get("order_by", []))
 
     @property
+    def filter(self) -> ExpressionList:
+        return self._ensure_str(self._definition.get("filter", []))
+
+    @property
     def having(self) -> ExpressionList:
         return self._ensure_str(self._definition.get("having", []))
 
@@ -329,7 +333,7 @@ class Executor:
 
     def _get_issues(
         self, task: TaskID, out_channel: CounterChannel
-    ) -> Generator[SingleResult, None, None]:
+    ) -> Generator[Result, None, None]:
         jql = self._get_jql()
         cache_key = f"{jql}:{','.join(self.query.order_by)}:{self.query.limit}"
 
@@ -381,14 +385,40 @@ class Executor:
         if self.query.cache:
             self.cache.set(cache_key, cache, expire=self.query.cache)
 
-    def _process_group_by(
+    def _process_filter(
         self,
-        iterator: Generator[SingleResult, None, None],
+        iterator: Generator[Result, None, None],
         task: TaskID,
         input_channel: CounterChannel,
         output_channel: CounterChannel,
     ) -> Generator[Result, None, None]:
-        groups: Dict[int, GroupedResult] = {}
+        output_channel.zero()
+
+        for row in iterator:
+            self.progress.update(task, total=input_channel.get(), visible=True)
+
+            include_row = True
+            for filter_expression in self.query.filter:
+                if not row.evaluate_expression(
+                    filter_expression, self.query.group_by, self.functions,
+                ):
+                    include_row = False
+                    break
+
+            if include_row:
+                output_channel.increment()
+                yield row
+
+            self.progress.update(task, advance=1)
+
+    def _process_group_by(
+        self,
+        iterator: Generator[Result, None, None],
+        task: TaskID,
+        input_channel: CounterChannel,
+        output_channel: CounterChannel,
+    ) -> Generator[Result, None, None]:
+        groups: Dict[int, Result] = {}
 
         output_channel.zero()
 
@@ -480,7 +510,23 @@ class Executor:
 
         # Do not show the counters until we know how many rows they have waiting
         iterator_task = self.progress.add_task("jira", total=0, visible=False)
-        phases = []
+        phases: List[
+            Tuple[
+                Callable[
+                    [
+                        Generator[Result, None, None],
+                        TaskID,
+                        CounterChannel,
+                        CounterChannel,
+                    ],
+                    Generator[Result, None, None],
+                ],
+                TaskID,
+            ]
+        ] = []
+        if self.query.filter:
+            filter_task = self.progress.add_task("filter", total=0, visible=False)
+            phases.append((self._process_filter, filter_task,),)
         if self.query.group_by:
             group_by_task = self.progress.add_task("group_by", total=0, visible=False)
             phases.append((self._process_group_by, group_by_task,),)

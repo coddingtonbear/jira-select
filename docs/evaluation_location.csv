@@ -3,8 +3,9 @@
 ``from``,Defines data source,str,*n/a*,*n/a*
 ``where``,Remote filtering of results,List[JqlString],Remote,**No**
 ``order_by``,Remote ordering of results,List[JqlString],Remote,**No**
+``filter``,Local pre-grouping filtering of results,List[Expression],Local,Yes
 ``group_by``,Grouping returned rows together,List[Expression],Local,Yes
-``having``,Local filtering of results,List[Expression],Local,Yes
+``having``,Local post-grouping filtering of results,List[Expression],Local,Yes
 ``sort_by``,Local sorting of results,List[Expression],Local,Yes
 ``limit``,Remote limiting of the count of results,int,Remote,*n/a*
 ``expand``,Defines Jira issue field expansions,List[str],Remote,*n/a*

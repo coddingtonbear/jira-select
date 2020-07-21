@@ -13,7 +13,8 @@ Query Lifecycle
           end
         end
         subgraph Local
-            limit-->group_by
+            limit-->filter
+            filter-->group_by
             group_by-->having
             having-->sort_by
             sort_by-->cap
