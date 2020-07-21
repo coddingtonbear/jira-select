@@ -52,6 +52,7 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     "tuple": tuple,
     "map": map,
     "filter": filter,
+    "type": lambda x: str(type(x)),
     # Statistics
     **get_functions_for_module(
         statistics,

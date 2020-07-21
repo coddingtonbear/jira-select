@@ -95,4 +95,3 @@ An array isn't quite what we want
 so we use the ``sum`` function to get that.
 
 See :ref:`Query Functions` for more information.
-

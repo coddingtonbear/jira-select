@@ -11,3 +11,33 @@ but you can still use Jira-select -- you just need to install the "Windows Subsy
 If that's not an option,
 you can still use ``jira-select`` to run queries directly with the :ref:`run subcommand`,
 opening the generated CSV file in an app of your choice.
+
+Sometimes filtering using ``having`` (or sorting using ``sort_by``) on a value I see in the output doesn't work; why not?
+-------------------------------------------------------------------------------------------------------------------------
+
+Oftentimes the data returned from Jira for a particular field
+is not a simple string or number
+and is instead a complex object full of other information.
+In those cases, we show the most reasonable string value was can obtain
+from the object instead of showing you the whole object.
+
+To use such objects in ``having`` or ``sort_by`` expressions,
+you should convert them into a reasonable simple data type
+using one of the functions in :ref:`Types`.
+
+If you're curious about which fields we're transforming
+into strings behind-the-scenes,
+try wrapping your column in ``type``
+to see the data's actual type.
+
+If you want to see the data that is being hidden
+by the above transformations
+-- for example: for ``issuetype`` --
+you can access the raw Jira object via the ``raw`` property
+of the field; e.g.
+
+.. code-block:: yaml
+
+   select:
+   - issuetype.raw
+   from: issues

@@ -204,6 +204,8 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 .. py:function:: tuple(value: Any) -> tuple
 
+.. py:function:: type(value: Any) -> str
+
 
 Sorting
 -------
