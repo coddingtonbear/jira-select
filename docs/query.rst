@@ -190,7 +190,7 @@ If you would like to limit the count of rows *after* ``group_by`` and
    use ``cap`` instead.
 
 ``cache``
----------
+~~~~~~~~~
 
 This will cache the results returned by Jira
 for up to the specified number of seconds.
