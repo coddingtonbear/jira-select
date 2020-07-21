@@ -212,7 +212,7 @@ that is up to that number of seconds old.
 
 .. code-block:: yaml
 
-   cache: (300, 86400)
+   cache: [300, 86400]
 
 In this case, we will cache the results for up to 86400 seconds,
 but will only accept a cached value that is 300 seconds old or newer.
