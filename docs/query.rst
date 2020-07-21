@@ -207,7 +207,7 @@ Note that e cache parameter can be in one of two forms:
    cache: 86400
 
 In this case, we will cache the results for up to 86400 seconds
-and will also accpet an already-stored cached value
+and will also accept an already-stored cached value
 that is up to that number of seconds old.
 
 .. code-block:: yaml
@@ -221,6 +221,10 @@ You can also pass ``null`` as the second parameter to allow
 reading from the cache, but disallow writing a new cached value,
 or pass ``null`` as the first parameter to disallow using an existing cache,
 but allowing storing a new value.
+
+Note that to take full advantage of caching,
+you may also want to use the ``filter`` feature described below.
+Using it can let you take better advantage of your cached values.
 
 Unusual
 -------
