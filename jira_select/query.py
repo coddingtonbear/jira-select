@@ -334,6 +334,8 @@ class Executor:
             except KeyError:
                 pass
 
+        self.progress.update(task, visible=True)
+
         cache = []
 
         while start_at < min(max_results, result_limit):
@@ -480,7 +482,7 @@ class Executor:
         return result
 
     def _get_iterator(self) -> Generator[Dict[str, Any], None, None]:
-        iterator_task = self.progress.add_task("jira", total=2 ** 32)
+        iterator_task = self.progress.add_task("jira", total=2 ** 32, visible=False)
         group_by_task: Optional[TaskID] = None
         if self.query.group_by:
             group_by_task = self.progress.add_task("group_by", total=2 ** 32)
