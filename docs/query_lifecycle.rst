@@ -31,6 +31,7 @@ Jira-select queries are evaluated in many steps across two phases:
 
 * Local
 
+  * Filtering (``filter``)
   * Grouping (``group_by``)
   * Filtering (``having``)
   * Sorting (``sort_by``)
