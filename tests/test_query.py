@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from dotmap import DotMap
+from jira import Issue
 
 from jira_select.types import QueryDefinition
 from jira_select.query import Executor
@@ -16,46 +16,39 @@ class TestQuery(JiraSelectTestCase):
     def setUp(self):
         super().setUp()
 
-        self.JIRA_ISSUES = JiraList(
-            [
-                DotMap(
-                    {
-                        "key": "ALPHA-1",
-                        "fields": {
-                            "issuetype": "Issue",
-                            "summary": "My Ticket",
-                            "project": "ALPHA",
-                            "story_points": 1,
-                        },
-                    }
-                ),
-                DotMap(
-                    {
-                        "key": "ALPHA-3",
-                        "fields": {
-                            "issuetype": "Bug",
-                            "summary": "Another Ticket",
-                            "project": "ALPHA",
-                            "story_points": 10,
-                        },
-                    }
-                ),
-                DotMap(
-                    {
-                        "key": "ALPHA-2",
-                        "fields": {
-                            "issuetype": "Issue",
-                            "summary": "My Ticket #2",
-                            "project": "ALPHA",
-                            "story_points": 1,
-                        },
-                    }
-                ),
-            ]
-        )
-        self.JIRA_ISSUES.total = len(self.JIRA_ISSUES)
+        self.JIRA_ISSUES = [
+            {
+                "key": "ALPHA-1",
+                "fields": {
+                    "issuetype": "Issue",
+                    "summary": "My Ticket",
+                    "project": "ALPHA",
+                    "story_points": 1,
+                },
+            },
+            {
+                "key": "ALPHA-3",
+                "fields": {
+                    "issuetype": "Bug",
+                    "summary": "Another Ticket",
+                    "project": "ALPHA",
+                    "story_points": 10,
+                },
+            },
+            {
+                "key": "ALPHA-2",
+                "fields": {
+                    "issuetype": "Issue",
+                    "summary": "My Ticket #2",
+                    "project": "ALPHA",
+                    "story_points": 1,
+                },
+            },
+        ]
+        issues = JiraList([Issue(None, None, issue) for issue in self.JIRA_ISSUES])
+        issues.total = len(self.JIRA_ISSUES)
 
-        self.mock_jira = Mock(search_issues=Mock(return_value=self.JIRA_ISSUES))
+        self.mock_jira = Mock(search_issues=Mock(return_value=issues))
 
     def test_simple(self):
         query: QueryDefinition = {
