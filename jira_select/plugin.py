@@ -170,8 +170,10 @@ class BaseCommand(metaclass=ABCMeta):
                     )
 
             verify = self.options.disable_certificate_verification or instance.get(
-                "verify", True
+                "verify"
             )
+            if verify is None:
+                verify = True
             if verify is False:
                 disable_warnings()
 
