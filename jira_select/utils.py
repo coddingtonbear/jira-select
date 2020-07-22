@@ -14,7 +14,7 @@ from simpleeval import EvalWithCompoundTypes
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
-from .exceptions import QueryError
+from .exceptions import QueryError, JiraSelectError
 from .types import (
     ConfigDict,
     ExpressionList,
@@ -209,6 +209,10 @@ def get_field_data(
                 expression, names={"_": row, **row.as_dict()}, functions=functions,
             )
         )
+    except JiraSelectError:
+        # Re-raise these -- they can be used for alerting the user
+        # to a configuration problem or w/e
+        raise
     except (
         simpleeval.AttributeDoesNotExist,
         simpleeval.NameNotDefined,
