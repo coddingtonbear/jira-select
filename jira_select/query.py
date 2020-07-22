@@ -387,8 +387,13 @@ class Executor:
                 if self.query.cache:
                     cache.append(result.raw)
 
+                # Do not return the issue directly -- it'll have session
+                # information available that might allow you to accidentally
+                # do something that modifies data.  Instead, take the Raw
+                # JSON and use this as if we were re-hydrating from cache.
+                yield SingleResult(Issue({}, None, result.raw))
+
                 start_at += 1
-                yield SingleResult(result)
 
                 # Return early if our result limit has been reached
                 if start_at >= result_limit:
