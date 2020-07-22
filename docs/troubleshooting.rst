@@ -47,8 +47,7 @@ I can't connect because my Jira instance uses a self-signed certificate
 
 Don't worry,
 there are two command-line arguments you can use
-for configuring certificate verification
-when using the ``jira-select configure`` command:
+for configuring certificate verification:
 
 * ``--disable-certificate-verification``: For the brave.  This will entirely
   disable certificate verification for this instance when configuring it
@@ -56,4 +55,14 @@ when using the ``jira-select configure`` command:
 * ``--certificate=/path/to/certificate``: For the people who have a
   security team watching what they're doing.  This will ask jira-select
   to use a particular self-signed certificate.
+
+These are overrides available for all commands (not just ``configure``)
+so these arguments can only be used
+between ``jira-select`` and the command you're running
+(probably only ``configure``
+as when you use them with ``configure``
+those settings will be recorded in your configuration's settings
+for the future)::
+
+  jira-select --disable-certificate-verification configure
 
