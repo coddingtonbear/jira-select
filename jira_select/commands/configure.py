@@ -1,9 +1,10 @@
 from logging import getLogger
-from typing import Tuple
+from typing import Tuple, Any, Dict, Union
 
 import keyring
 from jira import JIRA, JIRAError
 from prompt_toolkit.shortcuts import input_dialog, yes_no_dialog
+from urllib3 import disable_warnings
 
 from ..constants import APP_NAME
 from ..exceptions import UserError
@@ -49,16 +50,26 @@ class Command(BaseCommand):
         instance_url = ""
         username = ""
         password = ""
+        verify: Union[bool, str] = True
 
         while True:
             instance_url, username, password = self.collect_credentials()
 
+            if self.options.disable_certificate_verification:
+                verify = False
+                disable_warnings()
+            elif self.options.certificate:
+                verify = self.options.certificate
+
+            options: Dict[str, Any] = {
+                "agile_rest_path": "agile",
+                "server": instance_url,
+                "verify": verify,
+            }
+
             try:
                 JIRA(
-                    instance_url,
-                    options={"agile_rest_path": "agile",},
-                    basic_auth=(username, password),
-                    max_retries=0,
+                    options, basic_auth=(username, password), max_retries=0,
                 )
                 break
             except JIRAError:
@@ -75,6 +86,7 @@ class Command(BaseCommand):
         self.config.setdefault("instances", {})[self.options.instance_name] = {
             "url": instance_url,
             "username": username,
+            "verify": verify,
         }
         self.save_config()
 

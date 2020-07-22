@@ -64,6 +64,7 @@ class InstanceDefinition(TypedDict, total=False):
     url: str
     username: str
     password: str
+    verify: Union[str, bool]
 
 
 class ConfigDict(TypedDict, total=False):

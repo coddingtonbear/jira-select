@@ -15,6 +15,7 @@ from dateutil.parser import parse as parse_datetime
 import keyring
 from jira import JIRA
 from rich.console import Console
+from urllib3 import disable_warnings
 
 from .constants import APP_NAME
 from .exceptions import ConfigurationError
@@ -167,9 +168,19 @@ class BaseCommand(metaclass=ABCMeta):
                         "for this user account in your system keyring or use "
                         "`jira-select configure`."
                     )
+
+            verify = self.options.disable_certificate_verification or instance.get(
+                "verify", True
+            )
+            if verify is False:
+                disable_warnings()
+
             self._jira = JIRA(
-                server=instance_url,
-                options={"agile_rest_path": "agile",},
+                options={
+                    "agile_rest_path": "agile",
+                    "server": instance_url,
+                    "verify": verify,
+                },
                 basic_auth=(username, password),
             )
 

@@ -41,3 +41,19 @@ of the field; e.g.
    select:
    - issuetype.raw
    from: issues
+
+I can't connect because my Jira instance uses a self-signed certificate
+-----------------------------------------------------------------------
+
+Don't worry,
+there are two command-line arguments you can use
+for configuring certificate verification
+when using the ``jira-select configure`` command:
+
+* ``--disable-certificate-verification``: For the brave.  This will entirely
+  disable certificate verification for this instance when configuring it
+  as well as for all future connections to it.
+* ``--certificate=/path/to/certificate``: For the people who have a
+  security team watching what they're doing.  This will ask jira-select
+  to use a particular self-signed certificate.
+

@@ -63,6 +63,19 @@ def main():
         ),
     )
     parser.add_argument(
+        "--certificate",
+        help=(
+            "Path to a certificate to self-signed certificate use for "
+            "connecting to your instance."
+        ),
+    )
+    parser.add_argument(
+        "--disable-certificate-verification",
+        action="store_true",
+        default=False,
+        help="Do not verify server certificate.  Generally not recommended.",
+    )
+    parser.add_argument(
         "--debugger",
         action="store_true",
         help=(
