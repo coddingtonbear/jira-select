@@ -221,4 +221,4 @@ def get_field_data(
             raise
         return None
     except Exception as e:
-        raise QueryError(str(e))
+        raise QueryError(f"{e}: {expression}")
