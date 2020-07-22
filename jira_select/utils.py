@@ -140,13 +140,7 @@ def get_row_dict(row: Any) -> Dict[str, Any]:
 
     # Gather any top-level keys, too, to make sure we fetch any expansions
     for key in dir(row):
-        value = getattr(row, key)
-        if (
-            key != "fields"
-            and not key.startswith("_")
-            and not key.upper() == key
-            and not callable(value)
-        ):
+        if key != "fields" and not key.startswith("_") and not key.upper() == key:
             names[key] = getattr(row, key)
 
     return names
