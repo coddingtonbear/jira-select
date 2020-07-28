@@ -115,3 +115,5 @@ def main():
         command.handle()
     except UserError as e:
         console.print(f"[red]{e}[/red]")
+    except Exception:
+        console.print_exception()
