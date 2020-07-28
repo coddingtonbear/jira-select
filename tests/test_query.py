@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 from jira import Issue
+from jira.resources import Resource
 
 from jira_select.types import QueryDefinition
 from jira_select.query import Executor
@@ -16,6 +17,15 @@ class TestQuery(JiraSelectTestCase):
     def setUp(self):
         super().setUp()
 
+        class MyResource(Resource):
+            def __init__(self, raw):
+                super().__init__(None, None, None)
+                self.raw = raw
+
+        class NonResource:
+            def __str__(self):
+                return "<NonResource>"
+
         self.JIRA_ISSUES = [
             {
                 "key": "ALPHA-1",
@@ -26,6 +36,8 @@ class TestQuery(JiraSelectTestCase):
                     "story_points": 1,
                     "customfield10010": 50,
                     "customfield10011": "Ivanovna",
+                    "customfield10012": MyResource({"ok": "yes"}),
+                    "customfield10013": NonResource(),
                 },
             },
             {
@@ -37,6 +49,8 @@ class TestQuery(JiraSelectTestCase):
                     "story_points": 10,
                     "customfield10010": 55,
                     "customfield10011": "Jackson",
+                    "customfield10012": MyResource({"ok": "no"}),
+                    "customfield10013": NonResource(),
                 },
             },
             {
@@ -48,6 +62,8 @@ class TestQuery(JiraSelectTestCase):
                     "story_points": 1,
                     "customfield10010": 56,
                     "customfield10011": "Chartreuse",
+                    "customfield10012": MyResource({"ok": "maybe"}),
+                    "customfield10013": NonResource(),
                 },
             },
         ]
@@ -214,6 +230,46 @@ class TestQuery(JiraSelectTestCase):
             {"mn": "Ivanovna"},
             {"mn": "Jackson"},
             {"mn": "Chartreuse"},
+        ]
+
+        assert expected_results == actual_results
+
+    def test_interpolated_value_resource(self):
+        arbitrary_query: QueryDefinition = {
+            "select": ['{Result Object}["ok"] as "ro"'],
+            "from": "issues",
+        }
+        self.mock_jira.fields = Mock(
+            return_value=[{"name": "Result Object", "key": "customfield10012"},]
+        )
+
+        query = Executor(self.mock_jira, arbitrary_query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"ro": "yes"},
+            {"ro": "no"},
+            {"ro": "maybe"},
+        ]
+
+        assert expected_results == actual_results
+
+    def test_interpolated_value_nonresource(self):
+        arbitrary_query: QueryDefinition = {
+            "select": ['{Beep Boop} as "bb"'],
+            "from": "issues",
+        }
+        self.mock_jira.fields = Mock(
+            return_value=[{"name": "Beep Boop", "key": "customfield10013"},]
+        )
+
+        query = Executor(self.mock_jira, arbitrary_query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"bb": "<NonResource>"},
+            {"bb": "<NonResource>"},
+            {"bb": "<NonResource>"},
         ]
 
         assert expected_results == actual_results

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
+import ast
 from collections.abc import Mapping
 from functools import total_ordering
 from typing import (
@@ -35,6 +36,7 @@ from .utils import (
     get_cache_path,
     get_field_data,
     get_row_dict,
+    normalize_value,
     parse_sort_by_definition,
     parse_select_definition,
 )
@@ -292,9 +294,20 @@ class FieldNameMapping(Mapping):
     def __getitem__(self, key) -> Any:
         field_name = self._field_name_map.get(key, key)
 
-        value = self._row.as_dict().get(field_name)
+        value = normalize_value(self._row.as_dict().get(field_name))
 
+        quote = False
+
+        # If the value is a string, we'll want to quote it so it
+        # will be parseable
         if isinstance(value, str):
+            quote = True
+        try:
+            ast.parse(str(value))
+        except SyntaxError:
+            quote = True
+
+        if quote:
             return f'"{value}"'
 
         return value

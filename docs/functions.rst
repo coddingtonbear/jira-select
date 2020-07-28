@@ -36,6 +36,8 @@ Jira
    * ``originBoardId``: The board to which this sprint belongs.
 
 
+.. _field_by_name function:
+
 .. py:function:: field_by_name(row: Any, display_name: str) -> Optional[str]
 
    Returns value for field having the specified display name.
