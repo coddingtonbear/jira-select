@@ -337,7 +337,7 @@ class Executor:
     def field_name_map(self) -> Dict[str, str]:
         if not self._field_name_map:
             for jira_field in self.jira.fields():
-                self._field_name_map[jira_field["name"]] = jira_field["key"]
+                self._field_name_map[jira_field["name"]] = jira_field["id"]
 
         return self._field_name_map
 
