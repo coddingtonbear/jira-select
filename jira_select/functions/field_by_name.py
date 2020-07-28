@@ -15,6 +15,14 @@ class Function(BaseFunction):
             - field_by_name(_, "Story Points")
         from: issues
 
+    It's almost certainly preferable that you just use the
+    direct string interpolation that we provide; the
+    above example using that method would be::
+
+        select
+            - {Story Points}
+        from: issues
+
     """
 
     FIELDS: Optional[List] = None

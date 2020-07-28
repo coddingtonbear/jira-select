@@ -292,7 +292,12 @@ class FieldNameMapping(Mapping):
     def __getitem__(self, key) -> Any:
         field_name = self._field_name_map.get(key, key)
 
-        return self._row.as_dict().get(field_name)
+        value = self._row.as_dict().get(field_name)
+
+        if isinstance(value, str):
+            return f'"{value}"'
+
+        return value
 
     def __iter__(self):
         for k, v in self._field_name_map:

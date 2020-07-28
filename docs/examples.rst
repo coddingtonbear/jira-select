@@ -19,20 +19,24 @@ Summing the number of story points assigned in a particular sprint
 .. code-block:: yaml
 
    select:
-   - sum(field_by_name(_, "Story Points")) as "Total Story Points"
+   - sum({Story Points}) as "Total Story Points"
    from: issues
    where:
    - project = "MYPROJECT"
    group_by:
    - True
    having:
-   - '"My Sprint Name" in sprint_name(field_by_name(_, "Sprint")[-1])'
+   - '"My Sprint Name" in sprint_name({Sprint}[-1])'
 
 In Jira, your "Story Points" and "Sprint" fields may have any number of names
-since they're "Custom Fields".
-If you know the name of the field, you can use that in place of
-``field_by_name(_, "Story Points")``,
-and you can find out that name by using the :ref:`schema subcommand` subcommand.
+since they're "Custom Fields"
+-- their real names are things like
+``customfield10024`` and ``customfield10428``,
+but may vary instance to instance.
+You can use the field name directly in your query,
+but if you know only the "human-readable" name
+for your field, you can provide it in brackets
+as shown above with -- `{Story Points}` and `{Sprint}`.
 
 The ``where`` limitation here is used solely for reducing the number of records needing to be downloaded,
 and can be omitted if you are willing to wait.
@@ -66,7 +70,7 @@ Summing the total estimated size of issues per-person for a given sprint
    group_by:
    - assignee
    having:
-   - '"My Sprint Name" in sprint_name(field_by_name(_, "Sprint")[-1])'
+   - '"My Sprint Name" in sprint_name({Sprint}[-1])'
 
 See :ref:`Summing the number of story points assigned in a particular sprint` for
 an explanation of the ``having`` section here.

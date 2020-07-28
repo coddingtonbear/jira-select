@@ -42,6 +42,20 @@ Jira
 
    .. note::
 
+      You probably do not nee to use this function.
+      We provide another, simpler, method for getting
+      the value of a field by its human-readable name--
+      just place the human-readable name in between
+      curly braces in your query expression; eg::
+
+      .. code-block::
+
+         select
+           - {Story Points} as "Story Points"
+         from: issues
+
+   .. note::
+
       You will almost certainly want to provide the parameter named ``_``
       (an underscore) as the first argument to this function.
       Jira-select provides the raw row data to functions under this variable name.

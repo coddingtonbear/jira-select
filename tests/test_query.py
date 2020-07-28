@@ -25,6 +25,7 @@ class TestQuery(JiraSelectTestCase):
                     "project": "ALPHA",
                     "story_points": 1,
                     "customfield10010": 50,
+                    "customfield10011": "Ivanovna",
                 },
             },
             {
@@ -35,6 +36,7 @@ class TestQuery(JiraSelectTestCase):
                     "project": "ALPHA",
                     "story_points": 10,
                     "customfield10010": 55,
+                    "customfield10011": "Jackson",
                 },
             },
             {
@@ -45,6 +47,7 @@ class TestQuery(JiraSelectTestCase):
                     "project": "ALPHA",
                     "story_points": 1,
                     "customfield10010": 56,
+                    "customfield10011": "Chartreuse",
                 },
             },
         ]
@@ -175,7 +178,7 @@ class TestQuery(JiraSelectTestCase):
 
         assert expected_result == actual_result
 
-    def test_interpolated_value(self):
+    def test_interpolated_value_nonstring(self):
         arbitrary_query: QueryDefinition = {
             "select": ['{Jellybean Guess} as "jb"'],
             "from": "issues",
@@ -191,6 +194,26 @@ class TestQuery(JiraSelectTestCase):
             {"jb": 50},
             {"jb": 55},
             {"jb": 56},
+        ]
+
+        assert expected_results == actual_results
+
+    def test_interpolated_value_string(self):
+        arbitrary_query: QueryDefinition = {
+            "select": ['{Maiden Name} as "mn"'],
+            "from": "issues",
+        }
+        self.mock_jira.fields = Mock(
+            return_value=[{"name": "Maiden Name", "key": "customfield10011"},]
+        )
+
+        query = Executor(self.mock_jira, arbitrary_query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"mn": "Ivanovna"},
+            {"mn": "Jackson"},
+            {"mn": "Chartreuse"},
         ]
 
         assert expected_results == actual_results
