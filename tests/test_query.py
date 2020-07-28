@@ -24,6 +24,7 @@ class TestQuery(JiraSelectTestCase):
                     "summary": "My Ticket",
                     "project": "ALPHA",
                     "story_points": 1,
+                    "customfield10010": 50,
                 },
             },
             {
@@ -33,6 +34,7 @@ class TestQuery(JiraSelectTestCase):
                     "summary": "Another Ticket",
                     "project": "ALPHA",
                     "story_points": 10,
+                    "customfield10010": 55,
                 },
             },
             {
@@ -42,13 +44,16 @@ class TestQuery(JiraSelectTestCase):
                     "summary": "My Ticket #2",
                     "project": "ALPHA",
                     "story_points": 1,
+                    "customfield10010": 56,
                 },
             },
         ]
         issues = JiraList([Issue(None, None, issue) for issue in self.JIRA_ISSUES])
         issues.total = len(self.JIRA_ISSUES)
 
-        self.mock_jira = Mock(search_issues=Mock(return_value=issues))
+        self.mock_jira = Mock(
+            search_issues=Mock(return_value=issues), fields=Mock(return_value=[])
+        )
 
     def test_simple(self):
         query: QueryDefinition = {
@@ -145,6 +150,47 @@ class TestQuery(JiraSelectTestCase):
             {"key": "ALPHA-1",},
             {"key": "ALPHA-3",},
             {"key": "ALPHA-2",},
+        ]
+
+        assert expected_results == actual_results
+
+    def test_field_name_map(self):
+        arbitrary_query: QueryDefinition = {
+            "select": ["key"],
+            "from": "issues",
+        }
+        self.mock_jira.fields = Mock(
+            return_value=[
+                {"name": "Story Points", "key": "customfield10010"},
+                {"name": "Sprint", "key": "customfield10011"},
+            ]
+        )
+        query = Executor(self.mock_jira, arbitrary_query, True)
+
+        expected_result = {
+            "Story Points": "customfield10010",
+            "Sprint": "customfield10011",
+        }
+        actual_result = query.field_name_map
+
+        assert expected_result == actual_result
+
+    def test_interpolated_value(self):
+        arbitrary_query: QueryDefinition = {
+            "select": ['{Jellybean Guess} as "jb"'],
+            "from": "issues",
+        }
+        self.mock_jira.fields = Mock(
+            return_value=[{"name": "Jellybean Guess", "key": "customfield10010"},]
+        )
+
+        query = Executor(self.mock_jira, arbitrary_query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"jb": 50},
+            {"jb": 55},
+            {"jb": 56},
         ]
 
         assert expected_results == actual_results

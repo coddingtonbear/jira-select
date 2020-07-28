@@ -5,7 +5,17 @@ import logging
 import os
 import re
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+    Tuple,
+    Mapping,
+)
 
 from appdirs import user_config_dir
 from jira.resources import Resource
@@ -160,7 +170,7 @@ def evaluate_expression(
     expression: str,
     names: Dict[str, Any],
     functions: Optional[Dict[str, Callable]] = None,
-    interpolations: Optional[Dict[str, Any]] = None,
+    interpolations: Optional[Mapping[str, Any]] = None,
 ) -> Any:
     expression = expression.format_map(interpolations or {})
 
@@ -201,6 +211,7 @@ def get_field_data(
     row: Result,
     expression: str,
     functions: Optional[Dict[str, Callable]] = None,
+    interpolations: Optional[Mapping[str, Any]] = None,
     error_returns_null=True,
 ) -> Any:
     if functions is None:
@@ -209,7 +220,10 @@ def get_field_data(
     try:
         return normalize_value(
             evaluate_expression(
-                expression, names={"_": row, **row.as_dict()}, functions=functions,
+                expression,
+                names={"_": row, **row.as_dict()},
+                functions=functions,
+                interpolations=interpolations,
             )
         )
     except JiraSelectError:

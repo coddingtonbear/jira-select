@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
+from collections.abc import Mapping
 from functools import total_ordering
 from typing import (
     Any,
@@ -85,8 +86,9 @@ class Result(metaclass=ABCMeta):
     def evaluate_expression(
         self,
         expression: Expression,
-        group_by: ExpressionList = None,
-        functions: Dict[str, Callable] = None,
+        group_by: Optional[ExpressionList] = None,
+        field_name_map: Optional[Dict[str, str]] = None,
+        functions: Optional[Dict[str, Callable]] = None,
     ):
         if group_by is None:
             group_by = []
@@ -98,7 +100,12 @@ class Result(metaclass=ABCMeta):
         if expression_includes_group_by(expression, group_by):
             row_source = self.single()
 
-        return get_field_data(row_source, expression, functions)
+        return get_field_data(
+            row_source,
+            expression,
+            functions=functions,
+            interpolations=FieldNameMapping(self, field_name_map or {}),
+        )
 
 
 class SingleResult(Result):
@@ -277,6 +284,27 @@ class NullCache:
         return
 
 
+class FieldNameMapping(Mapping):
+    def __init__(self, row: Result, field_name_map: Dict[str, str]):
+        self._row = row
+        self._field_name_map = field_name_map
+
+    def __getitem__(self, key) -> Any:
+        field_name = self._field_name_map.get(key, key)
+
+        return self._row.as_dict().get(field_name)
+
+    def __iter__(self):
+        for k, v in self._field_name_map:
+            yield (
+                k,
+                v,
+            )
+
+    def __len__(self):
+        return len(self._field_name_map)
+
+
 class CounterChannel:
     def __init__(self):
         self._counter: int = 2 ** 32
@@ -312,6 +340,8 @@ class Executor:
         if enable_cache:
             self._cache = MinimumRecencyCache(get_cache_path())
 
+        self._field_name_map: Dict[str, str] = {}
+
     @property
     def jira(self) -> JIRA:
         return self._jira
@@ -327,6 +357,14 @@ class Executor:
     @property
     def functions(self) -> Dict[str, Callable]:
         return self._functions
+
+    @property
+    def field_name_map(self) -> Dict[str, str]:
+        if not self._field_name_map:
+            for jira_field in self.jira.fields():
+                self._field_name_map[jira_field["name"]] = jira_field["key"]
+
+        return self._field_name_map
 
     def _get_jql(self) -> str:
         query = " AND ".join(f"({q})" for q in self.query.where)
@@ -418,9 +456,7 @@ class Executor:
 
             include_row = True
             for filter_expression in self.query.filter:
-                if not row.evaluate_expression(
-                    filter_expression, self.query.group_by, self.functions,
-                ):
+                if not self.evaluate_expression(row, filter_expression):
                     include_row = False
                     break
 
@@ -470,9 +506,7 @@ class Executor:
 
             include_row = True
             for having in self.query.having:
-                if not row.evaluate_expression(
-                    having, self.query.group_by, self.functions,
-                ):
+                if not self.evaluate_expression(row, having):
                     include_row = False
                     break
 
@@ -498,9 +532,7 @@ class Executor:
         for sort_expression, reverse in reversed(self.query.sort_by):
 
             def sort_key(row):
-                result = row.evaluate_expression(
-                    sort_expression, self.query.group_by, self.functions
-                )
+                result = self.evaluate_expression(row, sort_expression)
                 self.progress.update(task, advance=1)
 
                 return NullAcceptableSort(result)
@@ -513,8 +545,8 @@ class Executor:
         result: Dict[str, Any] = {}
 
         for field_defn in self.query.select:
-            result[field_defn["column"]] = row.evaluate_expression(
-                field_defn["expression"], self.query.group_by, self.functions,
+            result[field_defn["column"]] = self.evaluate_expression(
+                row, field_defn["expression"],
             )
 
         return result
@@ -574,6 +606,14 @@ class Executor:
     @property
     def progress(self) -> Union[Progress, NullProgressbar]:
         return self._progress_bar
+
+    def evaluate_expression(self, row: Result, expression: Expression) -> Any:
+        return row.evaluate_expression(
+            expression,
+            self.query.group_by,
+            functions=self.functions,
+            field_name_map=self.field_name_map,
+        )
 
     def __iter__(self) -> Generator[Dict[str, Any], None, None]:
         progress_bar_cls: Union[Type[Progress], Type[NullProgressbar]] = NullProgressbar
