@@ -182,8 +182,8 @@ class TestQuery(JiraSelectTestCase):
         }
         self.mock_jira.fields = Mock(
             return_value=[
-                {"name": "Story Points", "key": "customfield10010"},
-                {"name": "Sprint", "key": "customfield10011"},
+                {"name": "Story Points", "id": "customfield10010"},
+                {"name": "Sprint", "id": "customfield10011"},
             ]
         )
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -202,7 +202,7 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Jellybean Guess", "key": "customfield10010"},]
+            return_value=[{"name": "Jellybean Guess", "id": "customfield10010"},]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -222,7 +222,7 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Maiden Name", "key": "customfield10011"},]
+            return_value=[{"name": "Maiden Name", "id": "customfield10011"},]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -242,7 +242,7 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Result Object", "key": "customfield10012"},]
+            return_value=[{"name": "Result Object", "id": "customfield10012"},]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -262,7 +262,7 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Beep Boop", "key": "customfield10013"},]
+            return_value=[{"name": "Beep Boop", "id": "customfield10013"},]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
