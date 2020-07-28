@@ -24,7 +24,7 @@ from simpleeval import EvalWithCompoundTypes
 from yaml import safe_dump, safe_load
 
 from .constants import APP_NAME
-from .exceptions import QueryError, JiraSelectError
+from .exceptions import FieldNameError, QueryError, JiraSelectError
 from .types import (
     ConfigDict,
     ExpressionList,
@@ -172,7 +172,10 @@ def evaluate_expression(
     functions: Optional[Dict[str, Callable]] = None,
     interpolations: Optional[Mapping[str, Any]] = None,
 ) -> Any:
-    expression = expression.format_map(interpolations or {})
+    try:
+        expression = expression.format_map(interpolations or {})
+    except KeyError as e:
+        raise FieldNameError(e)
 
     return EvalWithCompoundTypes(names=names, functions=functions).eval(expression)
 
@@ -226,6 +229,8 @@ def get_field_data(
                 interpolations=interpolations,
             )
         )
+    except FieldNameError as e:
+        raise QueryError(f"Field {e} does not exist.") from e
     except JiraSelectError:
         # Re-raise these -- they can be used for alerting the user
         # to a configuration problem or w/e
@@ -242,4 +247,4 @@ def get_field_data(
             raise
         return None
     except Exception as e:
-        raise QueryError(f"{e}: {expression}")
+        raise QueryError(f"{e}: {expression}") from e

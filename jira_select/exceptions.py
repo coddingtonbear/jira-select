@@ -12,3 +12,7 @@ class UserError(JiraSelectError):
 
 class QueryError(UserError):
     pass
+
+
+class FieldNameError(QueryError):
+    pass
