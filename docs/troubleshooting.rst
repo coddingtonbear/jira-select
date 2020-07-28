@@ -65,3 +65,21 @@ those settings will be recorded in your configuration's settings
 for the future)::
 
   jira-select --disable-certificate-verification configure
+
+When attempting to use a field's human readable name in curly braces, I get a Parse Error
+-----------------------------------------------------------------------------------------
+
+YAML, the file format we use for queries in jira-select,
+has some parsing rules that will make it interpret a line starting with a
+quote, curly brace, bracket, or other reserved characters
+differently from other lines.
+
+In cases like those,
+you should just wrap your whole query expression in quotes;
+for example::
+
+.. code-block:: yaml
+
+   select:
+   - '{Story Points}'
+   from: issues
