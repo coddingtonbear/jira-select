@@ -354,7 +354,14 @@ class Executor:
         self, task: TaskID, out_channel: CounterChannel
     ) -> Generator[Result, None, None]:
         jql = self._get_jql()
-        cache_key = f"{jql}:{','.join(self.query.order_by)}:{self.query.limit}"
+        cache_key = ":".join(
+            [
+                jql,
+                str(self.query.order_by),
+                str(self.query.limit),
+                str(self.query.expand),
+            ]
+        )
 
         start_at = 0
         max_results = 2 ** 32
