@@ -167,6 +167,19 @@ class TestEvaluateExpression(JiraSelectTestCase):
 
         assert expected_result == actual_result
 
+    def test_field_interpolations(self):
+        arbitrary_interpolated_value = "boop"
+        expression = "'{field name}'"
+        names = {}
+        interpolations = {"field name": arbitrary_interpolated_value}
+
+        expected_result = arbitrary_interpolated_value
+        actual_result = utils.evaluate_expression(
+            expression, interpolations=interpolations, names=names
+        )
+
+        assert actual_result == expected_result
+
 
 class TestGetFieldData(JiraSelectTestCase):
     def test_simple(self):

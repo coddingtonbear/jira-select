@@ -160,7 +160,10 @@ def evaluate_expression(
     expression: str,
     names: Dict[str, Any],
     functions: Optional[Dict[str, Callable]] = None,
+    interpolations: Optional[Dict[str, Any]] = None,
 ) -> Any:
+    expression = expression.format_map(interpolations or {})
+
     return EvalWithCompoundTypes(names=names, functions=functions).eval(expression)
 
 
