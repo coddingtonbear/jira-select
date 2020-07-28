@@ -76,7 +76,7 @@ differently from other lines.
 
 In cases like those,
 you should just wrap your whole query expression in quotes;
-for example::
+for example:
 
 .. code-block:: yaml
 
