@@ -13,18 +13,20 @@ class JiraList(list):
     pass
 
 
+class MyResource(Resource):
+    def __init__(self, raw):
+        super().__init__(None, None, None)
+        self.raw = raw
+
+
+class NonResource:
+    def __str__(self):
+        return "<NonResource>"
+
+
 class TestQuery(JiraSelectTestCase):
     def setUp(self):
         super().setUp()
-
-        class MyResource(Resource):
-            def __init__(self, raw):
-                super().__init__(None, None, None)
-                self.raw = raw
-
-        class NonResource:
-            def __str__(self):
-                return "<NonResource>"
 
         self.JIRA_ISSUES = [
             {
@@ -236,7 +238,7 @@ class TestQuery(JiraSelectTestCase):
 
     def test_interpolated_value_resource(self):
         arbitrary_query: QueryDefinition = {
-            "select": ['{Result Object}["ok"] as "ro"'],
+            "select": ['{Result Object}.ok as "ro"'],
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
@@ -266,10 +268,5 @@ class TestQuery(JiraSelectTestCase):
         query = Executor(self.mock_jira, arbitrary_query, True)
 
         actual_results = list(query)
-        expected_results = [
-            {"bb": "<NonResource>"},
-            {"bb": "<NonResource>"},
-            {"bb": "<NonResource>"},
-        ]
-
-        assert expected_results == actual_results
+        for result in actual_results:
+            assert isinstance(result["bb"], NonResource)

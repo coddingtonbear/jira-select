@@ -65,24 +65,3 @@ those settings will be recorded in your configuration's settings
 for the future)::
 
   jira-select --disable-certificate-verification configure
-
-When using curly braces to access the content of a field by its human-readable name, I can't access properties of that object
------------------------------------------------------------------------------------------------------------------------------
-
-When using curly brace syntax
-for getting a Jira field value by its human-readable name
-you are actually using
-`Python's format_map <https://docs.python.org/3/library/stdtypes.html#str.format_map>`_ method
-with a mapping of your fields' human-readable names to their field value.
-If the string representation of that field's value is not parseable
-by the standard python ast module,
-it will automatically be converted into a quoted string
-to ensure that your query is parseable.
-
-This formatting occurs _before_ running your expression;
-so you will not be able to access properties of that object in your expression
-unless those properties exist on the object parsed by python's ast
-when executing your expression.
-
-If you *do* need to access field properties,
-you can use the :ref:`field_by_name function`.

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-import ast
-from collections.abc import Mapping
 from functools import total_ordering
 from typing import (
     Any,
@@ -36,7 +34,6 @@ from .utils import (
     get_cache_path,
     get_field_data,
     get_row_dict,
-    normalize_value,
     parse_sort_by_definition,
     parse_select_definition,
 )
@@ -103,10 +100,7 @@ class Result(metaclass=ABCMeta):
             row_source = self.single()
 
         return get_field_data(
-            row_source,
-            expression,
-            functions=functions,
-            interpolations=FieldNameMapping(self, field_name_map or {}),
+            row_source, expression, functions=functions, interpolations=field_name_map,
         )
 
 
@@ -284,43 +278,6 @@ class NullCache:
 
     def add(self, key, value, **kwargs):
         return
-
-
-class FieldNameMapping(Mapping):
-    def __init__(self, row: Result, field_name_map: Dict[str, str]):
-        self._row = row
-        self._field_name_map = field_name_map
-
-    def __getitem__(self, key) -> Any:
-        field_name = self._field_name_map.get(key, key)
-
-        value = normalize_value(self._row.as_dict().get(field_name))
-
-        quote = False
-
-        # If the value is a string, we'll want to quote it so it
-        # will be parseable
-        if isinstance(value, str):
-            quote = True
-        try:
-            ast.parse(str(value))
-        except SyntaxError:
-            quote = True
-
-        if quote:
-            return f'"{value}"'
-
-        return value
-
-    def __iter__(self):
-        for k, v in self._field_name_map:
-            yield (
-                k,
-                v,
-            )
-
-    def __len__(self):
-        return len(self._field_name_map)
 
 
 class CounterChannel:
