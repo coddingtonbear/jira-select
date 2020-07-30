@@ -78,3 +78,47 @@ Displays issue fields available for query.
 * ``SEARCH_TERM``: A search term to use for filtering results.  The term
   is case-insensitive and must be present in either the function name or
   description to be displayed.
+
+`jira-select run-script FILENAME [ARGS...]`
+-------------------------------------------
+
+Executes the ``main(**kwargs)`` function in the specified filename,
+passing it two keyword arguments:
+
+* ``args``: An array of extra arguments.
+* ``cmd``: The command class (via which you can access configuration,
+  your jira instance, and other utilities).
+
+This function is intended for use in ad-hoc scripting needs.
+If you are the sort of person to be running complex queries
+against your Jira instance,
+you're also likely to be the sort of person who
+will occasionally write an import script
+for ingesting issues into Jira.
+This utility function allows you to do that more easily
+by letting you lean on the Jira settings
+you've already configured jira-select to use.
+
+.. important::
+
+   If you want to future-proof your script, be sure that the signature
+   of your ``main`` function accepts ``**kwargs`` even if your signature
+   already captures ``args`` and ``cmd`` explicitly.  New keyword
+   arguments may be added at any time.
+
+Example contenst of a user script named ``my_file.py``:
+
+.. code-block:: python
+
+   def main(args, cmd, **kwargs):
+      print(f"Extra args: {args}")
+      print(cmd.jira)
+
+Running this file with::
+
+   jira-select run-script my_file.py --extra --args
+
+Will print::
+
+   Extra args: ['--extra', '--args']
+   <jira.client.JIRA object at 0x7fc0a47e7e80>
