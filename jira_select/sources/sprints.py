@@ -80,6 +80,8 @@ class Source(BaseSource):
 
                     is_last = sprints.isLast
                     for sprint in sprints:
+                        sprint_start_at += 1
+
                         if sprint.id in already_returned:
                             continue
 
@@ -89,8 +91,6 @@ class Source(BaseSource):
                         yield sprint.raw
 
                         already_returned.add(sprint.id)
-
-                        sprint_start_at += 1
 
                         # Return early if our result limit has been reached
                         if count >= result_limit:

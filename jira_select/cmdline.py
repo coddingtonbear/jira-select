@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 from rich.console import Console
 from rich.traceback import install as enable_rich_traceback
@@ -82,6 +83,12 @@ def main():
             "Wait for debugger connection before processing command (requires debugpy)."
         ),
     )
+    parser.add_argument(
+        "--log-level",
+        help=(
+            "Print logging messages of the specified level and above " "to the console."
+        ),
+    )
     subparsers = parser.add_subparsers(dest="command")
     subparsers.required = True
 
@@ -96,6 +103,9 @@ def main():
         cmd_class.add_arguments(subparser)
 
     args = parser.parse_args()
+
+    if args.log_level:
+        logging.basicConfig(level=logging.getLevelName(args.log_level))
 
     if args.debugger:
         import debugpy
