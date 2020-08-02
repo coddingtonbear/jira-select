@@ -51,6 +51,40 @@ Overview
    :file: evaluation_location.csv
    :header-rows: 1
 
+What is a ``JqlString``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+A ``JqlString`` is standard Jira JQL.
+You can find more information about writing JQL
+in `Jira's JQL documentation <https://www.atlassian.com/blog/jira-software/jql-the-most-flexible-way-to-search-jira-14>`_.
+
+What is an ``Expression``
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An ``Expression`` is an expression evaluated by Jira-select.
+Expressions have access to all
+functions documented in :ref:`Query Functions`.
+The variables available for use in your expressions can be determined
+by using ``jira-select schema [issue|board|sprint]`.
+
+Expressions are (with one caveat) valid Python expressions.
+The single caveat is that you can use curly braces to quote
+field names.
+These curly-brace-quoted fields will be replaced by the actual
+Jira field name before processing the expression in Python.
+
+For example; if you have a custom field named ``customfield10010``
+that has a human-readable name of ``Story Points``, you can create
+an expression like::
+
+   {Story Points} >= 5
+
+this expression will be transformed into::
+
+   customfield10010 >= 5
+
+before evaluating the expression in Python.
+
 Ubiquitous
 ----------
 
