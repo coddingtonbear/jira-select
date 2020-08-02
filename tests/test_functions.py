@@ -83,15 +83,15 @@ class TestSprintDetails(JiraSelectFunctionTestCase):
 class TestGetSprint(JiraSelectFunctionTestCase):
     def test_basic(self):
         arbitrary_sprint_id = 10
-        arbitrary_sprint_object = object()
+        arbitrary_sprint_object = Mock(raw={})
 
-        mock_jira = Mock(sprint=Mock(return_value=arbitrary_sprint_object))
-
-        actual = self.execute_function(
-            "get_sprint", arbitrary_sprint_id, jira=mock_jira
+        mock_jira = Mock(
+            sprint=Mock(return_value=arbitrary_sprint_object),
+            _options={"agile_rest_path": "/"},
         )
 
-        assert actual is arbitrary_sprint_object
+        self.execute_function("get_sprint_by_id", arbitrary_sprint_id, jira=mock_jira)
+
         assert mock_jira.sprint.called_with(arbitrary_sprint_id)
 
 
