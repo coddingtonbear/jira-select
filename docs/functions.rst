@@ -31,11 +31,17 @@ Jira
    * ``endDate``: Sprint ending date (as datetime)
    * ``completeDate``: Sprint completion date (as datetime)
 
-.. py:function:: get_sprint(id: int) -> Optional[jira.resources.Sprint]
+.. py:function:: get_sprint_by_id(id: int) -> Optional[jira.resources.Sprint]
 
    This function will request the information for the sprint specified by
    ``id`` from your Jira server and return it as a ``jira.resources.Sprint``
    object.
+
+.. py:function:: get_sprint_by_name(board_name_or_id: Union[str, int], sprint_name: str) -> Optional[jira.resources.Sprint]
+
+   This function will request the information for the sprint matching
+   the specified name and belonging to the specified board.  This will
+   be returned as a ``jira.resources.Sprint`` resource.
 
 .. _field_by_name function:
 

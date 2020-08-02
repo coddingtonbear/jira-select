@@ -8,11 +8,16 @@ from ..plugin import BaseFunction
 class Function(BaseFunction):
     """ Returns a `jira.resources.Sprint` object for a given sprint ID string."""
 
-    CACHE: Dict[int, str] = {}
+    CACHE: Dict[int, Sprint] = {}
 
     def get_sprint_details(self, id: int) -> Sprint:
         if id not in self.CACHE:
-            self.CACHE[id] = self.jira.sprint(id)
+            sprint = self.jira.sprint(id)
+            self.CACHE[id] = Sprint(
+                {"agile_rest_path": self.jira._options["agile_rest_path"]},
+                None,
+                sprint.raw,
+            )
 
         return self.CACHE[id]
 
