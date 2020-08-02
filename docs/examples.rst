@@ -141,7 +141,7 @@ will become::
       {"timespentSeconds": 50},
    ]
 
-We're still not quite there -- the value under ``timespentSeconds`
+We're still not quite there -- the value under ``timespentSeconds``
 still needs to be ``extract``ed
 from the inner objects using ``extract``;
 if we do that we receive::
