@@ -1,11 +1,12 @@
 import datetime
 from unittest.mock import Mock
+from types import SimpleNamespace
 
-from dotmap import DotMap
 import pytz
 
 from jira_select.plugin import get_installed_functions
 from jira_select.functions.sprint_details import SprintInfo
+from jira_select.functions.flatten_changelog import ChangelogEntry
 
 from .base import JiraSelectTestCase
 
@@ -108,7 +109,7 @@ class TestFieldByName(JiraSelectFunctionTestCase):
             )
         )
 
-        my_row = DotMap({arbitrary_field_name: arbitrary_value})
+        my_row = SimpleNamespace(**{arbitrary_field_name: arbitrary_value})
 
         actual = self.execute_function(
             "field_by_name", my_row, arbitrary_human_name, jira=mock_jira
@@ -136,3 +137,104 @@ class TestEstimateToDays(JiraSelectFunctionTestCase):
         )
 
         assert expected_value == actual_value
+
+
+class TestFlattenChangelog(JiraSelectFunctionTestCase):
+    def test_basic(self):
+        changelog = SimpleNamespace(
+            histories=[
+                SimpleNamespace(
+                    **{
+                        "author": "me@adamcoddington.net",
+                        "created": "2015-11-01T18:16:37.388+0000",
+                        "id": "10500",
+                        "items": [
+                            SimpleNamespace(
+                                **{
+                                    "field": "description",
+                                    "fieldtype": "jira",
+                                    "from": None,
+                                    "fromString": None,
+                                    "to": None,
+                                    "toString": "Testing ticket body.",
+                                }
+                            )
+                        ],
+                    }
+                ),
+                SimpleNamespace(
+                    **{
+                        "author": "me@adamcoddington.net",
+                        "created": "2015-10-11T07:39:40.063+0000",
+                        "id": "10403",
+                        "items": [
+                            SimpleNamespace(
+                                **{
+                                    "field": "status",
+                                    "fieldtype": "jira",
+                                    "from": "10000",
+                                    "fromString": "To Do",
+                                    "to": "10001",
+                                    "toString": "Done",
+                                }
+                            ),
+                            SimpleNamespace(
+                                **{
+                                    "field": "resolution",
+                                    "fieldtype": "jira",
+                                    "from": None,
+                                    "fromString": None,
+                                    "to": "1",
+                                    "toString": "Fixed",
+                                }
+                            ),
+                        ],
+                    }
+                ),
+            ]
+        )
+
+        expected_results = [
+            ChangelogEntry(
+                author="me@adamcoddington.net",
+                created=datetime.datetime(
+                    2015, 11, 1, 18, 16, 37, 388000, tzinfo=pytz.UTC
+                ),
+                id=10500,
+                field="description",
+                fieldtype="jira",
+                fromValue=None,
+                fromString=None,
+                toValue=None,
+                toString="Testing ticket body.",
+            ),
+            ChangelogEntry(
+                author="me@adamcoddington.net",
+                created=datetime.datetime(
+                    2015, 10, 11, 7, 39, 40, 63000, tzinfo=pytz.UTC
+                ),
+                id=10403,
+                field="status",
+                fieldtype="jira",
+                fromValue="10000",
+                fromString="To Do",
+                toValue="10001",
+                toString="Done",
+            ),
+            ChangelogEntry(
+                author="me@adamcoddington.net",
+                created=datetime.datetime(
+                    2015, 10, 11, 7, 39, 40, 63000, tzinfo=pytz.UTC
+                ),
+                id=10403,
+                field="resolution",
+                fieldtype="jira",
+                fromValue=None,
+                fromString=None,
+                toValue="1",
+                toString="Fixed",
+            ),
+        ]
+        actual_results = self.execute_function("flatten_changelog", changelog)
+
+        assert expected_results == actual_results
