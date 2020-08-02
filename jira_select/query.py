@@ -179,14 +179,15 @@ class Query:
     def _ensure_str(self, iterable=Iterable[Any]) -> List[str]:
         return [str(item) for item in iterable]
 
-    def _get_all_fields(self):
-        fields = [{"id": "key"}, {"id": "id"}] + self._jira.fields()
-        for field in fields:
-            definition: SelectFieldDefinition = {
-                "expression": field["id"],
-                "column": field["id"],
-            }
-            yield definition
+    def _get_all_fields(self) -> List[SelectFieldDefinition]:
+        sources = get_installed_sources()
+
+        try:
+            source = sources[self.from_]
+        except KeyError:
+            return []
+
+        return source.get_all_fields(self._jira)
 
     @property
     def select(self) -> List[SelectFieldDefinition]:

@@ -1,11 +1,31 @@
-from typing import Dict
+from typing import Dict, List, Iterator
 
+from jira import JIRA
 from jira.resources import Issue
 
 from ..plugin import BaseSource
+from ..types import SelectFieldDefinition
 
 
 class Source(BaseSource):
+    FIELDS: List[SelectFieldDefinition] = [
+        {"expression": "key", "column": "key",},
+        {"expression": "id", "column": "id",},
+    ]
+
+    @classmethod
+    def get_all_fields(cls, jira: JIRA) -> List[SelectFieldDefinition]:
+        field_definitions: List[SelectFieldDefinition] = super().get_all_fields(jira)
+
+        for field in jira.fields():
+            definition: SelectFieldDefinition = {
+                "expression": field["id"],
+                "column": field["id"],
+            }
+            field_definitions.append(definition)
+
+        return field_definitions
+
     def _get_jql(self) -> str:
         query = " AND ".join(f"({q})" for q in self.query.where)
         order_by_fields = ", ".join(self.query.order_by)
@@ -15,7 +35,7 @@ class Source(BaseSource):
 
         return query
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Dict]:
         start_at = 0
         max_results = 2 ** 32
         result_limit = self.query.limit or 2 ** 32

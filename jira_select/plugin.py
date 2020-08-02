@@ -17,6 +17,7 @@ from typing import (
     Type,
     cast,
     Iterator,
+    List,
 )
 
 import pkg_resources
@@ -29,7 +30,7 @@ from urllib3 import disable_warnings
 
 from .constants import APP_NAME
 from .exceptions import ConfigurationError
-from .types import ConfigDict, InstanceDefinition
+from .types import ConfigDict, InstanceDefinition, SelectFieldDefinition
 from .utils import save_config, get_functions_for_module
 
 if TYPE_CHECKING:
@@ -341,12 +342,18 @@ def get_installed_sources() -> Dict[str, Type[BaseSource]]:
 
 
 class BaseSource(metaclass=ABCMeta):
+    FIELDS: List[SelectFieldDefinition] = []
+
     def __init__(self, executor: Executor, task: TaskID, out_channel: CounterChannel):
         self._executor = executor
         self._task = task
         self._out_channel = out_channel
 
         super().__init__()
+
+    @classmethod
+    def get_all_fields(cls, jira: JIRA) -> List[SelectFieldDefinition]:
+        return copy.deepcopy(cls.FIELDS)
 
     def remove_progress(self):
         self._executor.progress.remove_task(self._task)
