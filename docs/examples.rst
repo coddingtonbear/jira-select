@@ -100,7 +100,7 @@ See :ref:`Query Functions` for more information.
 Summing worklog entries
 -----------------------
 
-.. code-boock:: yaml
+.. code-block:: yaml
 
    select:
    - sum(extract(flatten_list(worklogs.worklogs), "timespentSeconds")) as "total seconds"
