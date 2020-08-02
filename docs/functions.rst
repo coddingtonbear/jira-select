@@ -84,6 +84,49 @@ Jira
    The ``timetracking.originalEstimate`` field contains values like ``1d 2h 3m``;
    using this function will transform such a value into ``1.25625``.
 
+.. py:function:: flatten_changelog(changelog) -> List[jira_select.functions.flatten_changelog.ChangelogEntry]
+
+   Converts changelog structure from your returned Jira issue into a
+   flattened list of ``jira_select.functions.flatten_changelog.ChangelogEntry``
+   instances.
+
+   .. note::
+
+      You must use the ``expand`` option of ``changelog`` for Jira to
+      return to you changelog information in your query; eg:
+
+      .. code-block:: yaml
+
+         select:
+         - flatten_changelog(changelog)
+         from: issues
+         expand:
+         - changelog
+
+      If you do not provide the necessary ``expand`` option, this
+      function will raise an error.
+
+   Every member of the returned list has the following properties:
+
+   * ``author`` (str): Author of the change
+   * ``created`` (datetime.datetime): When the change took place
+   * ``id`` (int): The ID of the changelog entry
+   * ``field`` (str): The name of the field that was changed
+   * ``fieldtype`` (str): The type of the field that was changed
+   * ``fromValue`` (Optional[Any]): The original value of the field.  Note that
+     the original Jira field name for this is ``from``.
+   * ``fromString`` (Optional[str]): The original value of the field as a
+     string.
+   * ``toValue`` (Optional[Any]): The final value of the field.  Note that
+     the original Jira field name for this is ``to`.
+   * ``toString`` (Optional[str]): The final value of the field as a
+     string.
+
+   This returned list of records can be filtered with ``simple_filter``
+   to either find particular entries or filter out rows that do not
+   have an entry having particular characteristics.
+
+
 Data Traversal
 --------------
 
@@ -253,6 +296,42 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 Filtering & Mapping
 -------------------
+
+.. py:function:: simple_filter(iterable: Iterable[Any], **query_params: Dict[str, Any]) -> Iterable[Any]
+.. py:function:: simple_filter_any(iterable: Iterable[Any], **query_params: Dict[str, Any]) -> Iterable[Any]
+
+   These functions provide you with a simple way of filtering lists using
+   a syntax reminiscent of Django's ORM query filter parameters.
+
+   * ``simple_filter``: All provided ``query_params`` must match for the row
+     to be returned.
+   * ``simple_filter_any``: At least one provided param in ``query_params``
+     must match for the row to be returned.
+
+   For example; to find issues having become resolved between two dates,
+   you could run a query like the following:
+
+   .. code-block:: yaml
+
+      select:
+      - "*"
+      from: issues
+      filter:
+      - simple_filter(
+            flatten_changelog(changelog),
+            field__eq="resolution",
+            toValue__ne=None,
+            created__lt=parse_datetime("2020-02-02"),
+            created__gt=parse_datetime("2020-02-01"),
+        )
+      expand:
+      - changelog
+
+   Consult the `documentation for QueryableList <https://github.com/kata198/QueryableList#user-content-operations>`_
+   for information about the full scope of parameters available.
+
+Python Builtin Functions
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 See more in information in `Python's Documentation <https://docs.python.org/3/library/functions.html>`_.
 
