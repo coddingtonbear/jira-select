@@ -238,3 +238,43 @@ class TestFlattenChangelog(JiraSelectFunctionTestCase):
         actual_results = self.execute_function("flatten_changelog", changelog)
 
         assert expected_results == actual_results
+
+
+class TestSimpleFilter(JiraSelectFunctionTestCase):
+    def test_basic(self):
+        rows = [{"value": 10,}, {"value": 20,}]
+
+        expected_results = [{"value": 10,}]
+        actual_results = self.execute_function("simple_filter", rows, value__lte=10)
+
+        assert expected_results == actual_results
+
+    def test_basic_multiple(self):
+        rows = [{"value": 10, "name": "OK"}, {"value": 20, "name": "Nope"}]
+
+        expected_results = [{"value": 10, "name": "OK"}]
+        actual_results = self.execute_function(
+            "simple_filter", rows, value__lte=99, name__eq="OK"
+        )
+
+        assert expected_results == actual_results
+
+
+class TestSimpleFilterAny(JiraSelectFunctionTestCase):
+    def test_basic(self):
+        rows = [{"value": 10,}, {"value": 20,}]
+
+        expected_results = [{"value": 10,}]
+        actual_results = self.execute_function("simple_filter_any", rows, value__lte=10)
+
+        assert expected_results == actual_results
+
+    def test_basic_multiple(self):
+        rows = [{"value": 10, "name": "OK"}, {"value": 20, "name": "Nope"}]
+
+        expected_results = [{"value": 10, "name": "OK"}, {"value": 20, "name": "Nope"}]
+        actual_results = self.execute_function(
+            "simple_filter_any", rows, value__lte=99, name__eq="OK"
+        )
+
+        assert expected_results == actual_results
