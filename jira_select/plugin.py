@@ -30,7 +30,7 @@ from urllib3 import disable_warnings
 
 from .constants import APP_NAME
 from .exceptions import ConfigurationError
-from .types import ConfigDict, InstanceDefinition, SelectFieldDefinition
+from .types import ConfigDict, InstanceDefinition, SelectFieldDefinition, SchemaRow
 from .utils import save_config, get_functions_for_module
 
 if TYPE_CHECKING:
@@ -342,7 +342,7 @@ def get_installed_sources() -> Dict[str, Type[BaseSource]]:
 
 
 class BaseSource(metaclass=ABCMeta):
-    FIELDS: List[SelectFieldDefinition] = []
+    SCHEMA: List[SchemaRow] = []
 
     def __init__(self, executor: Executor, task: TaskID, out_channel: CounterChannel):
         self._executor = executor
@@ -352,8 +352,19 @@ class BaseSource(metaclass=ABCMeta):
         super().__init__()
 
     @classmethod
+    def get_schema(cls, jira: JIRA) -> List[SchemaRow]:
+        return copy.deepcopy(cls.SCHEMA)
+
+    @classmethod
     def get_all_fields(cls, jira: JIRA) -> List[SelectFieldDefinition]:
-        return copy.deepcopy(cls.FIELDS)
+        fields: List[SelectFieldDefinition] = []
+
+        for entry in cls.get_schema(jira):
+            fields.append(
+                {"expression": entry["id"], "column": entry["id"],}
+            )
+
+        return fields
 
     def remove_progress(self):
         self._executor.progress.remove_task(self._task)

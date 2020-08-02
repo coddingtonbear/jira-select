@@ -1,26 +1,47 @@
-from typing import Dict, List, Iterator
+from typing import Dict, List, Iterator, Any, Callable
 
+from dotmap import DotMap
 from jira import JIRA
 from jira.resources import Issue
+from simpleeval import NameNotDefined
 
-from ..plugin import BaseSource
-from ..types import SelectFieldDefinition
+from ..plugin import BaseSource, get_installed_functions
+from ..types import SchemaRow
+from ..utils import evaluate_expression
 
 
 class Source(BaseSource):
-    FIELDS: List[SelectFieldDefinition] = [
-        {"expression": "key", "column": "key",},
-        {"expression": "id", "column": "id",},
+    SCHEMA: List[SchemaRow] = [
+        {"id": "key", "type": "str"},
+        {"id": "id", "type": "int"},
     ]
 
     @classmethod
-    def get_all_fields(cls, jira: JIRA) -> List[SelectFieldDefinition]:
-        field_definitions: List[SelectFieldDefinition] = super().get_all_fields(jira)
+    def get_field_data(
+        cls, row: Any, expression: str, functions: Dict[str, Callable]
+    ) -> str:
+        result = evaluate_expression(expression, row, functions=functions)
+        if isinstance(result, str):
+            return result
+        return ""
 
-        for field in jira.fields():
-            definition: SelectFieldDefinition = {
-                "expression": field["id"],
-                "column": field["id"],
+    @classmethod
+    def get_schema(cls, jira: JIRA) -> List[SchemaRow]:
+        field_definitions: List[SchemaRow] = super().get_schema(jira)
+        functions = get_installed_functions()
+
+        for column in jira.fields():
+            try:
+                type = str(cls.get_field_data(DotMap(column), "schema.type", functions))
+            except NameNotDefined:
+                type = ""
+            definition: SchemaRow = {
+                "id": str(cls.get_field_data(DotMap(column), "id", functions)),
+                "type": type,
+                "description": str(
+                    cls.get_field_data(DotMap(column), "name", functions)
+                ),
+                "raw": DotMap(column),
             }
             field_definitions.append(definition)
 

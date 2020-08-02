@@ -1,13 +1,11 @@
 import argparse
-from typing import Any, Callable, Dict, Iterable
+from typing import Any, Callable, Dict
 
 from dotmap import DotMap
 from rich.table import Table
-from simpleeval import NameNotDefined
 
 from ..exceptions import JiraSelectError
-from ..plugin import BaseCommand, get_installed_functions
-from ..types import SchemaRow
+from ..plugin import BaseCommand, get_installed_functions, get_installed_sources
 from ..utils import evaluate_expression
 
 
@@ -18,12 +16,17 @@ class Command(BaseCommand):
 
     @classmethod
     def get_help(cls) -> str:
-        return "Searches Jira for fields matching your search query."
+        return (
+            "Describes the fields available in data returned from "
+            "a particular data source."
+        )
 
     @classmethod
     def add_arguments(cls, parser: argparse.ArgumentParser) -> None:
+        sources = get_installed_sources()
+
         parser.add_argument(
-            "source", choices=["issues"],
+            "source", choices=list(sources.keys()),
         )
         parser.add_argument(
             "search_terms",
@@ -43,44 +46,20 @@ class Command(BaseCommand):
     def evaluate_expression(self, row: Any, expression: str) -> Any:
         return evaluate_expression(expression, row, functions=self.functions)
 
-    def get_field_data(self, row: Any, expression: str) -> str:
-        result = self.evaluate_expression(row, expression)
-        if isinstance(result, str):
-            return result
-        return ""
-
-    def get_issue_data(self) -> Iterable[SchemaRow]:
-        for column in sorted(self.jira.fields(), key=lambda field: field["name"]):
-            try:
-                type = str(self.get_field_data(DotMap(column), "schema.type"))
-            except NameNotDefined:
-                type = ""
-            data: SchemaRow = {
-                "id": str(self.get_field_data(DotMap(column), "id")),
-                "type": type,
-                "description": str(self.get_field_data(DotMap(column), "name")),
-                "raw": DotMap(column),
-            }
-            yield data
-
     def handle(self) -> None:
-        source_data_fns: Dict[str, Callable[[], Iterable[SchemaRow]]] = {
-            "issues": self.get_issue_data
-        }
+        sources = get_installed_sources()
 
         try:
-            data_fn = source_data_fns[self.options.source]
+            source = sources[self.options.source]
         except KeyError:
-            raise JiraSelectError(
-                f"No source data function defined for {self.options.source}"
-            )
+            raise JiraSelectError(f"No source named '{self.options.source}' found.")
 
         table = Table(title=self.options.source)
         table.add_column(header="id", style="green")
         table.add_column(header="type", style="cyan")
         table.add_column(header="description", style="bright_cyan")
 
-        for row in data_fn():
+        for row in source.get_schema(self.jira):
             if self.options.search_terms:
                 matches = True
                 for option in self.options.search_terms:
@@ -94,7 +73,9 @@ class Command(BaseCommand):
                     continue
 
             table.add_row(
-                row["id"], row["type"], row["description"],
+                row.get("id", "Unknown"),
+                row.get("type", "Unknown"),
+                row.get("description", ""),
             )
 
         self.console.print(table)

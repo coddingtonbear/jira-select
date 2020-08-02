@@ -4,15 +4,14 @@ from jira.resources import Board
 
 from ..exceptions import QueryError
 from ..plugin import BaseSource
-from ..types import SelectFieldDefinition
+from ..types import SchemaRow
 
 
 class Source(BaseSource):
-    FIELDS: List[SelectFieldDefinition] = [
-        {"expression": "id", "column": "id",},
-        {"expression": "self", "column": "self",},
-        {"expression": "name", "column": "name",},
-        {"expression": "type", "column": "type",},
+    SCHEMA: List[SchemaRow] = [
+        {"id": "id", "type": "int"},
+        {"id": "name", "type": "str"},
+        {"id": "type", "type": "str"},
     ]
 
     def __iter__(self) -> Iterator[Dict]:
