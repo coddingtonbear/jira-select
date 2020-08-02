@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
         functions = get_installed_functions(self.jira)
         for name, fn in functions.items():
-            docstring = fn.__doc__
+            docstring = fn.__doc__ or ""
 
             try:
                 signature = (
