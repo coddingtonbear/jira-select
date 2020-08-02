@@ -97,6 +97,44 @@ so we use the ``sum`` function to get that.
 
 See :ref:`Query Functions` for more information.
 
+Summing story points of issues resolved during a particular sprint
+------------------------------------------------------------------
+
+.. code-block:: yaml
+
+   select:
+   - assignee
+   - sum({Story Points})
+   from: issues
+   where:
+   - project = 'My Project'
+   filter:
+   - simple_filter(
+       flatten_changelog(changelog),
+       created__gt=parse_datetime(get_sprint_by_name("Board Name", "Sprint Name").startDate),
+       created__lt=parse_datetime(get_sprint_by_name("Board Name", "Sprint Name").endDate),
+       field__eq="resolution",
+       fromValue__eq=None,
+       toValue__ne=None
+     )
+   group_by:
+   - assignee
+   expand:
+   - changelog
+
+The most important section in the above is in ``filter``;
+here you'll see that we're using the ``simple_filter`` function
+for filtering the (flattened) list of changelog entries
+to those changelog enttries that were created during the sprint
+and indicate that the field ``resolution`` was changed from ``None``
+to something that is not ``None``.
+
+For a row to be returned from ``filter``,
+each expression should return a truthy value.
+So rows that do not have a corresponding changelog entry
+matching the above requirements
+will be omitted from results.
+
 Summing worklog entries
 -----------------------
 
