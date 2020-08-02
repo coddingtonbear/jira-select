@@ -49,7 +49,7 @@ Jira
       We provide another, simpler, method for getting
       the value of a field by its human-readable name--
       just place the human-readable name in between
-      curly braces in your query expression; eg::
+      curly braces in your query expression; eg:
 
       .. code-block::
 
