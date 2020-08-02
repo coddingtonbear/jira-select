@@ -12,29 +12,30 @@ Jira
    Shortcut for returning the name of a sprint via its ID.  Equivalent
    to calling ``sprint_details(sprint_blob).name``.
 
-.. py:function:: sprint_details(sprint_blob: str) -> Optional[jira.resources.Sprint]
+.. py:function:: sprint_details(sprint_blob: str) -> Optional[dotmap.DotMap]
 
-   Returns a Sprint object representing the passed-in sprint blob.
+   Returns an object representing the passed-in sprint blob.
 
    Jira returns sprint information on an issue via strings looking something like::
 
       com.atlassian.greenhopper.service.sprint.Sprint@14b1c359[id=436,rapidViewId=153,state=CLOSED,name=MySprint,goal=Beep Boop,startDate=2020-03-09T21:53:07.264Z,endDate=2020-03-23T20:53:00.000Z,completeDate=2020-03-23T21:08:29.391Z,sequence=436
 
-   This function will extract the sprint's ID number from the string and
-   request the sprint's details from the Jira API, returning them to you
-   as a ``jira.resources.Sprint`` object.
-
-   Available properties include:
+   This function will extract the information found in the above string
+   into a ``jira_select.functions.sprint_details.SprintInfo`` object
+   allowing you to access each of the following properties::
 
    * ``id``: Sprint ID number
-   * ``self``: REST API URL
    * ``state``: Sprint state
    * ``name``: Sprint name
-   * ``startDate``: Sprint starting date (as string)
-   * ``endDate``: Sprint ending date (as string)
-   * ``completeDate``: Sprint completion date (as string)
-   * ``originBoardId``: The board to which this sprint belongs.
+   * ``startDate``: Sprint starting date (as datetime)
+   * ``endDate``: Sprint ending date (as datetime)
+   * ``completeDate``: Sprint completion date (as datetime)
 
+.. py:function:: get_sprint(id: int) -> Optional[jira.resources.Sprint]
+
+   This function will request the information for the sprint specified by
+   ``id`` from your Jira server and return it as a ``jira.resources.Sprint``
+   object.
 
 .. _field_by_name function:
 
