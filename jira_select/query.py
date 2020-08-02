@@ -9,8 +9,8 @@ from typing import (
     Generator,
     List,
     Optional,
-    cast,
     Iterable,
+    Iterator,
     Tuple,
     Type,
     Union,
@@ -20,7 +20,7 @@ from jira import JIRA, Issue
 from rich.progress import Progress, TaskID, BarColumn, TimeRemainingColumn
 
 from .cache import MinimumRecencyCache
-from .plugin import get_installed_functions
+from .plugin import BaseSource, get_installed_functions, get_installed_sources
 from .types import (
     ExpressionList,
     JqlList,
@@ -369,23 +369,17 @@ class Executor:
 
         return query
 
-    def _get_issues(
-        self, task: TaskID, out_channel: CounterChannel
-    ) -> Generator[Result, None, None]:
-        jql = self._get_jql()
+    def _get_cached(self, source: BaseSource) -> Iterator[Result]:
         cache_key = ":".join(
             [
                 str(self.jira.client_info()),
-                jql,
+                str(self.query.from_),
+                str(self.query.where),
                 str(self.query.order_by),
                 str(self.query.limit),
                 str(self.query.expand),
             ]
         )
-
-        start_at = 0
-        max_results = 2 ** 32
-        result_limit = self.query.limit or 2 ** 32
 
         if self.query.cache:
             try:
@@ -396,8 +390,8 @@ class Executor:
                 if not cached_results:
                     raise KeyError(cache_key)
 
-                out_channel.set(len(cached_results))
-                self.progress.remove_task(task)
+                source.update_count(len(cached_results))
+                source.remove_progress()
                 for result in cached_results:
                     yield SingleResult(Issue({}, None, result))
                 return
@@ -406,38 +400,9 @@ class Executor:
 
         cache = []
 
-        self.progress.update(task, completed=0, total=1, visible=True)
-        while start_at < min(max_results, result_limit):
-            results = self.jira.search_issues(
-                jql,
-                startAt=start_at,
-                expand=",".join(self.query.expand),
-                fields="*all",
-                maxResults=min(result_limit, 100),
-            )
-
-            max_results = results.total
-            count = min([results.total, result_limit])
-            out_channel.set(count)
-
-            for result in results:
-                result = cast(Issue, result)
-                self.progress.update(task, advance=1, total=count, visible=True)
-
-                if self.query.cache:
-                    cache.append(result.raw)
-
-                # Do not return the issue directly -- it'll have session
-                # information available that might allow you to accidentally
-                # do something that modifies data.  Instead, take the Raw
-                # JSON and use this as if we were re-hydrating from cache.
-                yield SingleResult(Issue({}, None, result.raw))
-
-                start_at += 1
-
-                # Return early if our result limit has been reached
-                if start_at >= result_limit:
-                    break
+        for result in source:
+            cache.append(result)
+            yield SingleResult(source.rehydrate(result))
 
         if self.query.cache:
             _, max_store = self.query.cache
@@ -446,11 +411,11 @@ class Executor:
 
     def _process_filter(
         self,
-        iterator: Generator[Result, None, None],
+        iterator: Iterator[Result],
         task: TaskID,
         input_channel: CounterChannel,
         output_channel: CounterChannel,
-    ) -> Generator[Result, None, None]:
+    ) -> Iterator[Result]:
         output_channel.zero()
 
         for row in iterator:
@@ -470,11 +435,11 @@ class Executor:
 
     def _process_group_by(
         self,
-        iterator: Generator[Result, None, None],
+        iterator: Iterator[Result],
         task: TaskID,
         input_channel: CounterChannel,
         output_channel: CounterChannel,
-    ) -> Generator[Result, None, None]:
+    ) -> Iterator[Result]:
         groups: Dict[int, Result] = {}
 
         output_channel.zero()
@@ -496,11 +461,11 @@ class Executor:
 
     def _process_having(
         self,
-        iterator: Generator[Result, None, None],
+        iterator: Iterator[Result],
         task: TaskID,
         input_channel: CounterChannel,
         output_channel: CounterChannel,
-    ) -> Generator[Result, None, None]:
+    ) -> Iterator[Result]:
         output_channel.zero()
 
         for row in iterator:
@@ -520,11 +485,11 @@ class Executor:
 
     def _process_sort_by(
         self,
-        iterator: Generator[Result, None, None],
+        iterator: Iterator[Result],
         task: TaskID,
         input_channel: CounterChannel,
         output_channel: CounterChannel,
-    ) -> Generator[Result, None, None]:
+    ) -> Iterator[Result]:
         # First, materialize our list
         rows = list(iterator)
         output_channel.set(len(rows))
@@ -554,9 +519,11 @@ class Executor:
         return result
 
     def _get_iterator(self) -> Generator[Dict[str, Any], None, None]:
-        if self.query.from_ == "issues":
-            iterator = self._get_issues
-        else:
+        sources = get_installed_sources()
+
+        try:
+            iterator = sources[self.query.from_]
+        except KeyError:
             raise NotImplementedError(
                 f"No search for source {self.query.from_} implemented."
             )
@@ -566,13 +533,8 @@ class Executor:
         phases: List[
             Tuple[
                 Callable[
-                    [
-                        Generator[Result, None, None],
-                        TaskID,
-                        CounterChannel,
-                        CounterChannel,
-                    ],
-                    Generator[Result, None, None],
+                    [Iterator[Result], TaskID, CounterChannel, CounterChannel,],
+                    Iterator[Result],
                 ],
                 TaskID,
             ]
@@ -594,7 +556,7 @@ class Executor:
         # Link up each generator with its source; these will vary
         # depending on what query feature are in use
         channel = CounterChannel()
-        cursor: Generator = iterator(iterator_task, channel)
+        cursor: Iterator = self._get_cached(iterator(self, iterator_task, channel))
         for phase, task_id in phases:
             output_channel = CounterChannel()
             cursor = phase(cursor, task_id, channel, output_channel)

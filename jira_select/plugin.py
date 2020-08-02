@@ -7,14 +7,24 @@ import json
 import logging
 import random
 import statistics
-from typing import IO, TYPE_CHECKING, Any, Callable, Dict, Optional, Type, cast
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Type,
+    cast,
+    Iterator,
+)
 
 import pkg_resources
 
-from dateutil.parser import parse as parse_datetime
 import keyring
 from jira import JIRA
 from rich.console import Console
+from rich.progress import TaskID
 from urllib3 import disable_warnings
 
 from .constants import APP_NAME
@@ -23,7 +33,7 @@ from .types import ConfigDict, InstanceDefinition
 from .utils import save_config, get_functions_for_module
 
 if TYPE_CHECKING:
-    from .query import Executor
+    from .query import Executor, CounterChannel, Query
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +90,6 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     # JSON
     "json_loads": json.loads,
     "json_dumps": json.dumps,
-    # Date Handling
-    "parse_datetime": parse_datetime,
 }
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 
@@ -306,4 +314,61 @@ class BaseFunction(metaclass=ABCMeta):
 
     @abstractmethod
     def __call__(self, *args, **kwargs) -> Optional[Any]:
+        ...
+
+
+def get_installed_sources() -> Dict[str, Type[BaseSource]]:
+    possible_sources: Dict[str, Type[BaseSource]] = {}
+    for entry_point in pkg_resources.iter_entry_points(group="jira_select.sources"):
+        try:
+            loaded_class = entry_point.load()
+        except ImportError:
+            logger.warning(
+                "Attempted to load entrypoint %s, but " "an ImportError occurred.",
+                entry_point,
+            )
+            continue
+        if not issubclass(loaded_class, BaseSource):
+            logger.warning(
+                "Loaded entrypoint %s, but loaded class is "
+                "not a subclass of `jira_select.plugin.BaseSource`.",
+                entry_point,
+            )
+            continue
+        possible_sources[entry_point.name] = loaded_class
+
+    return possible_sources
+
+
+class BaseSource(metaclass=ABCMeta):
+    def __init__(self, executor: Executor, task: TaskID, out_channel: CounterChannel):
+        self._executor = executor
+        self._task = task
+        self._out_channel = out_channel
+
+        super().__init__()
+
+    def remove_progress(self):
+        self._executor.progress.remove_task(self._task)
+
+    def update_progress(self, *args, **kwargs):
+        self._executor.progress.update(self._task, *args, **kwargs)
+
+    def update_count(self, value: int):
+        self._out_channel.set(value)
+
+    @property
+    def query(self) -> Query:
+        return self._executor.query
+
+    @property
+    def jira(self) -> JIRA:
+        return self._executor.jira
+
+    @abstractmethod
+    def rehydrate(self, value: Any) -> Any:
+        ...
+
+    @abstractmethod
+    def __iter__(self) -> Iterator[Any]:
         ...
