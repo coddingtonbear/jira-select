@@ -21,7 +21,10 @@ class Source(BaseSource):
         result_limit = self.query.limit or 2 ** 32
 
         if self.query.where:
-            raise QueryError("Board queries do not support 'where' expressions.")
+            raise QueryError(
+                "Board queries do not support 'where' expressions; "
+                "use a 'filter' expression instead."
+            )
 
         self.update_progress(completed=0, total=1, visible=True)
         while start_at < min(max_results, result_limit):

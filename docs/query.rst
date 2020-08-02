@@ -83,7 +83,12 @@ use the expression ``*`` in your search statement:
 ~~~~~~~~
 
 This section defines what you would like to query.
-The value should be a string, and at the moment there is only one option: "issues".
+The value should be a string.
+
+There are two query sources currently implemented:
+
+* ``issues``: Searches Jira issues.
+* ``boards``: Searches Jira boards.
 
 ``where``
 ~~~~~~~~~
