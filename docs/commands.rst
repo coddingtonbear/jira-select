@@ -67,10 +67,10 @@ Displays functions available for use in a query.
 
 .. _schema subcommand:
 
-`jira-select schema issues [--having=EXPRESSION] [SEARCH_TERM [SEARCH_TERM...]]`
---------------------------------------------------------------------------------
+`jira-select schema [issues|boards|sprints] [--having=EXPRESSION] [SEARCH_TERM [SEARCH_TERM...]]`
+-------------------------------------------------------------------------------------------------
 
-Displays issue fields available for query.
+Displays fields available for querying a given data source.
 
 * ``having=EXPRESSION``: A ``having`` expression to use for filtering displayed
   results.  The provided fields for filtering are ``id``, ``type``,
