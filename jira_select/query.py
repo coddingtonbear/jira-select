@@ -375,6 +375,7 @@ class Executor:
         jql = self._get_jql()
         cache_key = ":".join(
             [
+                str(self.jira.client_info()),
                 jql,
                 str(self.query.order_by),
                 str(self.query.limit),
