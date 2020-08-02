@@ -126,3 +126,13 @@ class TestEstimateToDays(JiraSelectFunctionTestCase):
         actual_value = self.execute_function("estimate_to_days", string_value)
 
         assert expected_value == actual_value
+
+    def test_alternate_hour_day(self):
+        string_value = "1d 2h 3m"
+
+        expected_value = 1.5125
+        actual_value = self.execute_function(
+            "estimate_to_days", string_value, day_hour_count=4
+        )
+
+        assert expected_value == actual_value

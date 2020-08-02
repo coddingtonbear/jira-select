@@ -12,17 +12,17 @@ Jira
    Shortcut for returning the name of a sprint via its ID.  Equivalent
    to calling ``sprint_details(sprint_blob).name``.
 
-.. py:function:: sprint_details(sprint_blob: str) -> Optional[dotmap.DotMap]
+.. py:function:: sprint_details(sprint_blob: str) -> Optional[jira_select.functions.sprint_details.SprintInfo]
 
    Returns an object representing the passed-in sprint blob.
 
    Jira returns sprint information on an issue via strings looking something like::
 
-      com.atlassian.greenhopper.service.sprint.Sprint@14b1c359[id=436,rapidViewId=153,state=CLOSED,name=MySprint,goal=Beep Boop,startDate=2020-03-09T21:53:07.264Z,endDate=2020-03-23T20:53:00.000Z,completeDate=2020-03-23T21:08:29.391Z,sequence=436
+      com.atlassian.greenhopper.service.sprint.Sprint@14b1c359[id=436,rapidViewId=153,state=CLOSED,name=MySprint,goal=Beep Boop,startDate=2020-03-09T21:53:07.264Z,endDate=2020-03-23T20:53:00.000Z,completeDate=2020-03-23T21:08:29.391Z,sequence=436]
 
    This function will extract the information found in the above string
    into a ``jira_select.functions.sprint_details.SprintInfo`` object
-   allowing you to access each of the following properties::
+   allowing you to access each of the following properties:
 
    * ``id``: Sprint ID number
    * ``state``: Sprint state
