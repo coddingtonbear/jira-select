@@ -89,6 +89,7 @@ There are two query sources currently implemented:
 
 * ``issues``: Searches Jira issues.
 * ``boards``: Searches Jira boards.
+* ``sprints``: Searches Jira sprints.
 
 ``where``
 ~~~~~~~~~
