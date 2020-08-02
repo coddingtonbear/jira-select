@@ -19,6 +19,14 @@ class Source(BaseSource):
         max_results = 2 ** 32
         result_limit = self.query.limit or 2 ** 32
 
+        if self.query.order_by:
+            raise QueryError(
+                "Board query 'order_by' expressions are not supported. "
+                "Use 'sort_by' instead."
+            )
+        if self.query.expand:
+            raise QueryError("Board query 'expand' expressions are not supported.")
+
         where = self.query.where or {}
         if where and not isinstance(where, dict):
             raise QueryError(
