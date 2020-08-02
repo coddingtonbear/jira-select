@@ -18,6 +18,7 @@ JQLString = str
 CustomFilterFieldName = str
 
 JqlList = List[str]
+WhereParamDict = Dict[str, Any]
 
 Expression = str
 
@@ -30,7 +31,7 @@ QueryDefinition = TypedDict(
     {
         "select": List[Field],
         "from": DataSource,
-        "where": JqlList,
+        "where": Union[JqlList, WhereParamDict],
         "order_by": JqlList,
         "filter": ExpressionList,
         "having": ExpressionList,

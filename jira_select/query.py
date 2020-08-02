@@ -27,6 +27,7 @@ from .types import (
     QueryDefinition,
     SelectFieldDefinition,
     Expression,
+    WhereParamDict,
 )
 from .utils import (
     calculate_result_hash,
@@ -206,8 +207,11 @@ class Query:
         return self._definition["from"]
 
     @property
-    def where(self) -> JqlList:
-        return self._ensure_str(self._definition.get("where", []))
+    def where(self) -> Union[JqlList, WhereParamDict]:
+        where = self._definition.get("where", [])
+        if isinstance(where, list):
+            return self._ensure_str(where)
+        return where
 
     @property
     def order_by(self) -> JqlList:

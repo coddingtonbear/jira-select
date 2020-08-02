@@ -93,12 +93,70 @@ There are two query sources currently implemented:
 ``where``
 ~~~~~~~~~
 
+The ``where`` section varies depending upon what kind of data source
+you are querying from.
+
+``issues``
+__________
+
 This section is where you enter the JQL for your query.
 This should be provided as a list of strings;
 these strings will be ``AND``-ed together to generate the query sent to Jira.
 
+.. code-block:: yaml
+
+   where:
+   - assignee = 'me@adamcoddington.net'
+
 You *cannot* use custom functions in this section
 given that it is evaluated on your Jira server instead of locally.
+
+``boards``
+__________
+
+You can provide key-value pairs to limit the returned boards;
+the following parameters are allowed:
+
+- ``type``: The board type.  Known values include 'scrum', 'kanban',
+  and 'simple'.
+- ``name``: The board name.  Returned boards mustinclude the string
+  you provided somewhere in their name.
+
+
+.. code-block:: yaml
+
+   where:
+     name: 'My Board'
+
+``sprints``
+___________
+
+You can provide key-value pairs to limit the returned boards;
+the following parameters are allowed:
+
+- ``state``: The sprint state.  Known values include 'future', 'active',
+  or 'closed'.
+- ``board_type``: The board type of the board to which this sprint belongs.
+  Known values include 'scrum', 'kanban', and 'simple'.
+- ``board_name``: The board name of the board to which this sprint belongs.
+  Returned boards mustinclude the string you provided somewhere in their name.
+
+.. code-block:: yaml
+
+   where:
+     state: 'active'
+
+.. note::
+
+   This type of query is slow
+   due to the way Jira's API exposes this type of record.
+   There is no endpoint allowing us to list sprints directly.
+   Instead, we must collect a list of sprints
+   by requesting a list of sprints for each board.
+
+   You can improve performance substantially
+   by using the ``board_type`` or ``board_name`` parameters
+   to limit the number of boards we will need to request sprints for.
 
 ``order_by``
 ~~~~~~~~~~~~

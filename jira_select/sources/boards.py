@@ -19,16 +19,26 @@ class Source(BaseSource):
         max_results = 2 ** 32
         result_limit = self.query.limit or 2 ** 32
 
-        if self.query.where:
+        where = self.query.where or {}
+        if where and not isinstance(where, dict):
             raise QueryError(
-                "Board queries do not support 'where' expressions; "
-                "use a 'filter' expression instead."
+                "Board query 'where' expressions should be a dictionary "
+                "having any of the following keys: 'type' or 'name'"
             )
+
+        param_type = where.pop("type", None)
+        param_name = where.pop("name", None)
+
+        if where:
+            raise QueryError(f"Unexpected 'where' parameters: {where}.")
 
         self.update_progress(completed=0, total=1, visible=True)
         while start_at < min(max_results, result_limit):
             results = self.jira.boards(
-                startAt=start_at, maxResults=min(result_limit, 100),
+                startAt=start_at,
+                maxResults=min(result_limit, 100),
+                type=param_type,
+                name=param_name,
             )
 
             max_results = results.total

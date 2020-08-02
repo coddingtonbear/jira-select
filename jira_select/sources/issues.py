@@ -5,6 +5,7 @@ from jira import JIRA
 from jira.resources import Issue
 from simpleeval import NameNotDefined
 
+from ..exceptions import QueryError
 from ..plugin import BaseSource, get_installed_functions
 from ..types import SchemaRow
 from ..utils import evaluate_expression
@@ -48,6 +49,13 @@ class Source(BaseSource):
         return field_definitions
 
     def _get_jql(self) -> str:
+        if self.query.where and not isinstance(self.query.where, list):
+            raise QueryError(
+                "Issue queries 'where' should be a list of JQL expression strings."
+            )
+
+        assert isinstance(self.query.where, list)
+
         query = " AND ".join(f"({q})" for q in self.query.where)
         order_by_fields = ", ".join(self.query.order_by)
 
