@@ -214,6 +214,26 @@ class TestQuery(JiraSelectTestCase):
 
         assert expected_result == actual_result
 
+    def test_interpolated_value_nonspecial(self):
+        arbitrary_query: QueryDefinition = {
+            "select": ['{customfield10011} as "mn"'],
+            "from": "issues",
+        }
+        self.mock_jira.fields = Mock(
+            return_value=[{"name": "Maiden Name", "id": "customfield10011"},]
+        )
+
+        query = Executor(self.mock_jira, arbitrary_query, True)
+
+        actual_results = list(query)
+        expected_results = [
+            {"mn": "Ivanovna"},
+            {"mn": "Jackson"},
+            {"mn": "Chartreuse"},
+        ]
+
+        assert expected_results == actual_results
+
     def test_interpolated_value_nonstring(self):
         arbitrary_query: QueryDefinition = {
             "select": ['{Jellybean Guess} as "jb"'],

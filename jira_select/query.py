@@ -311,6 +311,11 @@ class CounterChannel:
         return self._counter
 
 
+class FieldNameMap(dict):
+    def __missing__(self, key):
+        return key
+
+
 class Executor:
     def __init__(
         self,
@@ -329,7 +334,7 @@ class Executor:
         if enable_cache:
             self._cache = MinimumRecencyCache(get_cache_path())
 
-        self._field_name_map: Dict[str, str] = {}
+        self._field_name_map: Dict[str, str] = FieldNameMap()
 
     @property
     def jira(self) -> JIRA:
