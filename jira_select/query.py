@@ -115,6 +115,18 @@ class SingleResult(Result):
         return self
 
 
+class GroupedFieldContainer(list):
+    def __getattr__(self, name):
+        results = GroupedFieldContainer()
+
+        for row in self:
+            value = getattr(row, name, None)
+            if value is not None:
+                results.append(value)
+
+        return results
+
+
 class GroupedResult(Result):
     def __init__(
         self, rows: List[SingleResult] = None,
@@ -148,11 +160,13 @@ class GroupedResult(Result):
             # Exclude empty rows -- in SQL when you run an aggregation
             # function on a set of rows, NULL rows are skipped, so we
             # should probably do the same?
-            result[field] = [
-                row.as_dict()[field]
-                for row in self._rows
-                if row.as_dict().get(field) is not None
-            ]
+            result[field] = GroupedFieldContainer(
+                [
+                    row.as_dict()[field]
+                    for row in self._rows
+                    if row.as_dict().get(field) is not None
+                ]
+            )
 
         return result
 

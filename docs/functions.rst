@@ -94,13 +94,31 @@ Data Traversal
    attributes described by ``dotpath`` and return all non-null results as
    an array.
 
-   This is particularly useful for traversing into dictionaries and objects
-   returned by grouped rows; for example, to fetch all estimates for grouped
-   rows, you could use::
+   .. note::
 
-      extract(timetracking, "originalEstimate")
+      Although this will work,
+      it is not necessary to use this for traversing into properties of
+      grouped rows.  If your selected field is an object having a value
+      you'd like to select, you can simply use dotpath traversal to reach
+      the value you'd like.
 
    This function works for both dictionaries and objects.
+
+.. _flatten_list function:
+
+.. py:function:: flatten_list(field: List[List[Any]]) -> List[Any]
+
+   For a list containing a lists of items, create a single list of
+   items from the internal lists.
+
+   The above is a little bit difficult to read, but in principle
+   what this function does is convert values like::
+
+      [[1, 2, 3], [4, 5, 6]]
+
+   into a single list of the shape::
+
+      [1, 2, 3, 4, 5, 6]
 
 Dates
 -----

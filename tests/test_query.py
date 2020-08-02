@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 
+from dotmap import DotMap
 from jira import Issue
 from jira.resources import Resource
 
@@ -40,6 +41,12 @@ class TestQuery(JiraSelectTestCase):
                     "customfield10011": "Ivanovna",
                     "customfield10012": MyResource({"ok": "yes"}),
                     "customfield10013": NonResource(),
+                    "worklogs": DotMap(
+                        {"total": 1, "worklogs": [{"timespentSeconds": 60}]}
+                    ),
+                    "transactions": DotMap(
+                        {"byCurrency": {"usd": 100, "cad": 105, "cop": 200}}
+                    ),
                 },
             },
             {
@@ -53,6 +60,16 @@ class TestQuery(JiraSelectTestCase):
                     "customfield10011": "Jackson",
                     "customfield10012": MyResource({"ok": "no"}),
                     "customfield10013": NonResource(),
+                    "worklogs": DotMap(
+                        {
+                            "total": 2,
+                            "worklogs": [
+                                {"timespentSeconds": 30},
+                                {"timespentSeconds": 15},
+                            ],
+                        }
+                    ),
+                    "transactions": DotMap({"byCurrency": {"cad": 124, "cop": 843}}),
                 },
             },
             {
@@ -66,6 +83,7 @@ class TestQuery(JiraSelectTestCase):
                     "customfield10011": "Chartreuse",
                     "customfield10012": MyResource({"ok": "maybe"}),
                     "customfield10013": NonResource(),
+                    "transactions": DotMap({"byCurrency": {"usd": 10, "rur": 33}}),
                 },
             },
         ]
@@ -270,3 +288,31 @@ class TestQuery(JiraSelectTestCase):
         actual_results = list(query)
         for result in actual_results:
             assert isinstance(result["bb"], NonResource)
+
+    def test_autoextract_sum(self):
+        query: QueryDefinition = {
+            "select": ['sum(transactions.byCurrency.usd) as "value"'],
+            "from": "issues",
+            "group_by": ["True"],
+        }
+        query = Executor(self.mock_jira, query)
+
+        actual_results = list(query)[0]["value"]
+        expected_results = 110
+
+        assert expected_results == actual_results
+
+    def test_autoextract_internal_array(self):
+        query: QueryDefinition = {
+            "select": [
+                'sum(extract(flatten_list(worklogs.worklogs), "timespentSeconds")) as "value"'
+            ],
+            "from": "issues",
+            "group_by": ["True"],
+        }
+        query = Executor(self.mock_jira, query)
+
+        actual_results = list(query)[0]["value"]
+        expected_results = 105
+
+        assert expected_results == actual_results

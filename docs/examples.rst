@@ -63,7 +63,7 @@ Summing the total estimated size of issues per-person for a given sprint
 
    select:
    - assignee
-   - sum(map(estimate_to_days, extract(timeestimate, "originalEstimate")))
+   - sum(map(estimate_to_days, timeestimate.originalEstimate))
    from: issues
    where:
    - project = "MYPROJECT"
@@ -79,9 +79,6 @@ In Jira, estimations are stored in the ``timeestimate.originalEstimate`` field,
 but since we've grouped our rows by assignee,
 ``timeestimate`` represents an array of objects
 instead of a single object holding the ``originalEstimate`` we want.
-To get an array of ``originalEstimate`` objects,
-we will use the ``extract`` function;
-you can read more about what this function does at :ref:`Data Traversal` .
 
 If we were to stop here, we would receive an array of strings
 looking something like::
@@ -99,3 +96,65 @@ An array isn't quite what we want
 so we use the ``sum`` function to get that.
 
 See :ref:`Query Functions` for more information.
+
+Summing worklog entries
+-----------------------
+
+.. code-boock:: yaml
+
+   select:
+   - sum(extract(flatten_list(worklogs.worklogs), "timespentSeconds")) as "total seconds"
+   from: issues
+   group_by:
+   - True
+
+Worklog entries on issues are shaped like this for every row
+(unnecessary fields omitted)::
+
+   {
+      "total": 1,
+      "worklogs": [
+         {"timespentSeconds": 60},
+         {"timespentSeconds": 100},
+      ]
+   }
+
+So, if we were to just select ``worklogs.worklogs`` we'd receive an array of results in this shape::
+
+   [
+      [
+         {"timespentSeconds": 60},
+         {"timespentSeconds": 100},
+      ],
+      [
+         {"timespentSeconds": 50},
+      ]
+   ]
+
+The value we need is nested deeply in there, so we should first try to
+flatten the list of lists using ``flatten_list``; if we do that, our list
+will become::
+
+   [
+      {"timespentSeconds": 60},
+      {"timespentSeconds": 100},
+      {"timespentSeconds": 50},
+   ]
+
+We're still not quite there -- the value under ``timespentSeconds`
+still needs to be ``extract``ed
+from the inner objects using ``extract``;
+if we do that we receive::
+
+   [
+      60,
+      100,
+      50
+   ]
+
+We finally have something summable & can wrap that set of calls with ``sum``
+giving us an answer of ``210``.
+
+The ``group_by`` expression here is to make all of your rows be grouped together
+so the ``sum`` operation in your ``select`` block will operate over all of the returned rows.
+``True`` is used because that expression will evaluate to the same value for every row.
