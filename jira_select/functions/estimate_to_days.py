@@ -12,7 +12,7 @@ class Function(BaseFunction):
             "w": 5,
             "d": 1,
             "h": 1 / day_hour_count,
-            "m": 1 / day_hour_count * 60,
+            "m": 1 / day_hour_count / 60,
         }
         unit_matcher = re.compile(r"(?P<value>[\d.]+)(?P<unit>[^\d]+)")
         total_value: float = 0
