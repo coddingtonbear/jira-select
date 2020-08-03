@@ -125,6 +125,9 @@ There are two query sources currently implemented:
 * ``boards``: Searches Jira boards.
 * ``sprints``: Searches Jira sprints.
 
+Common
+------
+
 ``where``
 ~~~~~~~~~
 
@@ -201,9 +204,6 @@ be a list of strings.
 
 You *cannot* use custom functions in this section
 given that it is evaluated on your Jira server instead of locally.
-
-Common
-------
 
 ``group_by``
 ~~~~~~~~~~~~
