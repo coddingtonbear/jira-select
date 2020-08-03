@@ -70,7 +70,7 @@ by using ``jira-select schema [issues|boards|sprints]``.
 Expressions are (with one caveat) valid Python expressions.
 The single caveat is that you can use curly braces to quote
 field names.
-These curly-brace-quoted fields will be replaced by the actual
+These curly-brace-quoted fields will be replaced with the actual
 Jira field name before processing the expression in Python.
 
 For example; if you have a custom field named ``customfield10010``
