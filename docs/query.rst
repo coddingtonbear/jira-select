@@ -65,7 +65,7 @@ An ``Expression`` is an expression evaluated by Jira-select.
 Expressions have access to all
 functions documented in :ref:`Query Functions`.
 The variables available for use in your expressions can be determined
-by using ``jira-select schema [issue|board|sprint]`.
+by using ``jira-select schema [issues|boards|sprints]``.
 
 Expressions are (with one caveat) valid Python expressions.
 The single caveat is that you can use curly braces to quote
