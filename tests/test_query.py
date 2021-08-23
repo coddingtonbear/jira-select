@@ -4,8 +4,8 @@ from dotmap import DotMap
 from jira import Issue
 from jira.resources import Resource
 
-from jira_select.types import QueryDefinition
 from jira_select.query import Executor
+from jira_select.types import QueryDefinition
 
 from .base import JiraSelectTestCase
 
@@ -104,9 +104,15 @@ class TestQuery(JiraSelectTestCase):
 
         actual_results = list(query)
         expected_results = [
-            {"key": "ALPHA-1",},
-            {"key": "ALPHA-3",},
-            {"key": "ALPHA-2",},
+            {
+                "key": "ALPHA-1",
+            },
+            {
+                "key": "ALPHA-3",
+            },
+            {
+                "key": "ALPHA-2",
+            },
         ]
 
         assert expected_results == actual_results
@@ -122,9 +128,15 @@ class TestQuery(JiraSelectTestCase):
 
         actual_results = list(query)
         expected_results = [
-            {"key": "ALPHA-3",},
-            {"key": "ALPHA-1",},
-            {"key": "ALPHA-2",},
+            {
+                "key": "ALPHA-3",
+            },
+            {
+                "key": "ALPHA-1",
+            },
+            {
+                "key": "ALPHA-2",
+            },
         ]
 
         assert expected_results == actual_results
@@ -140,8 +152,12 @@ class TestQuery(JiraSelectTestCase):
 
         actual_results = list(query)
         expected_results = [
-            {"key": "ALPHA-1",},
-            {"key": "ALPHA-3",},
+            {
+                "key": "ALPHA-1",
+            },
+            {
+                "key": "ALPHA-3",
+            },
         ]
 
         assert expected_results == actual_results
@@ -158,8 +174,14 @@ class TestQuery(JiraSelectTestCase):
 
         actual_results = list(query)
         expected_results = [
-            {"issuetype": "Bug", "len(key)": 1,},
-            {"issuetype": "Issue", "len(key)": 2,},
+            {
+                "issuetype": "Bug",
+                "len(key)": 1,
+            },
+            {
+                "issuetype": "Issue",
+                "len(key)": 2,
+            },
         ]
 
         assert expected_results == actual_results
@@ -186,9 +208,15 @@ class TestQuery(JiraSelectTestCase):
 
         actual_results = list(query)
         expected_results = [
-            {"key": "ALPHA-1",},
-            {"key": "ALPHA-3",},
-            {"key": "ALPHA-2",},
+            {
+                "key": "ALPHA-1",
+            },
+            {
+                "key": "ALPHA-3",
+            },
+            {
+                "key": "ALPHA-2",
+            },
         ]
 
         assert expected_results == actual_results
@@ -220,7 +248,9 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Maiden Name", "id": "customfield10011"},]
+            return_value=[
+                {"name": "Maiden Name", "id": "customfield10011"},
+            ]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -240,7 +270,9 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Jellybean Guess", "id": "customfield10010"},]
+            return_value=[
+                {"name": "Jellybean Guess", "id": "customfield10010"},
+            ]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -260,7 +292,9 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Maiden Name", "id": "customfield10011"},]
+            return_value=[
+                {"name": "Maiden Name", "id": "customfield10011"},
+            ]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -280,7 +314,9 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Result Object", "id": "customfield10012"},]
+            return_value=[
+                {"name": "Result Object", "id": "customfield10012"},
+            ]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)
@@ -300,7 +336,9 @@ class TestQuery(JiraSelectTestCase):
             "from": "issues",
         }
         self.mock_jira.fields = Mock(
-            return_value=[{"name": "Beep Boop", "id": "customfield10013"},]
+            return_value=[
+                {"name": "Beep Boop", "id": "customfield10013"},
+            ]
         )
 
         query = Executor(self.mock_jira, arbitrary_query, True)

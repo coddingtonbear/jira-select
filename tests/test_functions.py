@@ -1,12 +1,12 @@
 import datetime
-from unittest.mock import Mock
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytz
 
-from jira_select.plugin import get_installed_functions
-from jira_select.functions.sprint_details import SprintInfo
 from jira_select.functions.flatten_changelog import ChangelogEntry
+from jira_select.functions.sprint_details import SprintInfo
+from jira_select.plugin import get_installed_functions
 
 from .base import JiraSelectTestCase
 
@@ -242,9 +242,20 @@ class TestFlattenChangelog(JiraSelectFunctionTestCase):
 
 class TestSimpleFilter(JiraSelectFunctionTestCase):
     def test_basic(self):
-        rows = [{"value": 10,}, {"value": 20,}]
+        rows = [
+            {
+                "value": 10,
+            },
+            {
+                "value": 20,
+            },
+        ]
 
-        expected_results = [{"value": 10,}]
+        expected_results = [
+            {
+                "value": 10,
+            }
+        ]
         actual_results = self.execute_function("simple_filter", rows, value__lte=10)
 
         assert expected_results == actual_results
@@ -262,9 +273,20 @@ class TestSimpleFilter(JiraSelectFunctionTestCase):
 
 class TestSimpleFilterAny(JiraSelectFunctionTestCase):
     def test_basic(self):
-        rows = [{"value": 10,}, {"value": 20,}]
+        rows = [
+            {
+                "value": 10,
+            },
+            {
+                "value": 20,
+            },
+        ]
 
-        expected_results = [{"value": 10,}]
+        expected_results = [
+            {
+                "value": 10,
+            }
+        ]
         actual_results = self.execute_function("simple_filter_any", rows, value__lte=10)
 
         assert expected_results == actual_results
