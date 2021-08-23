@@ -229,7 +229,8 @@ def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
     possible_commands: Dict[str, Callable] = copy.copy(BUILTIN_FUNCTIONS)
     possible_commands.update(REGISTERED_FUNCTIONS)
 
-    possible_commands.update(get_entrypoints(FUNCTION_ENTRYPOINT, BaseFunction))
+    for fn_name, fn in get_entrypoints(FUNCTION_ENTRYPOINT, BaseFunction).items():
+        possible_commands[fn_name] = fn(jira)
 
     return possible_commands
 
