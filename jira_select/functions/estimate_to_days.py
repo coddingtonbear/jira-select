@@ -5,7 +5,7 @@ from ..plugin import BaseFunction
 
 
 class Function(BaseFunction):
-    """ Converts a string estimate to days."""
+    """Converts a string estimate to days."""
 
     def __call__(self, value_str: str, day_hour_count=8) -> Optional[float]:  # type: ignore[override]
         unit_mapping = {

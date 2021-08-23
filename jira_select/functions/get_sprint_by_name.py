@@ -1,4 +1,8 @@
-from typing import Dict, Union, Hashable, Iterator, Optional
+from typing import Dict
+from typing import Hashable
+from typing import Iterator
+from typing import Optional
+from typing import Union
 
 from jira.exceptions import JIRAError
 from jira.resources import Sprint
@@ -8,7 +12,7 @@ from ..plugin import BaseFunction
 
 
 class Function(BaseFunction):
-    """ Returns a `jira.resources.Sprint` object for a given sprint ID string."""
+    """Returns a `jira.resources.Sprint` object for a given sprint ID string."""
 
     CACHE: Dict[Hashable, Sprint] = {}
 

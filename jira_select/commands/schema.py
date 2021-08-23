@@ -1,11 +1,15 @@
 import argparse
-from typing import Any, Callable, Dict
+from typing import Any
+from typing import Callable
+from typing import Dict
 
 from dotmap import DotMap
 from rich.table import Table
 
 from ..exceptions import JiraSelectError
-from ..plugin import BaseCommand, get_installed_functions, get_installed_sources
+from ..plugin import BaseCommand
+from ..plugin import get_installed_functions
+from ..plugin import get_installed_sources
 from ..utils import evaluate_expression
 
 
@@ -26,7 +30,8 @@ class Command(BaseCommand):
         sources = get_installed_sources()
 
         parser.add_argument(
-            "source", choices=list(sources.keys()),
+            "source",
+            choices=list(sources.keys()),
         )
         parser.add_argument(
             "search_terms",

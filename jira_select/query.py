@@ -1,43 +1,44 @@
 from __future__ import annotations
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+from abc import abstractmethod
 from functools import total_ordering
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Iterable,
-    Iterator,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Generator
+from typing import Iterable
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Type
+from typing import Union
 
-from jira import JIRA, Issue
-from rich.progress import Progress, TaskID, BarColumn, TimeRemainingColumn
+from jira import JIRA
+from jira import Issue
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TaskID
+from rich.progress import TimeRemainingColumn
 
 from .cache import MinimumRecencyCache
-from .plugin import BaseSource, get_installed_functions, get_installed_sources
-from .types import (
-    ExpressionList,
-    JqlList,
-    QueryDefinition,
-    SelectFieldDefinition,
-    Expression,
-    WhereParamDict,
-)
-from .utils import (
-    calculate_result_hash,
-    expression_includes_group_by,
-    get_cache_path,
-    get_field_data,
-    get_row_dict,
-    parse_sort_by_definition,
-    parse_select_definition,
-)
+from .plugin import BaseSource
+from .plugin import get_installed_functions
+from .plugin import get_installed_sources
+from .types import Expression
+from .types import ExpressionList
+from .types import JqlList
+from .types import QueryDefinition
+from .types import SelectFieldDefinition
+from .types import WhereParamDict
+from .utils import calculate_result_hash
+from .utils import expression_includes_group_by
+from .utils import get_cache_path
+from .utils import get_field_data
+from .utils import get_row_dict
+from .utils import parse_select_definition
+from .utils import parse_sort_by_definition
 
 
 @total_ordering
@@ -101,7 +102,10 @@ class Result(metaclass=ABCMeta):
             row_source = self.single()
 
         return get_field_data(
-            row_source, expression, functions=functions, interpolations=field_name_map,
+            row_source,
+            expression,
+            functions=functions,
+            interpolations=field_name_map,
         )
 
 
@@ -130,7 +134,8 @@ class GroupedFieldContainer(list):
 
 class GroupedResult(Result):
     def __init__(
-        self, rows: List[SingleResult] = None,
+        self,
+        rows: List[SingleResult] = None,
     ):
         super().__init__()
         self._rows: List[SingleResult] = rows if rows is not None else []
@@ -452,7 +457,11 @@ class Executor:
         for row in iterator:
             self.progress.update(task, total=input_channel.get(), visible=True)
 
-            row_hash = calculate_result_hash(row, self.query.group_by, self.functions,)
+            row_hash = calculate_result_hash(
+                row,
+                self.query.group_by,
+                self.functions,
+            )
             if row_hash not in groups:
                 output_channel.increment()
                 groups[row_hash] = GroupedResult()
@@ -518,7 +527,8 @@ class Executor:
 
         for field_defn in self.query.select:
             result[field_defn["column"]] = self.evaluate_expression(
-                row, field_defn["expression"],
+                row,
+                field_defn["expression"],
             )
 
         return result
@@ -538,7 +548,12 @@ class Executor:
         phases: List[
             Tuple[
                 Callable[
-                    [Iterator[Result], TaskID, CounterChannel, CounterChannel,],
+                    [
+                        Iterator[Result],
+                        TaskID,
+                        CounterChannel,
+                        CounterChannel,
+                    ],
                     Iterator[Result],
                 ],
                 TaskID,
@@ -546,16 +561,36 @@ class Executor:
         ] = []
         if self.query.filter:
             filter_task = self.progress.add_task("filter", total=0, visible=False)
-            phases.append((self._process_filter, filter_task,),)
+            phases.append(
+                (
+                    self._process_filter,
+                    filter_task,
+                ),
+            )
         if self.query.group_by:
             group_by_task = self.progress.add_task("group_by", total=0, visible=False)
-            phases.append((self._process_group_by, group_by_task,),)
+            phases.append(
+                (
+                    self._process_group_by,
+                    group_by_task,
+                ),
+            )
         if self.query.having:
             having_task = self.progress.add_task("having", total=0, visible=False)
-            phases.append((self._process_having, having_task,),)
+            phases.append(
+                (
+                    self._process_having,
+                    having_task,
+                ),
+            )
         if self.query.sort_by:
             sort_by_task = self.progress.add_task("sort_by", total=0, visible=False)
-            phases.append((self._process_sort_by, sort_by_task,),)
+            phases.append(
+                (
+                    self._process_sort_by,
+                    sort_by_task,
+                ),
+            )
         select_task = self.progress.add_task("select", total=0, visible=False)
 
         # Link up each generator with its source; these will vary

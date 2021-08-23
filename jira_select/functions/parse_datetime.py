@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
 
 from dateutil.parser import parse as parse_datetime
 from pytz import UTC
@@ -7,12 +8,12 @@ from jira_select.plugin import BaseFunction
 
 
 class Function(BaseFunction):
-    """ Parse a date string into a datetime object.
+    """Parse a date string into a datetime object.
 
-    If no timezone is specified, UTC is assumed.
+     If no timezone is specified, UTC is assumed.
 
-   This relies on `python-dateutil`; there are many additional options available
-   that you can find documented `here <https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.parse>`_.
+    This relies on `python-dateutil`; there are many additional options available
+    that you can find documented `here <https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.parse>`_.
 
     """
 

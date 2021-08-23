@@ -1,6 +1,8 @@
-from dataclasses import dataclass
 import datetime
-from typing import Any, Optional, List
+from dataclasses import dataclass
+from typing import Any
+from typing import List
+from typing import Optional
 
 from dateutil.parser import parse as parse_date
 
@@ -22,7 +24,7 @@ class ChangelogEntry:
 
 
 class Function(BaseFunction):
-    """ Returns a flattened list of changelog entries.
+    """Returns a flattened list of changelog entries.
 
 
     Returns ``jira_select.functions.flatten_changelog.ChangelogEntry``

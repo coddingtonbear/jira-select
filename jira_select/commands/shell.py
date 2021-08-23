@@ -1,7 +1,7 @@
 import argparse
 import os
-import tempfile
 import subprocess
+import tempfile
 from typing import cast
 
 from jira import JIRAError
@@ -16,7 +16,8 @@ from yaml import safe_load
 from .. import __version__
 from ..exceptions import QueryError
 from ..formatters.csv import Formatter as CsvFormatter
-from ..plugin import BaseCommand, get_installed_functions
+from ..plugin import BaseCommand
+from ..plugin import get_installed_functions
 from ..query import Executor
 from ..types import QueryDefinition
 from ..utils import get_config_dir
@@ -38,7 +39,10 @@ class Command(BaseCommand):
     @classmethod
     def add_arguments(cls, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            "--editor-mode", "-m", choices=["emacs", "vi"], default=None,
+            "--editor-mode",
+            "-m",
+            choices=["emacs", "vi"],
+            default=None,
         )
         parser.add_argument(
             "--disable-progressbars",
@@ -99,13 +103,16 @@ class Command(BaseCommand):
             vi_mode = self.options.editor_mode
         if vi_mode:
             self.console.print(
-                " | [bold]Run:[/bold]\t\tESC->ENTER", style="deep_sky_blue4",
+                " | [bold]Run:[/bold]\t\tESC->ENTER",
+                style="deep_sky_blue4",
             )
             self.console.print(
-                " | [bold]Clear:[/bold]\tCTRL+C", style="deep_sky_blue4",
+                " | [bold]Clear:[/bold]\tCTRL+C",
+                style="deep_sky_blue4",
             )
             self.console.print(
-                " | [bold]Exit:[/bold]\tCTRL+D", style="deep_sky_blue4",
+                " | [bold]Exit:[/bold]\tCTRL+D",
+                style="deep_sky_blue4",
             )
 
         completions = self.build_completions()

@@ -1,9 +1,14 @@
 from logging import getLogger
-from typing import Tuple, Any, Dict, Union
+from typing import Any
+from typing import Dict
+from typing import Tuple
+from typing import Union
 
 import keyring
-from jira import JIRA, JIRAError
-from prompt_toolkit.shortcuts import input_dialog, yes_no_dialog
+from jira import JIRA
+from jira import JIRAError
+from prompt_toolkit.shortcuts import input_dialog
+from prompt_toolkit.shortcuts import yes_no_dialog
 from urllib3 import disable_warnings
 
 from ..constants import APP_NAME
@@ -69,7 +74,9 @@ class Command(BaseCommand):
 
             try:
                 JIRA(
-                    options, basic_auth=(username, password), max_retries=0,
+                    options,
+                    basic_auth=(username, password),
+                    max_retries=0,
                 )
                 break
             except JIRAError:

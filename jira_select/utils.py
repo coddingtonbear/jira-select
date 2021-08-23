@@ -5,32 +5,31 @@ import logging
 import os
 import re
 from types import ModuleType
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Union,
-    Tuple,
-    Mapping,
-)
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import List
+from typing import Mapping
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
+import simpleeval
 from appdirs import user_config_dir
 from jira.resources import Resource
-import simpleeval
 from simpleeval import EvalWithCompoundTypes
-from yaml import safe_dump, safe_load
+from yaml import safe_dump
+from yaml import safe_load
 
 from .constants import APP_NAME
-from .exceptions import FieldNameError, QueryError, JiraSelectError
-from .types import (
-    ConfigDict,
-    ExpressionList,
-    SelectFieldDefinition,
-    Expression,
-)
+from .exceptions import FieldNameError
+from .exceptions import JiraSelectError
+from .exceptions import QueryError
+from .types import ConfigDict
+from .types import Expression
+from .types import ExpressionList
+from .types import SelectFieldDefinition
 
 if TYPE_CHECKING:
     from .query import Result
@@ -60,7 +59,10 @@ def get_cache_path(subcache: str = "default") -> str:
 
 def get_default_config_path() -> str:
     root_path = get_config_dir()
-    return os.path.join(root_path, "config.yaml",)
+    return os.path.join(
+        root_path,
+        "config.yaml",
+    )
 
 
 def get_config(path: str = None) -> ConfigDict:
@@ -85,7 +87,7 @@ def save_config(data: ConfigDict, path: str = None) -> None:
 def get_functions_for_module(
     module: ModuleType, names: List[str]
 ) -> Dict[str, Callable]:
-    """ Return functions in module matching the specified name.
+    """Return functions in module matching the specified name.
 
     This exists because some functions we want to publish as available
     functions are available only on Python >= 3.8.
@@ -131,7 +133,9 @@ def parse_sort_by_definition(expression: str) -> Tuple[str, bool]:
 
 
 def calculate_result_hash(
-    row: Result, group_fields: ExpressionList, functions: Dict[str, Callable],
+    row: Result,
+    group_fields: ExpressionList,
+    functions: Dict[str, Callable],
 ) -> int:
     params = [
         str(get_field_data(row, group_field, functions)) for group_field in group_fields

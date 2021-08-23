@@ -1,11 +1,13 @@
-from typing import Any, Optional, List
+from typing import Any
+from typing import List
+from typing import Optional
 
 from ..plugin import BaseFunction
 from ..query import Result
 
 
 class Function(BaseFunction):
-    """ Returns value in row for field having the specified human-readable name.
+    """Returns value in row for field having the specified human-readable name.
 
     Note that jira-select provides the row under the variable name `_`.
 

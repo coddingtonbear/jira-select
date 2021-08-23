@@ -1,4 +1,5 @@
-from typing import Dict, Optional
+from typing import Dict
+from typing import Optional
 
 from jira.resources import Sprint
 
@@ -6,7 +7,7 @@ from ..plugin import BaseFunction
 
 
 class Function(BaseFunction):
-    """ Returns a `jira.resources.Sprint` object for a given sprint ID string."""
+    """Returns a `jira.resources.Sprint` object for a given sprint ID string."""
 
     CACHE: Dict[int, Sprint] = {}
 

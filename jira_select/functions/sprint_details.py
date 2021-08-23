@@ -1,7 +1,11 @@
-from dataclasses import dataclass
 import datetime
 import re
-from typing import Any, Dict, Optional, Callable, cast
+from dataclasses import dataclass
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Optional
+from typing import cast
 
 from dateutil.parser import parse as parse_date
 
@@ -22,7 +26,7 @@ class SprintInfo:
 
 
 class Function(BaseFunction):
-    """ Returns a `jira_select.functions.sprint_details.SprintInfo` object for a given sprint ID string."""
+    """Returns a `jira_select.functions.sprint_details.SprintInfo` object for a given sprint ID string."""
 
     def get_sprint_details(self, representation: str) -> Optional[SprintInfo]:
         # com.atlassian.greenhopper.service.sprint.Sprint@14b1c359[id=436,rapidViewId=153,state=CLOSED,name=ORC #11 3/9-3/23,goal=Code Complete 3/18,startDate=2020-03-09T21:53:07.264Z,endDate=2020-03-23T20:53:00.000Z,completeDate=2020-03-23T21:08:29.391Z,sequence=436]
