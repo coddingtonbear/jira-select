@@ -3,15 +3,17 @@ import logging
 
 from rich.console import Console
 from rich.traceback import install as enable_rich_traceback
+from safdie import SafdieRunner
 
+from .constants import COMMAND_ENTRYPOINT
 from .exceptions import UserError
-from .plugin import get_installed_commands
-from .utils import get_config, get_default_config_path
+from .plugin import BaseCommand
+from .utils import get_config
+from .utils import get_default_config_path
 
 
 def main():
     enable_rich_traceback()
-    commands = get_installed_commands()
 
     default_config_path = get_default_config_path()
 
@@ -89,20 +91,8 @@ def main():
             "Print logging messages of the specified level and above " "to the console."
         ),
     )
-    subparsers = parser.add_subparsers(dest="command")
-    subparsers.required = True
-
-    for cmd_name, cmd_class in commands.items():
-        parser_kwargs = {}
-
-        cmd_help = cmd_class.get_help()
-        if cmd_help:
-            parser_kwargs["help"] = cmd_help
-
-        subparser = subparsers.add_parser(cmd_name, **parser_kwargs)
-        cmd_class.add_arguments(subparser)
-
-    args = parser.parse_args()
+    runner = SafdieRunner(COMMAND_ENTRYPOINT, cmd_class=BaseCommand, parser=parser)
+    args = runner.parse_args()
 
     if args.log_level:
         logging.basicConfig(level=logging.getLevelName(args.log_level))
@@ -119,10 +109,8 @@ def main():
 
     console = Console()
 
-    command = commands[args.command](config=config, options=args)
-
     try:
-        command.handle()
+        runner.run_command_for_parsed_args(args, init_kwargs={"config": config})
     except UserError as e:
         console.print(f"[red]{e}[/red]")
     except Exception:

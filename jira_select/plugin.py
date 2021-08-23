@@ -1,40 +1,47 @@
 from __future__ import annotations
 
-from abc import ABCMeta, abstractmethod
-import argparse
 import copy
 import json
 import logging
 import random
 import statistics
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Optional,
-    Type,
-    cast,
-    Iterator,
-    List,
-)
-
-import pkg_resources
+from abc import ABCMeta
+from abc import abstractmethod
+from typing import IO
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Type
+from typing import cast
 
 import keyring
 from jira import JIRA
 from rich.console import Console
 from rich.progress import TaskID
+from safdie import BaseCommand as SafdieBaseCommand
+from safdie import get_entrypoints
 from urllib3 import disable_warnings
 
 from .constants import APP_NAME
+from .constants import FORMATTER_ENTRYPOINT
+from .constants import FUNCTION_ENTRYPOINT
+from .constants import SOURCE_ENTRYPOINT
 from .exceptions import ConfigurationError
-from .types import ConfigDict, InstanceDefinition, SelectFieldDefinition, SchemaRow
-from .utils import save_config, get_functions_for_module
+from .types import ConfigDict
+from .types import InstanceDefinition
+from .types import SchemaRow
+from .types import SelectFieldDefinition
+from .utils import get_functions_for_module
+from .utils import save_config
 
 if TYPE_CHECKING:
-    from .query import Executor, CounterChannel, Query
+    from .query import CounterChannel
+    from .query import Executor
+    from .query import Query
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +94,10 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
         ],
     ),
     # Random
-    **get_functions_for_module(random, ["random", "randrange", "randint", "choice"],),
+    **get_functions_for_module(
+        random,
+        ["random", "randrange", "randint", "choice"],
+    ),
     # JSON
     "json_loads": json.loads,
     "json_dumps": json.dumps,
@@ -95,60 +105,31 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 
 
-def get_installed_commands() -> Dict[str, Type[BaseCommand]]:
-    possible_commands: Dict[str, Type[BaseCommand]] = {}
-    for entry_point in pkg_resources.iter_entry_points(group="jira_select.commands"):
-        try:
-            loaded_class = entry_point.load()
-        except ImportError:
-            logger.warning(
-                "Attempted to load entrypoint %s, but " "an ImportError occurred.",
-                entry_point,
-            )
-            continue
-        if not issubclass(loaded_class, BaseCommand):
-            logger.warning(
-                "Loaded entrypoint %s, but loaded class is "
-                "not a subclass of `jira_select.plugin.BaseCommand`.",
-                entry_point,
-            )
-            continue
-        possible_commands[entry_point.name] = loaded_class
-
-    return possible_commands
-
-
-class BaseCommand(metaclass=ABCMeta):
+class BaseCommand(SafdieBaseCommand):
     _jira: Optional[JIRA] = None
 
-    def __init__(self, config: ConfigDict, options: argparse.Namespace):
+    def __init__(self, *, config: ConfigDict, **kwargs):
         self._config: ConfigDict = config
-        self._options: argparse.Namespace = options
         self._console = Console(highlight=False)
-        super().__init__()
+        super().__init__(**kwargs)
 
     @property
     def config(self) -> ConfigDict:
-        """ Provides the configuration dictionary."""
+        """Provides the configuration dictionary."""
         return self._config
 
     def save_config(self) -> None:
-        """ Saves the existing configuration dictionary."""
+        """Saves the existing configuration dictionary."""
         save_config(self.config, self.options.config)
 
     @property
-    def options(self) -> argparse.Namespace:
-        """ Provides options provided at the command-line."""
-        return self._options
-
-    @property
     def console(self) -> Console:
-        """ Provides access to the console (see `rich.console.Console`."""
+        """Provides access to the console (see `rich.console.Console`."""
         return self._console
 
     @property
     def jira(self) -> JIRA:
-        """ Provides access to the configured Jira instance."""
+        """Provides access to the configured Jira instance."""
         if self._jira is None:
             instance: Dict[InstanceDefinition] = cast(  # type: ignore
                 InstanceDefinition,
@@ -197,43 +178,9 @@ class BaseCommand(metaclass=ABCMeta):
 
         return self._jira
 
-    @classmethod
-    def get_help(cls) -> str:
-        """ Retuurns help text for this function."""
-        return ""
-
-    @classmethod
-    def add_arguments(cls, parser: argparse.ArgumentParser) -> None:
-        """ Allows adding additional command-line arguments. """
-        pass
-
-    @abstractmethod
-    def handle(self) -> None:
-        """ This is where the work of your function starts. """
-        ...
-
 
 def get_installed_formatters() -> Dict[str, Type[BaseFormatter]]:
-    possible_formatters: Dict[str, Type[BaseFormatter]] = {}
-    for entry_point in pkg_resources.iter_entry_points(group="jira_select.formatters"):
-        try:
-            loaded_class = entry_point.load()
-        except ImportError:
-            logger.warning(
-                "Attempted to load entrypoint %s, but " "an ImportError occurred.",
-                entry_point,
-            )
-            continue
-        if not issubclass(loaded_class, BaseFormatter):
-            logger.warning(
-                "Loaded entrypoint %s, but loaded class is "
-                "not a subclass of `jira_select.plugin.BaseFormatter`.",
-                entry_point,
-            )
-            continue
-        possible_formatters[entry_point.name] = loaded_class
-
-    return possible_formatters
+    return get_entrypoints(FORMATTER_ENTRYPOINT, BaseFormatter)
 
 
 class BaseFormatter(metaclass=ABCMeta):
@@ -274,7 +221,7 @@ class BaseFormatter(metaclass=ABCMeta):
 
 
 def register_function(name: str, fn: Callable):
-    """ Register a callable to be a function available in queries."""
+    """Register a callable to be a function available in queries."""
     REGISTERED_FUNCTIONS[name] = fn
 
 
@@ -282,23 +229,7 @@ def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
     possible_commands: Dict[str, Callable] = copy.copy(BUILTIN_FUNCTIONS)
     possible_commands.update(REGISTERED_FUNCTIONS)
 
-    for entry_point in pkg_resources.iter_entry_points(group="jira_select.functions"):
-        try:
-            loaded_class = entry_point.load()
-        except ImportError:
-            logger.warning(
-                "Attempted to load entrypoint %s, but " "an ImportError occurred.",
-                entry_point,
-            )
-            continue
-        if not issubclass(loaded_class, BaseFunction):
-            logger.warning(
-                "Loaded entrypoint %s, but loaded class is "
-                "not a subclass of `jira_select.plugin.BaseFunction`.",
-                entry_point,
-            )
-            continue
-        possible_commands[entry_point.name] = cast(Callable, loaded_class(jira))
+    possible_commands.update(get_entrypoints(FUNCTION_ENTRYPOINT, BaseFunction))
 
     return possible_commands
 
@@ -319,26 +250,7 @@ class BaseFunction(metaclass=ABCMeta):
 
 
 def get_installed_sources() -> Dict[str, Type[BaseSource]]:
-    possible_sources: Dict[str, Type[BaseSource]] = {}
-    for entry_point in pkg_resources.iter_entry_points(group="jira_select.sources"):
-        try:
-            loaded_class = entry_point.load()
-        except ImportError:
-            logger.warning(
-                "Attempted to load entrypoint %s, but " "an ImportError occurred.",
-                entry_point,
-            )
-            continue
-        if not issubclass(loaded_class, BaseSource):
-            logger.warning(
-                "Loaded entrypoint %s, but loaded class is "
-                "not a subclass of `jira_select.plugin.BaseSource`.",
-                entry_point,
-            )
-            continue
-        possible_sources[entry_point.name] = loaded_class
-
-    return possible_sources
+    return get_entrypoints(SOURCE_ENTRYPOINT, BaseSource)
 
 
 class BaseSource(metaclass=ABCMeta):
@@ -361,7 +273,10 @@ class BaseSource(metaclass=ABCMeta):
 
         for entry in cls.get_schema(jira):
             fields.append(
-                {"expression": entry["id"], "column": entry["id"],}
+                {
+                    "expression": entry["id"],
+                    "column": entry["id"],
+                }
             )
 
         return fields
