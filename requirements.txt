@@ -14,3 +14,4 @@ diskcache>=4.1.0,<5.0.0
 queryablelist>=3.1.0,<4.0.0
 pytz
 safdie>=2.0.0,<3.0
+pydantic>=1.8.2,<2.0

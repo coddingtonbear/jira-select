@@ -2,12 +2,16 @@ import argparse
 import subprocess
 import sys
 import tempfile
-from typing import IO, Dict, Optional, cast
+from typing import IO
+from typing import Dict
+from typing import Optional
+from typing import cast
 
 from yaml import safe_load
 
 from ..exceptions import UserError
-from ..plugin import BaseCommand, get_installed_formatters
+from ..plugin import BaseCommand
+from ..plugin import get_installed_formatters
 from ..query import Executor
 from ..types import QueryDefinition
 
@@ -52,9 +56,9 @@ class Command(BaseCommand):
             raise UserError(f"No viewer set for format {self.options.format}")
         formatter_cls = get_installed_formatters()[self.options.format]
 
-        query_definition: QueryDefinition = {}
+        query_definition: QueryDefinition
         with open(self.options.query_file, "r") as inf:
-            query_definition = safe_load(inf)
+            query_definition = QueryDefinition.parse_obj(safe_load(inf))
 
         output: IO[str] = sys.stdout
         output_file = self.options.output

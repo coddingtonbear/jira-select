@@ -57,7 +57,9 @@ class Command(BaseCommand):
         result = session.prompt(">>> ")
 
         try:
-            query_definition: QueryDefinition = safe_load(result)
+            query_definition: QueryDefinition = QueryDefinition.parse_obj(
+                safe_load(result)
+            )
             query = Executor(
                 self.jira,
                 query_definition,

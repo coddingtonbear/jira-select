@@ -95,10 +95,12 @@ class TestQuery(JiraSelectTestCase):
         )
 
     def test_simple(self):
-        query: QueryDefinition = {
-            "select": ["key"],
-            "from": "issues",
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["key"],
+                "from": "issues",
+            }
+        )
 
         query = Executor(self.mock_jira, query)
 
@@ -118,11 +120,13 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_sort_by(self):
-        query: QueryDefinition = {
-            "select": ["key"],
-            "from": "issues",
-            "sort_by": ["story_points desc", "key"],
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["key"],
+                "from": "issues",
+                "sort_by": ["story_points desc", "key"],
+            }
+        )
 
         query = Executor(self.mock_jira, query)
 
@@ -142,11 +146,13 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_filter(self):
-        query: QueryDefinition = {
-            "select": ["key"],
-            "from": "issues",
-            "filter": ["summary != 'My Ticket #2'"],
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["key"],
+                "from": "issues",
+                "filter": ["summary != 'My Ticket #2'"],
+            }
+        )
 
         query = Executor(self.mock_jira, query)
 
@@ -163,12 +169,14 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_group_by_aggregation(self):
-        query: QueryDefinition = {
-            "select": ["issuetype", "len(key)"],
-            "from": "issues",
-            "group_by": ["issuetype"],
-            "sort_by": ["len(key)"],
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["issuetype", "len(key)"],
+                "from": "issues",
+                "group_by": ["issuetype"],
+                "sort_by": ["len(key)"],
+            }
+        )
 
         query = Executor(self.mock_jira, query)
 
@@ -187,11 +195,13 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_cap(self):
-        query: QueryDefinition = {
-            "select": ["key"],
-            "from": "issues",
-            "cap": 1,
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["key"],
+                "from": "issues",
+                "cap": 1,
+            }
+        )
 
         query = Executor(self.mock_jira, query)
 
@@ -199,10 +209,12 @@ class TestQuery(JiraSelectTestCase):
         assert len(actual_results) == 1
 
     def test_simple_wprogress(self):
-        query: QueryDefinition = {
-            "select": ["key"],
-            "from": "issues",
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["key"],
+                "from": "issues",
+            }
+        )
 
         query = Executor(self.mock_jira, query, True)
 
@@ -222,10 +234,12 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_field_name_map(self):
-        arbitrary_query: QueryDefinition = {
-            "select": ["key"],
-            "from": "issues",
-        }
+        arbitrary_query = QueryDefinition.parse_obj(
+            {
+                "select": ["key"],
+                "from": "issues",
+            }
+        )
         self.mock_jira.fields = Mock(
             return_value=[
                 {"name": "Story Points", "id": "customfield10010"},
@@ -243,10 +257,12 @@ class TestQuery(JiraSelectTestCase):
         assert expected_result == actual_result
 
     def test_interpolated_value_nonspecial(self):
-        arbitrary_query: QueryDefinition = {
-            "select": ['{customfield10011} as "mn"'],
-            "from": "issues",
-        }
+        arbitrary_query = QueryDefinition.parse_obj(
+            {
+                "select": ['{customfield10011} as "mn"'],
+                "from": "issues",
+            }
+        )
         self.mock_jira.fields = Mock(
             return_value=[
                 {"name": "Maiden Name", "id": "customfield10011"},
@@ -265,10 +281,12 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_interpolated_value_nonstring(self):
-        arbitrary_query: QueryDefinition = {
-            "select": ['{Jellybean Guess} as "jb"'],
-            "from": "issues",
-        }
+        arbitrary_query = QueryDefinition.parse_obj(
+            {
+                "select": ['{Jellybean Guess} as "jb"'],
+                "from": "issues",
+            }
+        )
         self.mock_jira.fields = Mock(
             return_value=[
                 {"name": "Jellybean Guess", "id": "customfield10010"},
@@ -287,10 +305,12 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_interpolated_value_string(self):
-        arbitrary_query: QueryDefinition = {
-            "select": ['{Maiden Name} as "mn"'],
-            "from": "issues",
-        }
+        arbitrary_query = QueryDefinition.parse_obj(
+            {
+                "select": ['{Maiden Name} as "mn"'],
+                "from": "issues",
+            }
+        )
         self.mock_jira.fields = Mock(
             return_value=[
                 {"name": "Maiden Name", "id": "customfield10011"},
@@ -309,10 +329,12 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_interpolated_value_resource(self):
-        arbitrary_query: QueryDefinition = {
-            "select": ['{Result Object}.ok as "ro"'],
-            "from": "issues",
-        }
+        arbitrary_query = QueryDefinition.parse_obj(
+            {
+                "select": ['{Result Object}.ok as "ro"'],
+                "from": "issues",
+            }
+        )
         self.mock_jira.fields = Mock(
             return_value=[
                 {"name": "Result Object", "id": "customfield10012"},
@@ -331,10 +353,12 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_interpolated_value_nonresource(self):
-        arbitrary_query: QueryDefinition = {
-            "select": ['{Beep Boop} as "bb"'],
-            "from": "issues",
-        }
+        arbitrary_query = QueryDefinition.parse_obj(
+            {
+                "select": ['{Beep Boop} as "bb"'],
+                "from": "issues",
+            }
+        )
         self.mock_jira.fields = Mock(
             return_value=[
                 {"name": "Beep Boop", "id": "customfield10013"},
@@ -348,11 +372,13 @@ class TestQuery(JiraSelectTestCase):
             assert isinstance(result["bb"], NonResource)
 
     def test_autoextract_sum(self):
-        query: QueryDefinition = {
-            "select": ['sum(transactions.byCurrency.usd) as "value"'],
-            "from": "issues",
-            "group_by": ["True"],
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ['sum(transactions.byCurrency.usd) as "value"'],
+                "from": "issues",
+                "group_by": ["True"],
+            }
+        )
         query = Executor(self.mock_jira, query)
 
         actual_results = list(query)[0]["value"]
@@ -361,13 +387,15 @@ class TestQuery(JiraSelectTestCase):
         assert expected_results == actual_results
 
     def test_autoextract_internal_array(self):
-        query: QueryDefinition = {
-            "select": [
-                'sum(extract(flatten_list(worklogs.worklogs), "timespentSeconds")) as "value"'
-            ],
-            "from": "issues",
-            "group_by": ["True"],
-        }
+        query = QueryDefinition.parse_obj(
+            {
+                "select": [
+                    'sum(extract(flatten_list(worklogs.worklogs), "timespentSeconds")) as "value"'
+                ],
+                "from": "issues",
+                "group_by": ["True"],
+            }
+        )
         query = Executor(self.mock_jira, query)
 
         actual_results = list(query)[0]["value"]

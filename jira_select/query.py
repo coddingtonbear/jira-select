@@ -199,7 +199,7 @@ class Query:
     def select(self) -> List[SelectFieldDefinition]:
         fields: List[SelectFieldDefinition] = []
 
-        for field in self._definition["select"]:
+        for field in self._definition.select:
             if field == "*":
                 fields.extend(self._get_all_fields())
             else:
@@ -209,53 +209,53 @@ class Query:
 
     @property
     def from_(self) -> str:
-        return self._definition["from"]
+        return self._definition.from_
 
     @property
     def where(self) -> Union[JqlList, WhereParamDict]:
-        where = self._definition.get("where", [])
+        where = self._definition.where
         if isinstance(where, list):
             return self._ensure_str(where)
         return where
 
     @property
     def order_by(self) -> JqlList:
-        return self._ensure_str(self._definition.get("order_by", []))
+        return self._ensure_str(self._definition.order_by)
 
     @property
     def filter(self) -> ExpressionList:
-        return self._ensure_str(self._definition.get("filter", []))
+        return self._ensure_str(self._definition.filter_)
 
     @property
     def having(self) -> ExpressionList:
-        return self._ensure_str(self._definition.get("having", []))
+        return self._ensure_str(self._definition.having)
 
     @property
     def group_by(self) -> ExpressionList:
-        return self._ensure_str(self._definition.get("group_by", []))
+        return self._ensure_str(self._definition.group_by)
 
     @property
     def sort_by(self) -> List[Tuple[Expression, bool]]:
         return [
             parse_sort_by_definition(definition)
-            for definition in self._ensure_str(self._definition.get("sort_by", []))
+            for definition in self._ensure_str(self._definition.sort_by)
         ]
 
     @property
     def expand(self) -> List[str]:
-        return self._ensure_str(self._definition.get("expand", []))
+        return self._ensure_str(self._definition.expand)
 
     @property
     def limit(self) -> Optional[int]:
-        return self._definition.get("limit")
+        return self._definition.limit
 
     @property
     def cap(self) -> Optional[int]:
-        return self._definition.get("cap")
+        return self._definition.cap
 
     @property
     def cache(self) -> Optional[Tuple[Optional[int], Optional[int]]]:
-        value = self._definition.get("cache")
+        value = self._definition.cache
         if isinstance(value, int):
             return (
                 value,
