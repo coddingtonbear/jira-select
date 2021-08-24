@@ -50,7 +50,7 @@ class Command(BaseCommand):
 
     def handle(self) -> None:
         viewer: Optional[str] = cast(
-            str, self.config.get("viewers", {}).get(self.options.format)
+            str, getattr(self.config.viewers, self.options.format)
         ) or self.DEFAULT_VIEWERS.get(self.options.format)
         if not viewer and self.options.view:
             raise UserError(f"No viewer set for format {self.options.format}")

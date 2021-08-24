@@ -70,10 +70,10 @@ def get_config(path: str = None) -> ConfigDict:
         path = get_default_config_path()
 
     if not os.path.isfile(path):
-        return {}
+        return ConfigDict()
 
     with open(path, "r") as inf:
-        return safe_load(inf)
+        return ConfigDict.parse_obj(safe_load(inf))
 
 
 def save_config(data: ConfigDict, path: str = None) -> None:
@@ -81,7 +81,7 @@ def save_config(data: ConfigDict, path: str = None) -> None:
         path = get_default_config_path()
 
     with open(path, "w") as outf:
-        safe_dump(data, outf)
+        safe_dump(data.dict(), outf)
 
 
 def get_functions_for_module(
@@ -114,7 +114,7 @@ def parse_select_definition(
             expression = match_dict["expression"]
             column = match_dict["column"]
 
-        return {"expression": expression, "column": column}
+        return SelectFieldDefinition(expression=expression, column=column)
     return expression
 
 

@@ -526,9 +526,9 @@ class Executor:
         result: Dict[str, Any] = {}
 
         for field_defn in self.query.select:
-            result[field_defn["column"]] = self.evaluate_expression(
+            result[field_defn.column] = self.evaluate_expression(
                 row,
-                field_defn["expression"],
+                field_defn.expression,
             )
 
         return result

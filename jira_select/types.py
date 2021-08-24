@@ -7,12 +7,11 @@ from typing import Union
 
 from pydantic import BaseModel
 from pydantic import Field as ModelField
-from typing_extensions import TypedDict
 
 JiraFieldName = str
 
 
-class SelectFieldDefinition(TypedDict):
+class SelectFieldDefinition(BaseModel):
     expression: str
     column: str
 
@@ -53,22 +52,22 @@ class SchemaRow(BaseModel):
     raw: Optional[Any]
 
 
-class ViewerDefinitionDict(TypedDict, total=False):
-    csv: str
+class ViewerDefinition(BaseModel):
+    csv: Optional[str]
 
 
-class ShellConfigDict(TypedDict, total=False):
-    emacs_mode: bool
+class ShellConfig(BaseModel):
+    emacs_mode: Optional[bool] = False
 
 
-class InstanceDefinition(TypedDict, total=False):
-    url: str
-    username: str
-    password: str
-    verify: Union[str, bool]
+class InstanceDefinition(BaseModel):
+    url: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+    verify: Optional[Union[str, bool]] = True
 
 
-class ConfigDict(TypedDict, total=False):
-    instances: Dict[str, InstanceDefinition]
-    shell: ShellConfigDict
-    viewers: ViewerDefinitionDict
+class ConfigDict(BaseModel):
+    instances: Dict[str, InstanceDefinition] = ModelField(default_factory=dict)
+    shell: ShellConfig = ModelField(default_factory=ShellConfig)
+    viewers: ViewerDefinition = ModelField(default_factory=ViewerDefinition)

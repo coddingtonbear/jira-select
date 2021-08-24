@@ -11,6 +11,8 @@ from prompt_toolkit.shortcuts import input_dialog
 from prompt_toolkit.shortcuts import yes_no_dialog
 from urllib3 import disable_warnings
 
+from jira_select.types import InstanceDefinition
+
 from ..constants import APP_NAME
 from ..exceptions import UserError
 from ..plugin import BaseCommand
@@ -90,11 +92,11 @@ class Command(BaseCommand):
                 if not result:
                     raise UserError("Aborted; configuration not saved.")
 
-        self.config.setdefault("instances", {})[self.options.instance_name] = {
-            "url": instance_url,
-            "username": username,
-            "verify": verify,
-        }
+        self.config.instances[self.options.instance_name] = InstanceDefinition(
+            url=instance_url,
+            username=username,
+            verify=verify,
+        )
         self.save_config()
 
         store_password = yes_no_dialog(
