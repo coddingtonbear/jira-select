@@ -1,4 +1,6 @@
-from typing import Dict, Iterator, List
+from typing import Dict
+from typing import Iterator
+from typing import List
 
 from jira.resources import Board
 
@@ -9,9 +11,9 @@ from ..types import SchemaRow
 
 class Source(BaseSource):
     SCHEMA: List[SchemaRow] = [
-        {"id": "id", "type": "int"},
-        {"id": "name", "type": "str"},
-        {"id": "type", "type": "str"},
+        SchemaRow.parse_obj({"id": "id", "type": "int"}),
+        SchemaRow.parse_obj({"id": "name", "type": "str"}),
+        SchemaRow.parse_obj({"id": "type", "type": "str"}),
     ]
 
     def __iter__(self) -> Iterator[Dict]:

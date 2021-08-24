@@ -3,7 +3,6 @@ from typing import Any
 from typing import Callable
 from typing import Dict
 
-from dotmap import DotMap
 from rich.table import Table
 
 from ..exceptions import JiraSelectError
@@ -74,13 +73,9 @@ class Command(BaseCommand):
                 if not matches:
                     continue
             if self.options.having:
-                if not self.evaluate_expression(DotMap(row), self.options.having):
+                if not self.evaluate_expression(row, self.options.having):
                     continue
 
-            table.add_row(
-                row.get("id", "Unknown"),
-                row.get("type", "Unknown"),
-                row.get("description", ""),
-            )
+            table.add_row(row.id, row.type, row.description)
 
         self.console.print(table)

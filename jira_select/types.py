@@ -46,11 +46,11 @@ class QueryDefinition(BaseModel):
     cache: Optional[Union[int, Tuple[Optional[int], Optional[int]]]]
 
 
-class SchemaRow(TypedDict, total=False):
+class SchemaRow(BaseModel):
     id: str
     type: str
-    description: str
-    raw: Any
+    description: Optional[str]
+    raw: Optional[Any]
 
 
 class ViewerDefinitionDict(TypedDict, total=False):

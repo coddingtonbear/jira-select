@@ -275,8 +275,8 @@ class BaseSource(metaclass=ABCMeta):
         for entry in cls.get_schema(jira):
             fields.append(
                 {
-                    "expression": entry["id"],
-                    "column": entry["id"],
+                    "expression": entry.id,
+                    "column": entry.id,
                 }
             )
 
