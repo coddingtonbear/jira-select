@@ -16,7 +16,6 @@ from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Type
-from typing import cast
 
 import keyring
 from jira import JIRA
@@ -131,24 +130,23 @@ class BaseCommand(SafdieBaseCommand):
     def jira(self) -> JIRA:
         """Provides access to the configured Jira instance."""
         if self._jira is None:
-            instance: Dict[InstanceDefinition] = cast(  # type: ignore
-                InstanceDefinition,
-                self.config.get("instances", {}).get(self.options.instance_name, {}),
+            instance = self.config.instances.get(
+                self.options.instance_name, InstanceDefinition()
             )
 
-            instance_url = self.options.instance_url or instance.get("url")
+            instance_url = self.options.instance_url or instance.url
             if not instance_url:
                 raise ConfigurationError(
                     "instance_url not set; please run `jira-select configure`."
                 )
 
-            username = self.options.username or instance.get("username")
+            username = self.options.username or instance.username
             if not username:
                 raise ConfigurationError(
                     "username not set; please run `jira-select configure`."
                 )
 
-            password = self.options.password or instance.get("password")
+            password = self.options.password or instance.password
             if not password:
                 password = keyring.get_password(APP_NAME, instance_url + username)
                 if not password:
@@ -159,9 +157,7 @@ class BaseCommand(SafdieBaseCommand):
                         "`jira-select configure`."
                     )
 
-            verify = self.options.disable_certificate_verification or instance.get(
-                "verify"
-            )
+            verify = self.options.disable_certificate_verification or instance.verify
             if verify is None:
                 verify = True
             if verify is False:
@@ -274,10 +270,10 @@ class BaseSource(metaclass=ABCMeta):
 
         for entry in cls.get_schema(jira):
             fields.append(
-                {
-                    "expression": entry["id"],
-                    "column": entry["id"],
-                }
+                SelectFieldDefinition(
+                    expression=entry.id,
+                    column=entry.id,
+                )
             )
 
         return fields

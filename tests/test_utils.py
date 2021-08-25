@@ -1,9 +1,12 @@
 import copy
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import ANY
+from unittest.mock import Mock
+from unittest.mock import patch
 
 import simpleeval
 
-from jira_select import utils, query
+from jira_select import query
+from jira_select import utils
 from jira_select.types import SelectFieldDefinition
 
 from .base import JiraSelectTestCase
@@ -11,10 +14,12 @@ from .base import JiraSelectTestCase
 
 class TestParseSelectDefinition(JiraSelectTestCase):
     def test_returns_select_field_definition_directly(self):
-        field_definition: SelectFieldDefinition = {
-            "expression": "arbitrary",
-            "column": "whatever",
-        }
+        field_definition = SelectFieldDefinition.parse_obj(
+            {
+                "expression": "arbitrary",
+                "column": "whatever",
+            }
+        )
 
         expected_result = copy.deepcopy(field_definition)
         actual_result = utils.parse_select_definition(field_definition)
@@ -24,10 +29,12 @@ class TestParseSelectDefinition(JiraSelectTestCase):
     def test_returns_name_if_no_as_expression(self):
         field_definition = "my_field_name"
 
-        expected_result: SelectFieldDefinition = {
-            "expression": field_definition,
-            "column": field_definition,
-        }
+        expected_result = SelectFieldDefinition.parse_obj(
+            {
+                "expression": field_definition,
+                "column": field_definition,
+            }
+        )
         actual_result = utils.parse_select_definition(field_definition)
 
         assert expected_result == actual_result
@@ -35,10 +42,12 @@ class TestParseSelectDefinition(JiraSelectTestCase):
     def test_returns_name_and_field_if_as_expression(self):
         field_definition = 'my_field_name as "My Field"'
 
-        expected_result: SelectFieldDefinition = {
-            "expression": "my_field_name",
-            "column": "My Field",
-        }
+        expected_result = SelectFieldDefinition.parse_obj(
+            {
+                "expression": "my_field_name",
+                "column": "My Field",
+            }
+        )
         actual_result = utils.parse_select_definition(field_definition)
 
         assert expected_result == actual_result

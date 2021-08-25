@@ -1,4 +1,8 @@
-from typing import Dict, List, Iterator, Any, Callable
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Iterator
+from typing import List
 
 from dotmap import DotMap
 from jira import JIRA
@@ -6,15 +10,16 @@ from jira.resources import Issue
 from simpleeval import NameNotDefined
 
 from ..exceptions import QueryError
-from ..plugin import BaseSource, get_installed_functions
+from ..plugin import BaseSource
+from ..plugin import get_installed_functions
 from ..types import SchemaRow
 from ..utils import evaluate_expression
 
 
 class Source(BaseSource):
     SCHEMA: List[SchemaRow] = [
-        {"id": "key", "type": "str"},
-        {"id": "id", "type": "int"},
+        SchemaRow.parse_obj({"id": "key", "type": "str"}),
+        SchemaRow.parse_obj({"id": "id", "type": "int"}),
     ]
 
     @classmethod
@@ -36,15 +41,18 @@ class Source(BaseSource):
                 type = str(cls.get_field_data(DotMap(column), "schema.type", functions))
             except NameNotDefined:
                 type = ""
-            definition: SchemaRow = {
-                "id": str(cls.get_field_data(DotMap(column), "id", functions)),
-                "type": type,
-                "description": str(
-                    cls.get_field_data(DotMap(column), "name", functions)
-                ),
-                "raw": DotMap(column),
-            }
-            field_definitions.append(definition)
+            field_definitions.append(
+                SchemaRow.parse_obj(
+                    {
+                        "id": str(cls.get_field_data(DotMap(column), "id", functions)),
+                        "type": type,
+                        "description": str(
+                            cls.get_field_data(DotMap(column), "name", functions)
+                        ),
+                        "raw": DotMap(column),
+                    }
+                )
+            )
 
         return field_definitions
 

@@ -1,12 +1,17 @@
-from typing import Any, List, Union, Dict, Tuple, Optional
-from typing_extensions import TypedDict, Literal
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
-DataSource = Literal["issues", "boards"]
+from pydantic import BaseModel
+from pydantic import Field as ModelField
 
 JiraFieldName = str
 
 
-class SelectFieldDefinition(TypedDict):
+class SelectFieldDefinition(BaseModel):
     expression: str
     column: str
 
@@ -24,51 +29,45 @@ Expression = str
 
 ExpressionList = List[Expression]
 
-# We have to use the alternative method of defining the TypedDict since
-# one of our dictionary fields' names is a reserved word
-QueryDefinition = TypedDict(
-    "QueryDefinition",
-    {
-        "select": List[Field],
-        "from": DataSource,
-        "where": Union[JqlList, WhereParamDict],
-        "order_by": JqlList,
-        "filter": ExpressionList,
-        "having": ExpressionList,
-        "group_by": ExpressionList,
-        "sort_by": ExpressionList,
-        "expand": List[str],
-        "limit": int,
-        "cap": int,
-        "cache": Union[int, Tuple[Optional[int], Optional[int]]],
-    },
-    total=False,
-)
+
+class QueryDefinition(BaseModel):
+    select: List[Field]
+    from_: str = ModelField(alias="from")
+    where: Union[JqlList, WhereParamDict] = ModelField(default_factory=list)
+    order_by: JqlList = ModelField(default_factory=list)
+    filter_: ExpressionList = ModelField(alias="filter", default_factory=list)
+    having: ExpressionList = ModelField(default_factory=list)
+    group_by: ExpressionList = ModelField(default_factory=list)
+    sort_by: ExpressionList = ModelField(default_factory=list)
+    expand: ExpressionList = ModelField(default_factory=list)
+    limit: Optional[int]
+    cap: Optional[int]
+    cache: Optional[Union[int, Tuple[Optional[int], Optional[int]]]]
 
 
-class SchemaRow(TypedDict, total=False):
+class SchemaRow(BaseModel):
     id: str
     type: str
-    description: str
-    raw: Any
+    description: Optional[str]
+    raw: Optional[Any]
 
 
-class ViewerDefinitionDict(TypedDict, total=False):
-    csv: str
+class ViewerDefinition(BaseModel):
+    csv: Optional[str]
 
 
-class ShellConfigDict(TypedDict, total=False):
-    emacs_mode: bool
+class ShellConfig(BaseModel):
+    emacs_mode: Optional[bool] = False
 
 
-class InstanceDefinition(TypedDict, total=False):
-    url: str
-    username: str
-    password: str
-    verify: Union[str, bool]
+class InstanceDefinition(BaseModel):
+    url: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+    verify: Optional[Union[str, bool]] = True
 
 
-class ConfigDict(TypedDict, total=False):
-    instances: Dict[str, InstanceDefinition]
-    shell: ShellConfigDict
-    viewers: ViewerDefinitionDict
+class ConfigDict(BaseModel):
+    instances: Dict[str, InstanceDefinition] = ModelField(default_factory=dict)
+    shell: ShellConfig = ModelField(default_factory=ShellConfig)
+    viewers: ViewerDefinition = ModelField(default_factory=ViewerDefinition)

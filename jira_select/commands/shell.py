@@ -2,7 +2,6 @@ import argparse
 import os
 import subprocess
 import tempfile
-from typing import cast
 
 from jira import JIRAError
 from prompt_toolkit import PromptSession
@@ -52,12 +51,14 @@ class Command(BaseCommand):
         )
 
     def _prompt_loop(self, session: PromptSession):
-        viewer: str = cast(str, self.config.get("viewers", {}).get("csv")) or "vd"
+        viewer: str = self.config.viewers.csv or "vd"
 
         result = session.prompt(">>> ")
 
         try:
-            query_definition: QueryDefinition = safe_load(result)
+            query_definition: QueryDefinition = QueryDefinition.parse_obj(
+                safe_load(result)
+            )
             query = Executor(
                 self.jira,
                 query_definition,
@@ -98,7 +99,7 @@ class Command(BaseCommand):
             f"[bold]Jira-select[/bold] Shell v{__version__}",
             style="dodger_blue1 blink",
         )
-        vi_mode = not self.config.get("shell", {}).get("emacs_mode", False)
+        vi_mode = not self.config.shell.emacs_mode
         if self.options.editor_mode:
             vi_mode = self.options.editor_mode
         if vi_mode:
@@ -116,7 +117,7 @@ class Command(BaseCommand):
             )
 
         completions = self.build_completions()
-        session = PromptSession(
+        session: PromptSession = PromptSession(
             lexer=PygmentsLexer(YamlLexer),
             multiline=True,
             completer=completions,

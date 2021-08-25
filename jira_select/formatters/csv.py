@@ -1,5 +1,7 @@
 import csv
-from typing import Any, Dict, List
+from typing import Any
+from typing import Dict
+from typing import List
 
 from ..plugin import BaseFormatter
 
@@ -13,7 +15,7 @@ class Formatter(BaseFormatter):
         fields = []
 
         for field in self.executor.query.select:
-            fields.append(field["column"])
+            fields.append(field.column)
 
         return fields
 

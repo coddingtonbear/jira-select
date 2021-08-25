@@ -1,4 +1,6 @@
-from typing import Dict, Iterator, List
+from typing import Dict
+from typing import Iterator
+from typing import List
 
 from jira.exceptions import JIRAError
 from jira.resources import Sprint
@@ -10,13 +12,13 @@ from ..types import SchemaRow
 
 class Source(BaseSource):
     SCHEMA: List[SchemaRow] = [
-        {"id": "id", "type": "int"},
-        {"id": "state", "type": "str"},
-        {"id": "name", "type": "str"},
-        {"id": "startDate", "type": "datestr"},
-        {"id": "endDate", "type": "datestr"},
-        {"id": "completeDate", "type": "datestr"},
-        {"id": "originBoardId", "type": "int"},
+        SchemaRow.parse_obj({"id": "id", "type": "int"}),
+        SchemaRow.parse_obj({"id": "state", "type": "str"}),
+        SchemaRow.parse_obj({"id": "name", "type": "str"}),
+        SchemaRow.parse_obj({"id": "startDate", "type": "datestr"}),
+        SchemaRow.parse_obj({"id": "endDate", "type": "datestr"}),
+        SchemaRow.parse_obj({"id": "completeDate", "type": "datestr"}),
+        SchemaRow.parse_obj({"id": "originBoardId", "type": "int"}),
     ]
 
     def __iter__(self) -> Iterator[Dict]:
