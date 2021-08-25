@@ -13,6 +13,6 @@ class Command(BaseCommand):
     def handle(self) -> None:
         app = wx.App()
 
-        frame = JiraSelectFrame()
+        JiraSelectFrame(self.jira)
 
         app.MainLoop()

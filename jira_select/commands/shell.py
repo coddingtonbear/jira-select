@@ -10,20 +10,19 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers.data import YamlLexer
+from rich.progress import Progress
 from yaml import safe_load
 
 from .. import __version__
 from ..exceptions import QueryError
+from ..exceptions import QueryParseError
 from ..formatters.csv import Formatter as CsvFormatter
 from ..plugin import BaseCommand
 from ..plugin import get_installed_functions
 from ..query import Executor
+from ..query import NullProgressbar
 from ..types import QueryDefinition
 from ..utils import get_config_dir
-
-
-class QueryParseError(Exception):
-    pass
 
 
 class Command(BaseCommand):
@@ -62,7 +61,9 @@ class Command(BaseCommand):
             query = Executor(
                 self.jira,
                 query_definition,
-                progress_bar=self.options.enable_progressbars,
+                progress_bar_cls=(
+                    Progress if self.options.enable_progressbars else NullProgressbar
+                ),
             )
         except Exception as e:
             raise QueryParseError(e)

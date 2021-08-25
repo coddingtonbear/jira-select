@@ -16,3 +16,7 @@ class QueryError(UserError):
 
 class FieldNameError(QueryError):
     pass
+
+
+class QueryParseError(QueryError):
+    pass

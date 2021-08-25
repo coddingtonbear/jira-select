@@ -21,6 +21,7 @@ from rich.progress import BarColumn
 from rich.progress import Progress
 from rich.progress import TaskID
 from rich.progress import TimeRemainingColumn
+from typing_extensions import Protocol
 
 from .cache import MinimumRecencyCache
 from .plugin import BaseSource
@@ -284,6 +285,41 @@ class NullProgressbar:
         pass
 
 
+class ProgressBarProtocol(Protocol):
+    def __init__(self, *args, **kwargs):
+        ...
+
+    def update(
+        self,
+        task_id: Any,
+        *,
+        total: float = None,
+        visible: bool = True,
+        advance: float = None,
+    ) -> None:
+        ...
+
+    def add_task(
+        self,
+        description: str,
+        start: bool = True,
+        total: int = 100,
+        completed: int = 0,
+        visible: bool = True,
+        **fields: Any,
+    ) -> Any:
+        ...
+
+    def remove_task(self, task_id: Any) -> None:
+        ...
+
+    def __enter__(self):
+        ...
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        ...
+
+
 class NullCache:
     def __init__(self, *args, **kwargs):
         pass
@@ -332,13 +368,12 @@ class Executor:
         jira: JIRA,
         definition: QueryDefinition,
         enable_cache: bool = True,
-        progress_bar: bool = False,
+        progress_bar_cls: Type[ProgressBarProtocol] = Progress,
     ):
         self._query: Query = Query(jira, definition)
-        # self._definition: QueryDefinition = clean_query_definition(definition)
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
-        self._progress_bar_enabled = progress_bar
+        self._progress_bar_cls = progress_bar_cls
 
         self._cache: Union[MinimumRecencyCache, NullCache] = NullCache()
         if enable_cache:
@@ -620,11 +655,7 @@ class Executor:
         )
 
     def __iter__(self) -> Generator[Dict[str, Any], None, None]:
-        progress_bar_cls: Union[Type[Progress], Type[NullProgressbar]] = NullProgressbar
-        if self._progress_bar_enabled:
-            progress_bar_cls = Progress
-
-        with progress_bar_cls(
+        with self._progress_bar_cls(
             "[progress.description]{task.description}",
             BarColumn(),
             "[progress.percentage]{task.percentage:>3.0f}%",

@@ -1,4 +1,11 @@
+import traceback
+
 import wx
+from jira.client import JIRA
+from yaml import safe_load
+
+from jira_select.query import Executor
+from jira_select.types import QueryDefinition
 
 from .editor import EVT_RUN_QUERY
 from .editor import EditorPanel
@@ -7,18 +14,63 @@ from .grid import GridPanel
 
 
 class JiraSelectFrame(wx.Frame):
-    def run_query(self, evt: RunQueryEvent):
-        print(evt.data)
+    _jira: JIRA
 
-    def __init__(self):
+    @property
+    def jira(self) -> JIRA:
+        return self._jira
+
+    def OnRunQuery(self, evt: RunQueryEvent):
+
+        try:
+            query_definition = QueryDefinition.parse_obj(safe_load(evt.data))
+            query = Executor(self.jira, query_definition)
+            query_rows = list(query)
+        except Exception:
+            self.query_error_display.SetLabelText(traceback.format_exc())
+            self.query_error_display.Show()
+            self.grid.Hide()
+            self.Layout()
+            return
+
+        self.grid.Show()
+        self.query_error_display.Hide()
+        self.Layout()
+
+        self.grid.grid_view.ClearGrid()
+        self.grid.grid_view.CreateGrid(len(query_rows), len(query.query.select))
+
+        for idx, field in enumerate(query.query.select):
+            self.grid.grid_view.SetColLabelValue(idx, field.column)
+
+        for row_idx, row in enumerate(query_rows):
+            for col_idx, field in enumerate(query.query.select):
+                self.grid.grid_view.SetCellValue(
+                    row_idx, col_idx, str(row[field.column])
+                )
+
+    def __init__(self, jira: JIRA):
         super().__init__(parent=None, title="Jira Select")
+        self._jira = jira
+
+        # Start grid in a hidden state because we haven't yet
+        # executed a query to populate it with
+        self.grid = GridPanel(self)
+        self.grid.Hide()
+
+        self.editor = EditorPanel(self)
+
+        self.query_error_display = wx.StaticText(self, label="")
+        self.query_error_display.Hide()
 
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        main_sizer.Add(EditorPanel(self), proportion=1, flag=wx.EXPAND)
-        main_sizer.Add(GridPanel(self), proportion=2, flag=wx.EXPAND)
-        main_sizer.SetSizeHints(self)
+        main_sizer.Add(self.editor, proportion=1, flag=wx.EXPAND)
+        main_sizer.Add(self.query_error_display, proportion=2, flag=wx.EXPAND)
+        main_sizer.Add(self.grid, proportion=2, flag=wx.EXPAND)
 
-        self.Bind(EVT_RUN_QUERY, self.run_query)
+        self.Bind(EVT_RUN_QUERY, self.OnRunQuery)
 
-        self.SetSizerAndFit(main_sizer)
+        self.SetSizer(main_sizer)
+        self.SetSize(size=(1000, 500))
+
         self.Show()

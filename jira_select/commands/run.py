@@ -7,12 +7,14 @@ from typing import Dict
 from typing import Optional
 from typing import cast
 
+from rich.progress import Progress
 from yaml import safe_load
 
 from ..exceptions import UserError
 from ..plugin import BaseCommand
 from ..plugin import get_installed_formatters
 from ..query import Executor
+from ..query import NullProgressbar
 from ..types import QueryDefinition
 
 
@@ -71,7 +73,11 @@ class Command(BaseCommand):
             output_file = output.name
 
         query = Executor(
-            self.jira, query_definition, progress_bar=output is not sys.stdout
+            self.jira,
+            query_definition,
+            progress_bar_cls=(
+                Progress if output is not sys.stdout else NullProgressbar
+            ),
         )
         with formatter_cls(query, output) as formatter:
             for row in query:
