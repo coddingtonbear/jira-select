@@ -3,8 +3,26 @@ from wx import grid
 
 
 class Grid(grid.Grid):
+    _created = False
+    _column_count = 0
+    _row_count = 0
+
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
+
+    def CreateGrid(self, numRows, numCols):
+        if self._created:
+            self.DeleteCols(pos=0, numCols=self._column_count)
+            self.DeleteRows(pos=0, numRows=self._row_count)
+
+            self.AppendCols(numCols=numCols)
+            self.AppendRows(numRows=numRows)
+            return
+
+        self._column_count = numCols
+        self._row_count = numRows
+        self._created = True
+        return super().CreateGrid(numRows, numCols, selmode=grid.Grid.GridSelectCells)
 
 
 class GridPanel(wx.Panel):

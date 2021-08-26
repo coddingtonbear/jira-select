@@ -1,3 +1,4 @@
+import threading
 import traceback
 
 import wx
@@ -21,11 +22,12 @@ class JiraSelectFrame(wx.Frame):
         return self._jira
 
     def OnRunQuery(self, evt: RunQueryEvent):
-
         try:
+            self.editor.OnRunningQuery()
+
             query_definition = QueryDefinition.parse_obj(safe_load(evt.data))
-            query = Executor(self.jira, query_definition)
-            query_rows = list(query)
+            thread = threading.Thread(target=self.RunQuery, args=(query_definition,))
+            thread.start()
         except Exception:
             self.query_error_display.SetLabelText(traceback.format_exc())
             self.query_error_display.Show()
@@ -33,11 +35,17 @@ class JiraSelectFrame(wx.Frame):
             self.Layout()
             return
 
+    def RunQuery(self, defn: QueryDefinition):
+        query = Executor(self.jira, defn)
+        self.SetGridValues(query)
+
+    def SetGridValues(self, query: Executor):
+        query_rows = list(query)
+
         self.grid.Show()
         self.query_error_display.Hide()
         self.Layout()
 
-        self.grid.grid_view.ClearGrid()
         self.grid.grid_view.CreateGrid(len(query_rows), len(query.query.select))
 
         for idx, field in enumerate(query.query.select):
@@ -48,6 +56,8 @@ class JiraSelectFrame(wx.Frame):
                 self.grid.grid_view.SetCellValue(
                     row_idx, col_idx, str(row[field.column])
                 )
+
+        self.editor.OnFinishedRunningQuery()
 
     def __init__(self, jira: JIRA):
         super().__init__(parent=None, title="Jira Select")
