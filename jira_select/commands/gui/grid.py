@@ -9,6 +9,7 @@ class Grid(grid.Grid):
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
+        self.EnableEditing(False)
 
     def CreateGrid(self, numRows, numCols):
         if self._created:

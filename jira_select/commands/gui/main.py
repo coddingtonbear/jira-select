@@ -1,7 +1,11 @@
+import json
 import threading
 import traceback
+from typing import Any
+from typing import Optional
 
 import wx
+import wx.grid
 from jira.client import JIRA
 from yaml import safe_load
 
@@ -16,18 +20,24 @@ from .grid import GridPanel
 
 class JiraSelectFrame(wx.Frame):
     _jira: JIRA
+    _query_thread: Optional[threading.Thread] = None
 
     @property
     def jira(self) -> JIRA:
         return self._jira
 
     def OnRunQuery(self, evt: RunQueryEvent):
+        if self._query_thread and self._query_thread.is_alive():
+            return
+
         try:
             self.editor.OnRunningQuery()
 
             query_definition = QueryDefinition.parse_obj(safe_load(evt.data))
-            thread = threading.Thread(target=self.RunQuery, args=(query_definition,))
-            thread.start()
+            self._query_thread = threading.Thread(
+                target=self.RunQuery, args=(query_definition,)
+            )
+            self._query_thread.start()
         except Exception:
             self.query_error_display.SetLabelText(traceback.format_exc())
             self.query_error_display.Show()
@@ -38,6 +48,17 @@ class JiraSelectFrame(wx.Frame):
     def RunQuery(self, defn: QueryDefinition):
         query = Executor(self.jira, defn)
         self.SetGridValues(query)
+
+    def SerializeSingleValue(self, value: Any) -> str:
+        if isinstance(
+            value,
+            (
+                dict,
+                list,
+            ),
+        ):
+            return json.dumps(value, sort_keys=True, indent=4)
+        return str(value)
 
     def SetGridValues(self, query: Executor):
         query_rows = list(query)
@@ -54,8 +75,9 @@ class JiraSelectFrame(wx.Frame):
         for row_idx, row in enumerate(query_rows):
             for col_idx, field in enumerate(query.query.select):
                 self.grid.grid_view.SetCellValue(
-                    row_idx, col_idx, str(row[field.column])
+                    row_idx, col_idx, self.SerializeSingleValue(row[field.column])
                 )
+        self.grid.grid_view.AutoSize()
 
         self.editor.OnFinishedRunningQuery()
 
