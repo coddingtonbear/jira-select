@@ -41,8 +41,8 @@ jobs:
              cd pyinstaller &&
              make exe &&
              cd dist &&
-             zip -r9 jira-select jira-select.app/
-            OUT_FILE_NAME: jira-select.zip
+             zip -r9 jira-select.macos jira-select
+            OUT_FILE_NAME: jira-select.macos.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
@@ -58,8 +58,8 @@ jobs:
              cd pyinstaller &&
              make exe &&
              cd dist &&
-             tar -czvf jira-select.tar.gz ./jira-select
-            OUT_FILE_NAME: jira-select.tar.gz
+             tar -czvf jira-select.linux.tar.gz ./jira-select
+            OUT_FILE_NAME: jira-select.linux.tar.gz
             ASSET_MIME: application/gzip
     steps:
     - uses: actions/checkout@v1
