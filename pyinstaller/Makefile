@@ -1,3 +1,9 @@
+ifeq ($(OS),Windows_NT)
+	activate_script := env/bin/activate.bat
+else
+	activate_script := env/bin/activate
+endif
+
 help:
 	@echo 'Usage:'
 	@echo '	make clean: Clean up the local environment'
@@ -13,12 +19,12 @@ clean:
 new:
 	@/usr/bin/env python -m pip install virtualenv
 	@/usr/bin/env python -m virtualenv ./env
-	@. env/bin/activate && python -m pip install -e ../
-	@. env/bin/activate && python -m pip uninstall -y simpleeval
-	@. env/bin/activate && python -m pip install -r ./requirements.txt
+	@. $(activate_script) && python -m pip install -e ../
+	@. $(activate_script) && python -m pip uninstall -y simpleeval
+	@. $(activate_script) && python -m pip install -r ./requirements.txt
 
 exe: clean new
-	@. env/bin/activate && pyinstaller ./jira_select.exe.spec
+	@. $(activate_script) && pyinstaller ./jira_select.exe.spec
 
 dir: clean new
-	@. env/bin/activate && pyinstaller ./jira_select.spec
+	@. $(activate_script) && pyinstaller ./jira_select.spec
