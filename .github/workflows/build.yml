@@ -49,7 +49,7 @@ jobs:
             CMD_BUILD: >
              cd pyinstaller &&
              make exe &&
-             cd dist &&
+             cd dist
             OUT_FILE_NAME: jira-select.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
           - os: ubuntu-latest
