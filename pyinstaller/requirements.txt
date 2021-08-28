@@ -1,0 +1,2 @@
+pyinstaller>=4.5.1,<5.0
+git+https://github.com/danthedeckie/simpleeval.git@8b4b377e7394e3e0361dc12a04aa1da1864bc519#egg=simpleeval

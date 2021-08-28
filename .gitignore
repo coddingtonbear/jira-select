@@ -6,6 +6,9 @@ env/
 .eggs
 build/
 dist/
+pyinstaller/build/
+pyinstaller/dist/
+pyinstaller/env/
 docs/_build/
 docs/_static/
 docs/_templates/
