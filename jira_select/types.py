@@ -52,10 +52,6 @@ class SchemaRow(BaseModel):
     raw: Optional[Any]
 
 
-class ViewerDefinition(BaseModel):
-    csv: Optional[str]
-
-
 class ShellConfig(BaseModel):
     emacs_mode: Optional[bool] = False
 
@@ -70,4 +66,4 @@ class InstanceDefinition(BaseModel):
 class ConfigDict(BaseModel):
     instances: Dict[str, InstanceDefinition] = ModelField(default_factory=dict)
     shell: ShellConfig = ModelField(default_factory=ShellConfig)
-    viewers: ViewerDefinition = ModelField(default_factory=ViewerDefinition)
+    inline_viewers: Dict[str, str] = ModelField(default_factory=dict)

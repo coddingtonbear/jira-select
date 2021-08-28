@@ -4,6 +4,8 @@ import hashlib
 import logging
 import os
 import re
+import subprocess
+import sys
 from types import ModuleType
 from typing import TYPE_CHECKING
 from typing import Any
@@ -26,6 +28,7 @@ from .constants import APP_NAME
 from .exceptions import FieldNameError
 from .exceptions import JiraSelectError
 from .exceptions import QueryError
+from .exceptions import UnhandledConditionError
 from .types import ConfigDict
 from .types import Expression
 from .types import ExpressionList
@@ -252,3 +255,17 @@ def get_field_data(
         return None
     except Exception as e:
         raise QueryError(f"{e}: {expression}") from e
+
+
+def launch_default_viewer(path: str) -> None:
+    if sys.platform == "win32":
+        os.startfile(path)
+    elif sys.platform == "darwin":
+        subprocess.call(["open", path])
+    elif sys.platform == "linux":
+        subprocess.call(["xdg-open", path])
+    else:
+        raise UnhandledConditionError(
+            "Could not determine method of launching default "
+            f"interpreter for platform {sys.platform}."
+        )

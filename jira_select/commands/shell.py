@@ -2,8 +2,10 @@ import argparse
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
+from typing import IO
+from typing import Optional
+from typing import Type
 
 from jira import JIRAError
 from prompt_toolkit import PromptSession
@@ -15,14 +17,16 @@ from pygments.lexers.data import YamlLexer
 from yaml import safe_load
 
 from .. import __version__
+from ..constants import DEFAULT_INLINE_VIEWERS
 from ..exceptions import QueryError
-from ..formatters.csv import Formatter as CsvFormatter
-from ..formatters.table import Formatter as TableFormatter
 from ..plugin import BaseCommand
+from ..plugin import BaseFormatter
+from ..plugin import get_installed_formatters
 from ..plugin import get_installed_functions
 from ..query import Executor
 from ..types import QueryDefinition
 from ..utils import get_config_dir
+from ..utils import launch_default_viewer
 
 
 class QueryParseError(Exception):
@@ -52,10 +56,32 @@ class Command(BaseCommand):
             default=True,
             dest="enable_progressbars",
         )
+        parser.add_argument(
+            "--launch-default-viewer",
+            "-l",
+            action="store_true",
+            default=False,
+            help=(
+                "Display the output using the default viewer for the "
+                "filetype used by the selected formatter instead of "
+                "displaying the results inline."
+            ),
+            dest="launch_default_viewer",
+        )
+        parser.add_argument(
+            "--format",
+            "-f",
+            default="csv",
+            choices=get_installed_formatters().keys(),
+            dest="format",
+        )
 
-    def _prompt_loop(self, session: PromptSession):
-        viewer: str = self.config.viewers.csv or "vdx"
-
+    def _prompt_loop(
+        self,
+        session: PromptSession,
+        formatter_cls: Type[BaseFormatter],
+        outf: IO[bytes],
+    ):
         result = session.prompt(">>> ")
 
         try:
@@ -70,19 +96,30 @@ class Command(BaseCommand):
         except Exception as e:
             raise QueryParseError(e)
 
-        if shutil.which(viewer):
-            with tempfile.NamedTemporaryFile("w", suffix=".csv") as outf:
-                with CsvFormatter(query, outf) as formatter:
-                    for row in query:
-                        formatter.writerow(row)
+        outf.seek(0)
+        outf.truncate()
+
+        with formatter_cls(query, outf) as formatter:
+            for row in query:
+                formatter.writerow(row)
                 outf.flush()
 
-                proc = subprocess.Popen([viewer, outf.name])
-                proc.wait()
+        if self.options.launch_default_viewer:
+            launch_default_viewer(outf.name)
         else:
-            with TableFormatter(query, sys.stdout) as formatter:
-                for row in query:
-                    formatter.writerow(row)
+            self._inline_viewer(outf.name)
+
+    def _inline_viewer(self, path: str):
+        viewer: Optional[str] = self.config.inline_viewers.get(
+            self.options.format, DEFAULT_INLINE_VIEWERS.get(self.options.format)
+        )
+
+        if viewer and shutil.which(viewer):
+            proc = subprocess.Popen([viewer, path])
+            proc.wait()
+        else:
+            with open(path, "r") as inf:
+                self.console.print(inf.read())
 
     def build_completions(self) -> WordCompleter:
         sql_completions = [
@@ -135,21 +172,25 @@ class Command(BaseCommand):
             vi_mode=vi_mode,
             mouse_support=True,
         )
-
-        while True:
-            try:
-                self._prompt_loop(session)
-            except JIRAError as e:
-                self.console.print(f"[red][bold]Jira Error:[/bold] {e.text}[/red]")
-            except QueryError as e:
-                self.console.print(f"[red][bold]Query Error:[/bold] {e}[/red]")
-            except QueryParseError as e:
-                self.console.print(
-                    f"[red][bold]Parse Error:[/bold] Your query could not be parsed: {e}[/red]"
-                )
-            except KeyboardInterrupt:
-                continue
-            except EOFError:
-                break
-            except Exception:
-                self.console.print_exception()
+        formatter_cls = get_installed_formatters()[self.options.format]
+        with tempfile.NamedTemporaryFile(
+            formatter_cls.get_file_mode(),
+            suffix=f".{formatter_cls.get_file_extension()}",
+        ) as outf:
+            while True:
+                try:
+                    self._prompt_loop(session, formatter_cls, outf)
+                except JIRAError as e:
+                    self.console.print(f"[red][bold]Jira Error:[/bold] {e.text}[/red]")
+                except QueryError as e:
+                    self.console.print(f"[red][bold]Query Error:[/bold] {e}[/red]")
+                except QueryParseError as e:
+                    self.console.print(
+                        f"[red][bold]Parse Error:[/bold] Your query could not be parsed: {e}[/red]"
+                    )
+                except KeyboardInterrupt:
+                    continue
+                except EOFError:
+                    break
+                except Exception:
+                    self.console.print_exception()

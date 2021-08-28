@@ -29,7 +29,7 @@ class Formatter(BaseFormatter):
             self.table.add_column(field.column)
 
     def close(self):
-        console = Console()
+        console = Console(file=self.stream)
         console.print(self.table)
         super().close()
 

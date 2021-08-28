@@ -6,6 +6,10 @@ class ConfigurationError(JiraSelectError):
     pass
 
 
+class UnhandledConditionError(JiraSelectError):
+    pass
+
+
 class UserError(JiraSelectError):
     pass
 

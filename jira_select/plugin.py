@@ -23,6 +23,7 @@ from rich.console import Console
 from rich.progress import TaskID
 from safdie import BaseCommand as SafdieBaseCommand
 from safdie import get_entrypoints
+from typing_extensions import Literal
 from urllib3 import disable_warnings
 
 from .constants import APP_NAME
@@ -180,7 +181,7 @@ def get_installed_formatters() -> Dict[str, Type[BaseFormatter]]:
 
 
 class BaseFormatter(metaclass=ABCMeta):
-    def __init__(self, executor: Executor, stream: IO[str]):
+    def __init__(self, executor: Executor, stream: IO[bytes]):
         self._executor = executor
         self._stream = stream
 
@@ -188,6 +189,10 @@ class BaseFormatter(metaclass=ABCMeta):
     @abstractmethod
     def get_file_extension(cls) -> str:
         ...
+
+    @classmethod
+    def get_file_mode(cls) -> Literal["w", "wb"]:
+        return "w"
 
     @property
     def executor(self):
