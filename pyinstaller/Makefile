@@ -1,7 +1,7 @@
 ifeq ($(OS),Windows_NT)
-	activate_script := env/bin/activate.bat
+	activate_script := ./env/Scripts/activate.bat
 else
-	activate_script := env/bin/activate
+	activate_script := . env/bin/activate
 endif
 
 help:
@@ -19,12 +19,12 @@ clean:
 new:
 	@/usr/bin/env python -m pip install virtualenv
 	@/usr/bin/env python -m virtualenv ./env
-	@. $(activate_script) && python -m pip install -e ../
-	@. $(activate_script) && python -m pip uninstall -y simpleeval
-	@. $(activate_script) && python -m pip install -r ./requirements.txt
+	@$(activate_script) && python -m pip install -e ../
+	@$(activate_script) && python -m pip uninstall -y simpleeval
+	@$(activate_script) && python -m pip install -r ./requirements.txt
 
 exe: clean new
-	@. $(activate_script) && pyinstaller ./jira_select.exe.spec
+	@$(activate_script) && pyinstaller ./jira_select.exe.spec
 
 dir: clean new
-	@. $(activate_script) && pyinstaller ./jira_select.spec
+	@$(activate_script) && pyinstaller ./jira_select.spec
