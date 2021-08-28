@@ -41,7 +41,7 @@ jobs:
              cd pyinstaller &&
              make exe &&
              cd dist &&
-             zip -r9 jira-select.macos jira-select
+             zip -r9 jira-select.macos.zip jira-select
             OUT_FILE_NAME: jira-select.macos.zip
             ASSET_MIME: application/zip
           - os: windows-latest
