@@ -1,6 +1,8 @@
 import argparse
 import os
+import shutil
 import subprocess
+import sys
 import tempfile
 
 from jira import JIRAError
@@ -15,6 +17,7 @@ from yaml import safe_load
 from .. import __version__
 from ..exceptions import QueryError
 from ..formatters.csv import Formatter as CsvFormatter
+from ..formatters.table import Formatter as TableFormatter
 from ..plugin import BaseCommand
 from ..plugin import get_installed_functions
 from ..query import Executor
@@ -51,7 +54,7 @@ class Command(BaseCommand):
         )
 
     def _prompt_loop(self, session: PromptSession):
-        viewer: str = self.config.viewers.csv or "vd"
+        viewer: str = self.config.viewers.csv or "vdx"
 
         result = session.prompt(">>> ")
 
@@ -67,14 +70,19 @@ class Command(BaseCommand):
         except Exception as e:
             raise QueryParseError(e)
 
-        with tempfile.NamedTemporaryFile("w", suffix=".csv") as outf:
-            with CsvFormatter(query, outf) as formatter:
+        if shutil.which(viewer):
+            with tempfile.NamedTemporaryFile("w", suffix=".csv") as outf:
+                with CsvFormatter(query, outf) as formatter:
+                    for row in query:
+                        formatter.writerow(row)
+                outf.flush()
+
+                proc = subprocess.Popen([viewer, outf.name])
+                proc.wait()
+        else:
+            with TableFormatter(query, sys.stdout) as formatter:
                 for row in query:
                     formatter.writerow(row)
-            outf.flush()
-
-            proc = subprocess.Popen([viewer, outf.name])
-            proc.wait()
 
     def build_completions(self) -> WordCompleter:
         sql_completions = [
