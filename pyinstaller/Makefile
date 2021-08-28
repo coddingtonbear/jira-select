@@ -13,12 +13,12 @@ clean:
 new:
 	@/usr/bin/env python -m pip install virtualenv
 	@/usr/bin/env python -m virtualenv ./env
-	@./env/bin/python -m pip install -e ../
-	@./env/bin/python -m pip uninstall -y simpleeval
-	@./env/bin/python -m pip install -r ./requirements.txt
+	@env/bin/python -m pip install -e ../
+	@env/bin/python -m pip uninstall -y simpleeval
+	@env/bin/python -m pip install -r ./requirements.txt
 
 exe: clean new
-	@./env/bin/pyinstaller ./jira_select.exe.spec
+	@env/bin/pyinstaller ./jira_select.exe.spec
 
 dir: clean new
-	@./env/bin/pyinstaller ./jira_select.spec
+	@env/bin/pyinstaller ./jira_select.spec
