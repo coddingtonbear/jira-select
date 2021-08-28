@@ -58,7 +58,10 @@ def Entrypoint(dist, group, name, **kwargs):
     installed_packages = subprocess.check_output(["pip", "freeze"])
     for req in requirements.parse(installed_packages.decode('utf-8')):
         if req.name not in DO_NOT_PACKAGE:
-            datas += copy_metadata(req.name)
+            try:
+                datas += copy_metadata(req.name)
+            except pkg_resources.DistributionNotFound:
+                print(f"Could not find {req.name}")
 
     kwargs['datas'] = datas
 
