@@ -11,7 +11,8 @@ clean:
 	@/bin/rm -rf env build dist
 
 new:
-	@/usr/bin/env virtualenv ./env
+	@/usr/bin/env python -m pip install virtualenv
+	@/usr/bin/env python -m virtualenv ./env
 	@./env/bin/python -m pip install -e ../
 	@./env/bin/python -m pip uninstall -y simpleeval
 	@./env/bin/python -m pip install -r ./requirements.txt
