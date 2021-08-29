@@ -257,7 +257,9 @@ def get_field_data(
         raise QueryError(f"{e}: {expression}") from e
 
 
-def launch_default_viewer(path: str) -> None:
+def launch_default_viewer(relpath: str) -> None:
+    path = os.path.abspath(relpath)
+
     if sys.platform == "win32":
         os.startfile(path)
     elif sys.platform == "darwin":
