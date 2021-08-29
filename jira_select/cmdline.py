@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 from typing import Any
 from typing import Dict
 from typing import Iterable
@@ -128,5 +129,7 @@ def main():
         Runner(COMMAND_ENTRYPOINT, cmd_class=BaseCommand).run()
     except UserError as e:
         console.print(f"[red]{e}[/red]")
+        sys.exit(1)
     except Exception:
         console.print_exception()
+        sys.exit(1)
