@@ -31,8 +31,8 @@ class Command(BaseCommand):
             "--format",
             "-f",
             choices=formatters.keys(),
-            default="csv",
-            help="Data format in which to write record data; default: 'csv'.",
+            default="json",
+            help="Data format in which to write record data; default: 'json'.",
         )
         parser.add_argument(
             "--output",

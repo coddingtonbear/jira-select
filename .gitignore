@@ -14,3 +14,7 @@ docs/_static/
 docs/_templates/
 ChangeLog
 AUTHORS
+gui/node_modules/*
+gui/build/*
+gui/src-tauri/target/*
+gui/src-tauri/binaries/*
