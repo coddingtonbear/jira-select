@@ -1,4 +1,5 @@
 import argparse
+import json
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -39,6 +40,13 @@ class Command(BaseCommand):
             help="Case-insensitive search term for limiting displayed results.",
         )
         parser.add_argument(
+            "--json",
+            "-j",
+            default=False,
+            action="store_true",
+            help="Export schema as JSON format instead of printing a table.",
+        )
+        parser.add_argument(
             "--having",
             help=(
                 "A 'having' expression to use for limiting the displayed results. "
@@ -58,24 +66,48 @@ class Command(BaseCommand):
         except KeyError:
             raise JiraSelectError(f"No source named '{self.options.source}' found.")
 
-        table = Table(title=self.options.source)
-        table.add_column(header="id", style="green")
-        table.add_column(header="type", style="cyan")
-        table.add_column(header="description", style="bright_cyan")
+        if self.options.json:
+            fields = []
+            for row in source.get_schema(self.jira):
+                if self.options.search_terms:
+                    matches = True
+                    for option in self.options.search_terms:
+                        if option.lower() not in str(row).lower():
+                            matches = False
+                            break
+                    if not matches:
+                        continue
+                if self.options.having:
+                    if not self.evaluate_expression(row, self.options.having):
+                        continue
 
-        for row in source.get_schema(self.jira):
-            if self.options.search_terms:
-                matches = True
-                for option in self.options.search_terms:
-                    if option.lower() not in str(row).lower():
-                        matches = False
-                        break
-                if not matches:
-                    continue
-            if self.options.having:
-                if not self.evaluate_expression(row, self.options.having):
-                    continue
+                fields.append(
+                    {
+                        "id": row.id,
+                        "type": row.type,
+                        "description": row.description,
+                    }
+                )
+            self.console.print(json.dumps(fields, sort_keys=True, indent=4))
+        else:
+            table = Table(title=self.options.source)
+            table.add_column(header="id", style="green")
+            table.add_column(header="type", style="cyan")
+            table.add_column(header="description", style="bright_cyan")
 
-            table.add_row(row.id, row.type, row.description)
+            for row in source.get_schema(self.jira):
+                if self.options.search_terms:
+                    matches = True
+                    for option in self.options.search_terms:
+                        if option.lower() not in str(row).lower():
+                            matches = False
+                            break
+                    if not matches:
+                        continue
+                if self.options.having:
+                    if not self.evaluate_expression(row, self.options.having):
+                        continue
 
-        self.console.print(table)
+                table.add_row(row.id, row.type, row.description)
+
+            self.console.print(table)
