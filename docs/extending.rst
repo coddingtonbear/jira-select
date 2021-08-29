@@ -44,10 +44,39 @@ Functions
 
 For functions, you have two choices:
 
-1. To make your function persistently available, you'll need to implement
-   a setuptools entrypoint.  See `Entrypoint` below.
-2. If this is just for a particular script, you can register your function
-   directly.  See `Direct Registration` below.
+1. You can create and install a user script into your user functions
+   and within that script register a function using
+   the method described in `Direct Registration` below.
+3. If you plan to distribute your function on PyPI or would like for
+   it to be installable generally, you can create an entrypoint;
+   see `Entrypoint` below for details.
+
+Direct Registration
+~~~~~~~~~~~~~~~~~~~~
+
+1. Create a function in a python file somewhere.
+2. Wrapping that function in ``jira_select.plugin.register_function``.
+3. Install that user script using the `install-user-script` command.
+
+For example:
+
+.. code-block:: python
+
+   from jira_select.plugin import register_function
+
+
+   @register_function
+   def my_important_function(value):
+      """Returns 'OK'
+
+      This function isn't doing anything useful, really, but
+      you could of course make it useful if you were to write
+      your own.
+
+      """
+      return "OK"
+
+.. autofunction:: jira_select.plugin.register_function
 
 Entrypoint
 ~~~~~~~~~~
@@ -66,15 +95,6 @@ Entrypoint
    .. autoproperty:: jira
 
    .. automethod:: __call__
-
-
-Direct Registration
-~~~~~~~~~~~~~~~~~~~~
-
-1. Create any callable.
-2. Register that class at runtime by calling ``jira_select.plugin.register_function``.
-
-.. autofunction:: jira_select.plugin.register_function
 
 Formatters
 ----------

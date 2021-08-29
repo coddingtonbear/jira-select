@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import copy
+import importlib.util
 import json
 import logging
+import os
 import random
 import statistics
 from abc import ABCMeta
@@ -34,6 +36,7 @@ from .types import ConfigDict
 from .types import InstanceDefinition
 from .types import SchemaRow
 from .types import SelectFieldDefinition
+from .utils import get_custom_function_dir
 from .utils import get_functions_for_module
 from .utils import save_config
 
@@ -216,13 +219,41 @@ class BaseFormatter(metaclass=ABCMeta):
         ...
 
 
-def register_function(name: str, fn: Callable):
+def register_function(fn: Callable):
     """Register a callable to be a function available in queries."""
-    REGISTERED_FUNCTIONS[name] = fn
+    REGISTERED_FUNCTIONS[fn.__name__] = fn
 
 
 def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
     possible_commands: Dict[str, Callable] = copy.copy(BUILTIN_FUNCTIONS)
+
+    # Import any modules in the custom functions directory; as a
+    # side-effect of this, the functions will become listed within
+    # REGISTERED_FUNCTIONS
+    function_dir = get_custom_function_dir()
+    for dirname, subdirlist, filelist in os.walk(function_dir):
+        for filename in filelist:
+            if filename.endswith(".py"):
+                module_path_parts = ["user_scripts"]
+                if dirname != function_dir:
+                    module_path_parts.append(
+                        dirname[len(function_dir) + 1 :].replace("/", ".")
+                    )
+                module_path_parts.append(os.path.splitext(filename)[0])
+                module_path = ".".join(module_path_parts)
+
+                full_path = os.path.join(function_dir, dirname, filename)
+                try:
+                    spec = importlib.util.spec_from_file_location(
+                        module_path, full_path
+                    )
+                    if not spec:
+                        continue
+                    user_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(user_module)  # type: ignore
+                except Exception as e:
+                    logger.error("Could not import user script at %s: %s", full_path, e)
+
     possible_commands.update(REGISTERED_FUNCTIONS)
 
     for fn_name, fn in get_entrypoints(FUNCTION_ENTRYPOINT, BaseFunction).items():

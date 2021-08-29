@@ -52,6 +52,13 @@ def get_config_dir() -> str:
     return root_path
 
 
+def get_custom_function_dir() -> str:
+    root_path = os.path.join(user_config_dir(APP_NAME, "coddingtonbear"), "functions")
+    os.makedirs(root_path, exist_ok=True)
+
+    return root_path
+
+
 def get_cache_path(subcache: str = "default") -> str:
     config_path = get_config_dir()
     cache_path = os.path.join(config_path, "cache", subcache)

@@ -96,6 +96,7 @@ setup(
             "show-instances = jira_select.commands.show_instances:Command",
             "setup-instance = jira_select.commands.setup_instance:Command",
             "remove-instance = jira_select.commands.remove_instance:Command",
+            "install-user-script = jira_select.commands.install_user_script:Command",
         ],
         "jira_select.formatters": [
             "csv = jira_select.formatters.csv:Formatter",
