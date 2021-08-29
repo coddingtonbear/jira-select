@@ -61,6 +61,19 @@ Allows you to interactively generate a query definition file.
 Allows you to interactively configure jira-select to connect
 to your Jira instance.
 
+`jira-select setup-instance`
+----------------------------
+
+Configures an instance via the standard command-line arguments.
+See ``--help`` for more information.
+This is intended to be used programmatically;
+if you are a human, you probably want to use ``configure`` instead.
+
+`jira-select --instance-name=NAME remove-instance`
+--------------------------------------------------
+
+Removes configuration for the instance having the specified name.
+
 `jira-select show-instances [--json]`
 -------------------------------------
 
