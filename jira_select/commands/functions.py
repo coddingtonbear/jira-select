@@ -5,6 +5,7 @@ import json
 from rich.table import Table
 
 from ..plugin import BaseCommand
+from ..plugin import BaseFunction
 from ..plugin import get_installed_functions
 from ..utils import evaluate_expression
 
@@ -38,6 +39,11 @@ class Command(BaseCommand):
             ),
         )
 
+    def get_dotpath(self, fn) -> str:
+        if isinstance(fn, BaseFunction):
+            return f"{fn.__class__.__module__}.{fn.__class__.__name__}"
+        return f"{fn.__module__}.{fn.__name__}"
+
     def handle(self):
         functions = get_installed_functions(self.jira)
 
@@ -49,6 +55,7 @@ class Command(BaseCommand):
                 row = {
                     "name": name,
                     "description": docstring,
+                    "dotpath": self.get_dotpath(fn),
                 }
                 try:
                     row["signature"] = str(inspect.signature(fn))
@@ -68,23 +75,27 @@ class Command(BaseCommand):
                         continue
 
                 function_data.append(row)
+            function_data.sort(key=lambda row: row["name"])
             self.console.print(json.dumps(function_data, sort_keys=True, indent=4))
         else:
             table = Table(title="functions")
             table.add_column(header="name", style="green")
             table.add_column(header="description", style="white")
 
+            all_functions = []
             for name, fn in functions.items():
                 docstring = fn.__doc__ or ""
 
                 try:
                     signature = (
-                        f"[bright_cyan]{name}{inspect.signature(fn)}[/bright_cyan]\n\n"
+                        f"[bright_cyan]{name}{inspect.signature(fn)}[/bright_cyan]\n"
                     )
                 except Exception:
                     signature = ""
 
-                description = signature + docstring.strip() + "\n\n"
+                dotpath = f"[blue]{self.get_dotpath(fn)}[/blue]\n\n"
+
+                description = signature + dotpath + docstring.strip() + "\n\n"
 
                 row = {
                     "name": name,
@@ -102,6 +113,10 @@ class Command(BaseCommand):
                     if not evaluate_expression(self.options.having, row, functions):
                         continue
 
+                all_functions.append(row)
+
+            all_functions.sort(key=lambda row: row["name"])
+            for row in all_functions:
                 table.add_row(row["name"], row["description"])
 
             self.console.print(table)
