@@ -58,7 +58,7 @@ Direct Registration
 2. Wrapping that function in ``jira_select.plugin.register_function``.
 3. Install that user script using the `install-user-script` command.
 
-For example:
+For example, if you have a file named ``my_user_function.py`` in your current directory with the following contents:
 
 .. code-block:: python
 
@@ -67,16 +67,26 @@ For example:
 
    @register_function
    def my_important_function(value):
-      """Returns 'OK'
+      """Returns length of `value`
 
       This function isn't doing anything useful, really, but
       you could of course make it useful if you were to write
       your own.
 
       """
-      return "OK"
+      return len(value)
 
-.. autofunction:: jira_select.plugin.register_function
+you could install it with::
+
+   jira-select install-user-function my_user_function.py
+
+and after that, you will have access to ``my_important_function`` in a query like:
+
+.. code-block:: yaml
+
+   select:
+   - my_important_function(key)
+   from: issues
 
 Entrypoint
 ~~~~~~~~~~
