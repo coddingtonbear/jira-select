@@ -237,7 +237,9 @@ def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
                 module_path_parts = ["user_scripts"]
                 if dirname != function_dir:
                     module_path_parts.append(
-                        dirname[len(function_dir) + 1 :].replace("/", ".")
+                        dirname[len(function_dir) + 1 :]
+                        .replace("/", ".")
+                        .replace("\\", ".")
                     )
                 module_path_parts.append(os.path.splitext(filename)[0])
                 module_path = ".".join(module_path_parts)
