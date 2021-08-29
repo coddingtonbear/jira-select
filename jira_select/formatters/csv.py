@@ -1,4 +1,5 @@
 import csv
+from io import TextIOWrapper
 from typing import Any
 from typing import Dict
 from typing import List
@@ -21,8 +22,16 @@ class Formatter(BaseFormatter):
 
     def open(self):
         super().open()
-        self.out = csv.DictWriter(self.stream, fieldnames=self._generate_fieldnames())
+        self._wrapped_stream = TextIOWrapper(
+            self.stream, encoding="utf-8", write_through=True
+        )
+        self.out = csv.DictWriter(
+            self._wrapped_stream, fieldnames=self._generate_fieldnames()
+        )
         self.out.writeheader()
+
+    def close(self):
+        self._wrapped_stream.detach()
 
     def writerow(self, row: Dict[str, Any]):
         self.out.writerow(row)

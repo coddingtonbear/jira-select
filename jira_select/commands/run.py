@@ -37,8 +37,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--output",
             "-o",
-            type=argparse.FileType("w"),
-            default=sys.stdout,
+            type=argparse.FileType("wb+"),
+            default=sys.stdout.buffer,
             help="Path to file where records will be written; default: stdout.",
         )
         parser.add_argument(
@@ -95,5 +95,5 @@ class Command(BaseCommand):
                 proc = subprocess.Popen([viewer, self.options.output.name])
                 proc.wait()
             else:
-                with open(self.options.output.name, "r") as inf:
-                    self.console.print(inf.read())
+                self.options.output.seek(0)
+                self.console.print(self.options.output.read().decode("utf-8"))

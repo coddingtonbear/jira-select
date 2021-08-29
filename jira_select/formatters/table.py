@@ -1,3 +1,4 @@
+from io import TextIOWrapper
 from typing import Any
 from typing import Dict
 from typing import List
@@ -29,8 +30,10 @@ class Formatter(BaseFormatter):
             self.table.add_column(field.column)
 
     def close(self):
-        console = Console(file=self.stream)
+        wrapped = TextIOWrapper(self.stream, encoding="utf-8", write_through=True)
+        console = Console(file=wrapped)
         console.print(self.table)
+        wrapped.detach()
         super().close()
 
     def writerow(self, row: Dict[str, Any]):

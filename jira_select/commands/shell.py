@@ -107,19 +107,19 @@ class Command(BaseCommand):
         if self.options.launch_default_viewer:
             launch_default_viewer(outf.name)
         else:
-            self._inline_viewer(outf.name)
+            self._inline_viewer(outf)
 
-    def _inline_viewer(self, path: str):
+    def _inline_viewer(self, fobj: IO[bytes]):
         viewer: Optional[str] = self.config.inline_viewers.get(
             self.options.format, DEFAULT_INLINE_VIEWERS.get(self.options.format)
         )
 
         if viewer and shutil.which(viewer):
-            proc = subprocess.Popen([viewer, path])
+            proc = subprocess.Popen([viewer, fobj.name])
             proc.wait()
         else:
-            with open(path, "r") as inf:
-                self.console.print(inf.read())
+            fobj.seek(0)
+            self.console.print(fobj.read().decode("utf-8"))
 
     def build_completions(self) -> WordCompleter:
         sql_completions = [
@@ -174,7 +174,7 @@ class Command(BaseCommand):
         )
         formatter_cls = get_installed_formatters()[self.options.format]
         with tempfile.NamedTemporaryFile(
-            formatter_cls.get_file_mode(),
+            "wb+",
             suffix=f".{formatter_cls.get_file_extension()}",
         ) as outf:
             while True:
