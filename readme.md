@@ -33,7 +33,11 @@ You can either install from pip:
 pip install jira-select
 ```
 
-_or_ from source:
+_or_ you can download the latest packaged release here:
+
+https://github.com/coddingtonbear/jira-select/releases
+
+_or_ you can build from source:
 
 ```
 git clone https://github.com/coddingtonbear/jira-select.git
