@@ -57,6 +57,16 @@ class Command(BaseCommand):
             dest="enable_progressbars",
         )
         parser.add_argument(
+            "--output",
+            "-o",
+            type=argparse.FileType("wb+"),
+            default=None,
+            help=(
+                "Path to file where records will be written; default: "
+                "a temporary file."
+            ),
+        )
+        parser.add_argument(
             "--launch-default-viewer",
             "-l",
             action="store_true",
@@ -64,7 +74,10 @@ class Command(BaseCommand):
             help=(
                 "Display the output using the default viewer for the "
                 "filetype used by the selected formatter instead of "
-                "displaying the results inline."
+                "displaying the results inline.  Depending upon your "
+                "operating system, you may need to explicitly specify "
+                "the output file path using the --output parameter "
+                "for this option to work."
             ),
             dest="launch_default_viewer",
         )
@@ -173,24 +186,30 @@ class Command(BaseCommand):
             mouse_support=True,
         )
         formatter_cls = get_installed_formatters()[self.options.format]
-        with tempfile.NamedTemporaryFile(
-            "wb+",
-            suffix=f".{formatter_cls.get_file_extension()}",
-        ) as outf:
-            while True:
-                try:
-                    self._prompt_loop(session, formatter_cls, outf)
-                except JIRAError as e:
-                    self.console.print(f"[red][bold]Jira Error:[/bold] {e.text}[/red]")
-                except QueryError as e:
-                    self.console.print(f"[red][bold]Query Error:[/bold] {e}[/red]")
-                except QueryParseError as e:
-                    self.console.print(
-                        f"[red][bold]Parse Error:[/bold] Your query could not be parsed: {e}[/red]"
-                    )
-                except KeyboardInterrupt:
-                    continue
-                except EOFError:
-                    break
-                except Exception:
-                    self.console.print_exception()
+
+        output = self.options.output
+        if not output:
+            output = tempfile.NamedTemporaryFile(
+                "wb+",
+                suffix=f".{formatter_cls.get_file_extension()}",
+            )
+
+        while True:
+            try:
+                self._prompt_loop(session, formatter_cls, output)
+            except JIRAError as e:
+                self.console.print(f"[red][bold]Jira Error:[/bold] {e.text}[/red]")
+            except QueryError as e:
+                self.console.print(f"[red][bold]Query Error:[/bold] {e}[/red]")
+            except QueryParseError as e:
+                self.console.print(
+                    f"[red][bold]Parse Error:[/bold] Your query could not be parsed: {e}[/red]"
+                )
+            except KeyboardInterrupt:
+                continue
+            except EOFError:
+                break
+            except Exception:
+                self.console.print_exception()
+
+        output.close()
