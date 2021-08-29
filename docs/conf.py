@@ -16,7 +16,6 @@
 # sys.path.insert(0, os.path.abspath('.'))
 from typing import Dict
 
-
 # -- Project information -----------------------------------------------------
 
 project = "Jira-Select"
@@ -26,7 +25,7 @@ author = "Adam Coddington"
 # The short X.Y version
 version = ""
 # The full version, including alpha/beta/rc tags
-release = "1.8.0"
+release = "2.0.0"
 
 
 # -- General configuration ---------------------------------------------------
