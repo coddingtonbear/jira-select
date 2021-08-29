@@ -20,6 +20,14 @@ jira\_select.commands.configure module
    :undoc-members:
    :show-inheritance:
 
+jira\_select.commands.show_instances module
+-------------------------------------------
+
+.. automodule:: jira_select.commands.show_instances
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 jira\_select.commands.functions module
 --------------------------------------
 

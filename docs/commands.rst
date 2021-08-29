@@ -1,8 +1,8 @@
 Command-Line
 ============
 
-`jira-select shell [--editor-mode=MODE]`
-----------------------------------------
+`jira-select shell [--editor-mode=MODE] [--disable-progressbars] [--output=PATH] [--format=FORMAT] [--launch-default-viewer]`
+-----------------------------------------------------------------------------------------------------------------------------
 
 Opens an interactive shell (a.k.a repl) allowing you to interact with Jira
 and see your query results immediately afterward.
@@ -16,20 +16,36 @@ tab completion.
   configuration file by setting ``shell.emacs_mode`` to ``True`` or
   ``False``.  See ``--help`` if you're not sure where your configuration
   file is.
+* ``--disable-progressbars``: By defualt, a pretty progressbar is displayed to
+  provide an indication of how long you might have to wait for results.  Using
+  this option will disable this progressbar.
+* ``--output=PATH``: Instead of writing output to a temporary file, write output
+  to the specified file path.  This is useful if you're using the
+  ``--launch-default-viewer`` option to work around OS-level security limits
+  around what processes can read temporary files.
+* ``--format=FORMAT``: By default, the output is generated in ``json`` format,
+  but you can select a different output format by setting ``FORMAT`` to
+  ``csv``, ``html``, ``table`` or ``json``.
+* ``--launch-default-viewer``: Display the generated output in your system's default
+  viewer for the relevant filetype.  You may need to use this argument if you are
+  running on an operating system in which Visidata is not available
+  (e.g. Windows when not running under Windows Subsystem for Linux).
 
 .. _run subcommand:
 
-`jira-select run FILENAME [--format=FORMAT] [--output=PATH] [--view]`
----------------------------------------------------------------------
+`jira-select run FILENAME [--format=FORMAT] [--output=PATH] [--view] [--launch-default-viewer]`
+-----------------------------------------------------------------------------------------------
 
 Executes query specified in FILENAME and returns results in the specified format.
 
-* ``--format=FORMAT``: Sets the output format; options include ``csv`` (default)
-  and ``table``.
+* ``--format=FORMAT``: Sets the output format; options include ``json`` (default)
+  ``csv``, ``html` and ``table``.
 * ``--output=PATH``: Sets the output path.  If unspecified, the output
   will be written to stdout.
 * ``--view``: Open the appropriate viewer to view your query results after
   the query has completed.
+* ``--launch-default-viewer``: Display the generated output in your system's default
+  viewer for the relevant filetype.
 
 `jira-select build-query [--output=PATH]`
 ----------------------------------------------------
@@ -45,6 +61,14 @@ Allows you to interactively generate a query definition file.
 Allows you to interactively configure jira-select to connect
 to your Jira instance.
 
+`jira-select show-instances [--json]`
+-------------------------------------
+
+Displays for you which instances are currently configured for use with jira-select.
+
+* ``--json``: Instead of displaying results in a pretty-printed table,
+  export the results as json.
+
 `jira-select store-password USERNAME`
 -------------------------------------
 
@@ -59,7 +83,7 @@ Allows you to store a password for USERNAME in your system keychain.
 
 Displays functions available for use in a query.
 
-* ``having=EXPRESSION``: A ``having`` expression to use for filtering displayed
+* ``--having=EXPRESSION``: A ``having`` expression to use for filtering displayed
   results.  The provided fields for filtering are ``name`` and ``description``.
 * ``SEARCH_TERM``: A search term to use for filtering results.  The term
   is case-insensitive and must be present in either the function name or
@@ -67,17 +91,19 @@ Displays functions available for use in a query.
 
 .. _schema subcommand:
 
-`jira-select schema [issues|boards|sprints] [--having=EXPRESSION] [SEARCH_TERM [SEARCH_TERM...]]`
--------------------------------------------------------------------------------------------------
+`jira-select schema [issues|boards|sprints] [--having=EXPRESSION] [SEARCH_TERM [SEARCH_TERM...]] [--json]`
+----------------------------------------------------------------------------------------------------------
 
 Displays fields available for querying a given data source.
 
-* ``having=EXPRESSION``: A ``having`` expression to use for filtering displayed
+* ``--having=EXPRESSION``: A ``having`` expression to use for filtering displayed
   results.  The provided fields for filtering are ``id``, ``type``,
   ``description``, and ``raw``.
 * ``SEARCH_TERM``: A search term to use for filtering results.  The term
   is case-insensitive and must be present in either the function name or
   description to be displayed.
+* ``--json``: Instead of displaying results in a pretty-printed table,
+  export the results as json.
 
 `jira-select run-script FILENAME [ARGS...]`
 -------------------------------------------
