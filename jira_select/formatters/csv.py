@@ -23,7 +23,7 @@ class Formatter(BaseFormatter):
     def open(self):
         super().open()
         self._wrapped_stream = TextIOWrapper(
-            self.stream, encoding="utf-8", write_through=True
+            self.stream, encoding="utf-8", write_through=True, newline=""
         )
         self.out = csv.DictWriter(
             self._wrapped_stream, fieldnames=self._generate_fieldnames()
