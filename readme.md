@@ -25,6 +25,12 @@ built-in query language, this tool may make your life easier.
 Using Jira-select you can perform a wide variety of SQL-like query
 operations including grouping, aggregation, custom functions, and more.
 
+## Supported Platforms
+
+- Linux
+- Windows
+- OSX
+
 ## Installation
 
 You can either install from pip:
