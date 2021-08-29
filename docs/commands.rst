@@ -47,6 +47,23 @@ Executes query specified in FILENAME and returns results in the specified format
 * ``--launch-default-viewer``: Display the generated output in your system's default
   viewer for the relevant filetype.
 
+`jira-select install-user-script SCRIPT [--overwrite] [--name]`
+---------------------------------------------------------------
+
+Installs a python script into your user scripts directory.
+User scripts can be used to extend the functionality of jira-select
+by letting you write functions that can be available during your
+query operation.  See :ref:`Direct Registration` for more information
+about how to use this.
+
+* ``SCRIPT``: Path to the python script (or ``-`` to import from stdin)
+  to add to your user scripts directory.
+* ``--overwrite``: By default, an error will be returned if your query
+  script matches the name of an existing script.  Use this command-line
+  argument if you would like to overwrite a script having the same name.
+* ``--name``: By default, the name will match the incoming filename
+  (if it's available).  Use this to override that behavior.
+
 `jira-select build-query [--output=PATH]`
 ----------------------------------------------------
 
