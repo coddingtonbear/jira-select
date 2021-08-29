@@ -84,7 +84,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--format",
             "-f",
-            default="csv",
+            default="json",
             choices=get_installed_formatters().keys(),
             dest="format",
         )

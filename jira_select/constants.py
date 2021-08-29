@@ -14,5 +14,6 @@ FUNCTION_ENTRYPOINT = f"{ENTRYPOINT_PREFIX}.functions"
 
 DEFAULT_INLINE_VIEWERS: Dict[str, Optional[str]] = {
     "csv": "vd",
+    "json": "vd",
     "table": None,
 }

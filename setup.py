@@ -96,6 +96,7 @@ setup(
         ],
         "jira_select.formatters": [
             "csv = jira_select.formatters.csv:Formatter",
+            "json = jira_select.formatters.json:Formatter",
             "table = jira_select.formatters.table:Formatter",
         ],
         "jira_select.functions": [
