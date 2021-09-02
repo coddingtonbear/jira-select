@@ -11,7 +11,7 @@ help:
 	@echo '	make exe: Package app as single executable'
 	@echo '	make dir: Package app as directory'
 
-.PHONY: clean new exe dir
+.PHONY: clean new exe dir repackage
 
 clean:
 	@/bin/rm -rf env build dist
@@ -28,3 +28,6 @@ exe: clean new
 
 dir: clean new
 	@$(activate_script) && pyinstaller ./jira_select.spec
+
+repackage: clean new exe
+	@cd ../gui && node repackage.js
