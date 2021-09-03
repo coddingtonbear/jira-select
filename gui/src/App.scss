@@ -50,7 +50,7 @@ div.queryBuilder {
 
     div.sideBar {
       width: 40px;
-      background-color: blue;
+      border: 1px solid blue;
     }
 
     div.editor {
@@ -65,7 +65,6 @@ div.queryBuilder {
 
     div.grid {
       flex: 3;
-      background-color: orangered;
     }
   }
 }

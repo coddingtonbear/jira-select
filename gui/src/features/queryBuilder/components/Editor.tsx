@@ -4,13 +4,7 @@ import { queryBuilderActions } from "../../../store";
 import { useEditorValue } from "../queryBuilderSlice";
 
 import * as monaco from "monaco-editor";
-import MonacoEditor, { loader } from "@monaco-editor/react";
-
-loader.config({
-  paths: {
-    vs: "../node_modules/monaco-editor/min/vs",
-  },
-});
+import MonacoEditor from "@monaco-editor/react";
 
 const Editor: React.FC = () => {
   const editorValue = useEditorValue();
