@@ -1,18 +1,26 @@
 //import { fetch, ResponseType } from '@tauri-apps/api/http'
 import { invoke } from '@tauri-apps/api/tauri'
 
-type QueryRow = Record<string, any>
+export type QueryRow = Record<string, any>
 
-interface RpcResponse {
+export interface RpcResponse {
   stdout: string
   stderr: string
   code: number
 }
 
-export async function executeQuery(query: string): Promise<RpcResponse> {
-  console.log("Running command")
-  const result = await invoke<RpcResponse>('run_jira_select', {params: ["run-query", "--format=json"], stdin: query})
+export async function execute(params: string[], stdin: string): Promise<RpcResponse> {
+  return invoke<RpcResponse>('run_jira_select', {params, stdin})
+}
 
-  console.log("Result", result)
-  return result
+export async function executeQuery(query: string): Promise<QueryRow[]> {
+  const result = await execute(["run-query", "--format=json"], query)
+
+  if (result.code !== 0) {
+    throw new Error(
+      `Query execution failed with status ${result.code}: stderr: ${result.stderr}; stdout: ${result.stdout}`
+    )
+  }
+
+  return JSON.parse(result.stdout)
 }

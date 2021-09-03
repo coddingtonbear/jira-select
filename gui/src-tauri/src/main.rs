@@ -32,12 +32,6 @@ async fn run_jira_select(params: Vec<&str>, stdin: &str) -> Result<JiraSelectRes
 
   // read events such as stdout
   while let Some(event) = rx.recv().await {
-    /*if let CommandEvent::Stdout(line) = event {
-      stdout.push(line);
-    };
-    if let CommandEvent::Stderr(line) = event {
-      stderr.push(line);
-    };*/
     match event {
       CommandEvent::Stdout(line) => {
         stdout.push(line);
