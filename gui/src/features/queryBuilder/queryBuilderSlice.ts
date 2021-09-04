@@ -1,12 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { Editor, Grid, QueryBuilderState, SidebarOption } from "./types";
+import {
+  Editor,
+  Grid,
+  QueryBuilderState,
+  Sidebar,
+  SidebarOption,
+} from "./types";
 import { executeQuery } from "./thunks";
 
 const initialState: QueryBuilderState = {
   editor: { running: false },
   grid: { columns: [], rows: [] },
+  sidebar: { shown: false },
 };
 
 const reducers = {
@@ -17,10 +24,11 @@ const reducers = {
     state: QueryBuilderState,
     action: PayloadAction<SidebarOption>
   ) => {
-    state.sidebarOption = action.payload;
+    state.sidebar.selected = action.payload;
+    state.sidebar.shown = true;
   },
   hideSidebar: (state: QueryBuilderState) => {
-    state.sidebarOption = undefined;
+    state.sidebar.shown = false;
   },
 };
 
@@ -53,7 +61,7 @@ export const useEditorContext = (): Editor =>
 export const useGridContext = (): Grid =>
   useSelector((s: RootState) => s.queryEditor.grid);
 
-export const useSidebarOption = (): SidebarOption | undefined =>
-  useSelector((s: RootState) => s.queryEditor.sidebarOption);
+export const useSidebarContext = (): Sidebar =>
+  useSelector((s: RootState) => s.queryEditor.sidebar);
 
 export default queryBuilderSlice;

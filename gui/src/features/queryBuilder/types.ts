@@ -15,8 +15,13 @@ export interface Editor {
   running: boolean;
 }
 
+export interface Sidebar {
+  selected?: SidebarOption;
+  shown: boolean;
+}
+
 export interface QueryBuilderState {
   editor: Editor;
   grid: Grid;
-  sidebarOption?: SidebarOption;
+  sidebar: Sidebar;
 }

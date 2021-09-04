@@ -56,10 +56,28 @@ div.queryBuilder {
 
       svg {
         padding: 5px;
+
+        &.selected {
+          background-color: lightblue;
+        }
       }
       svg:hover {
         background-color: lightblue;
         cursor: pointer;
+      }
+    }
+
+    div.sidebarContainer {
+      flex: 1;
+      max-width: 0px;
+      min-width: 0px;
+      transition: all 0.5s ease;
+      background-color: lightgray;
+      border-right: 1px solid black;
+
+      &.displayed {
+        min-width: 300px;
+        max-width: auto;
       }
     }
 
