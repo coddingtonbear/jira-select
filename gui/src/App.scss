@@ -39,7 +39,7 @@ div.queryBuilder {
 
   div.toolbar {
     border: 1px solid greenyellow;
-    height: 40px;
+    flex: 0 0 40px;
   }
 
   div.body {
@@ -50,8 +50,7 @@ div.queryBuilder {
     display: flex;
 
     div.sideBar {
-      width: 40px;
-      flex: 0;
+      flex: 0 0 40px;
       border: 1px solid blue;
     }
 
