@@ -9,7 +9,6 @@ export interface Grid {
 }
 
 export interface Editor {
-  value: string;
   error?: string;
   running: boolean;
 }

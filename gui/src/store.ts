@@ -1,7 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import devToolsEnhancer from "remote-redux-devtools";
 import { useDispatch } from "react-redux";
-
 import queryBuilderSlice from "./features/queryBuilder/queryBuilderSlice";
 
 const rootReducer = combineReducers({

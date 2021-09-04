@@ -1,18 +1,14 @@
 import React from "react";
-import { useDispatch } from "react-redux";
-import { queryBuilderActions } from "../../../store";
 import { useEditorContext } from "../queryBuilderSlice";
 
 import * as monaco from "monaco-editor";
 import MonacoEditor from "@monaco-editor/react";
 
-const Editor: React.FC = () => {
-  const { value, error, running } = useEditorContext();
-  const dispatch = useDispatch();
+const DEFAULT_VALUE: string = "select:\n- key\nfrom: issues";
 
-  function onEditorChange(value: string | undefined) {
-    dispatch(queryBuilderActions.updateEditorValue(value ?? ""));
-  }
+const Editor: React.FC = () => {
+  const [value, setValue] = React.useState<string | undefined>(DEFAULT_VALUE);
+  const { error, running } = useEditorContext();
 
   const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     lineNumbers: "off",
@@ -27,7 +23,7 @@ const Editor: React.FC = () => {
       <MonacoEditor
         language="yaml"
         value={value}
-        onChange={onEditorChange}
+        onChange={setValue}
         className="editor"
         width=""
         height=""

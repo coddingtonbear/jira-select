@@ -5,17 +5,11 @@ import { Editor, Grid, QueryBuilderState } from "./types";
 import { executeQuery } from "./thunks";
 
 const initialState: QueryBuilderState = {
-  editor: { value: "select:\n- key\nfrom: issues", running: false },
+  editor: { running: false },
   grid: { columns: [], rows: [] },
 };
 
 const reducers = {
-  updateEditorValue: (
-    state: QueryBuilderState,
-    action: PayloadAction<string>
-  ) => {
-    state.editor.value = action.payload;
-  },
   updateGrid: (state: QueryBuilderState, action: PayloadAction<Grid>) => {
     state.grid = action.payload;
   },
@@ -44,10 +38,10 @@ const queryBuilderSlice = createSlice<
   },
 });
 
-export default queryBuilderSlice;
-
 export const useEditorContext = (): Editor =>
   useSelector((s: RootState) => s.queryEditor.editor);
 
 export const useGridContext = (): Grid =>
   useSelector((s: RootState) => s.queryEditor.grid);
+
+export default queryBuilderSlice;

@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import * as client from "../../jira_select_client";
-import { queryBuilderActions } from "../../store";
 import { Column } from "./types";
+import queryBuilderSlice from "./queryBuilderSlice";
 
 export const executeQuery = createAsyncThunk<void, string>(
   "queryBuilder/executeQuery",
@@ -35,7 +35,7 @@ export const executeQuery = createAsyncThunk<void, string>(
     }
 
     thunkAPI.dispatch(
-      queryBuilderActions.updateGrid({
+      queryBuilderSlice.actions.updateGrid({
         columns: columns,
         rows: processedResults,
       })
