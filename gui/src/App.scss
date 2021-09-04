@@ -45,26 +45,31 @@ div.queryBuilder {
   div.body {
     border: 1px solid magenta;
     flex: 1;
+    overflow: hidden;
 
     display: flex;
 
     div.sideBar {
       width: 40px;
+      flex: 0;
       border: 1px solid blue;
     }
 
     div.editor {
       flex: 1;
       min-width: 300px;
-
-      textarea {
-        width: 100%;
-        height: 100%;
-      }
     }
 
     div.grid {
       flex: 3;
+      overflow: hidden;
+
+      display: flex;
+      flex-direction: column;
+
+      & > div {
+        flex: 1;
+      }
     }
   }
 }
