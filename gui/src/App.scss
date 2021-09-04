@@ -38,20 +38,29 @@ div.queryBuilder {
   flex-direction: column;
 
   div.toolbar {
-    border: 1px solid greenyellow;
     flex: 0 0 40px;
+    background-color: black;
   }
 
   div.body {
-    border: 1px solid magenta;
     flex: 1;
     overflow: hidden;
 
     display: flex;
 
     div.sideBar {
+      text-align: center;
       flex: 0 0 40px;
-      border: 1px solid blue;
+
+      background-color: darkgray;
+
+      svg {
+        padding: 5px;
+      }
+      svg:hover {
+        background-color: lightblue;
+        cursor: pointer;
+      }
     }
 
     div.editorContainer {
@@ -67,16 +76,21 @@ div.queryBuilder {
       }
       div.error {
         padding: 5px;
+        max-height: 25%;
+        min-height: 25%;
+        overflow-y: scroll;
         background-color: #ffdddd;
         border: 1px solid #ff0000;
         flex: 0 0 40px;
       }
-      div.running {
-        padding: 5px;
-        flex: 0 0 40px;
-      }
       div.buttons {
+        background-color: lightgray;
         padding: 5px;
+
+        div.running {
+          background-color: lightblue;
+          padding: 5px;
+        }
 
         button {
           float: right;

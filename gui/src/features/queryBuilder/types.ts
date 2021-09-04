@@ -1,3 +1,5 @@
+export type SidebarOption = "fieldnames" | "functions" | "code";
+
 export interface Column {
   key: string;
   name: string;
@@ -16,4 +18,5 @@ export interface Editor {
 export interface QueryBuilderState {
   editor: Editor;
   grid: Grid;
+  sidebarOption?: SidebarOption;
 }

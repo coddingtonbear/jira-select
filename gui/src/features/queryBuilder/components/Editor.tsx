@@ -37,9 +37,9 @@ const Editor: React.FC = () => {
         options={editorOptions}
       />
       {error && <div className="error">{error} </div>}
-      {running && <div className="running">Query in progress...</div>}
       <div className="buttons">
         <button onClick={onRunQuery}>Run Query</button>
+        {running && <div className="running">Query in progress...</div>}
       </div>
     </div>
   );
