@@ -86,13 +86,10 @@ div.queryBuilder {
       div.buttons {
         background-color: lightgray;
         padding: 5px;
-
-        div.running {
-          background-color: lightblue;
-          padding: 5px;
-        }
+        flex: 0 0 64px;
 
         button {
+          height: 100%;
           float: right;
           padding: 5px;
         }
