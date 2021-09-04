@@ -8,6 +8,8 @@ import slice, { useSidebarContext } from "../queryBuilderSlice";
 import { useAppDispatch } from "../../../store";
 import { SidebarOption } from "../types";
 
+import FunctionsSidebar from "./sideBar/Functions";
+
 const QueryBuilder: React.FC = () => {
   const { selected, shown } = useSidebarContext();
   const dispatch = useAppDispatch();
@@ -48,7 +50,7 @@ const QueryBuilder: React.FC = () => {
           })}
         >
           {selected === "fieldnames" && <div>Fieldnames</div>}
-          {selected === "functions" && <div>Functions</div>}
+          {selected === "functions" && <FunctionsSidebar />}
           {selected === "code" && <div>Code</div>}
         </div>
         <Editor />

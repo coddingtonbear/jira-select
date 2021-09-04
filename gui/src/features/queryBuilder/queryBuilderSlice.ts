@@ -30,6 +30,15 @@ const reducers = {
   hideSidebar: (state: QueryBuilderState) => {
     state.sidebar.shown = false;
   },
+  insertTextAtCursor: (
+    state: QueryBuilderState,
+    action: PayloadAction<string>
+  ) => {
+    state.editor.insertString = action.payload;
+  },
+  insertTextAtCursorCompleted: (state: QueryBuilderState) => {
+    state.editor.insertString = undefined;
+  },
 };
 
 const queryBuilderSlice = createSlice<
@@ -63,5 +72,8 @@ export const useGridContext = (): Grid =>
 
 export const useSidebarContext = (): Sidebar =>
   useSelector((s: RootState) => s.queryEditor.sidebar);
+
+export const useInsertString = (): string | undefined =>
+  useSelector((s: RootState) => s.queryEditor.editor.insertString);
 
 export default queryBuilderSlice;

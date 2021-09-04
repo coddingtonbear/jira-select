@@ -13,6 +13,7 @@ export interface Grid {
 export interface Editor {
   error?: string;
   running: boolean;
+  insertString?: string;
 }
 
 export interface Sidebar {

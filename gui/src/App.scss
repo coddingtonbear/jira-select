@@ -79,6 +79,48 @@ div.queryBuilder {
         min-width: 300px;
         max-width: auto;
       }
+
+      h2 {
+        background-color: #b3b3b3;
+        border-bottom: 1px solid black;
+        text-align: center;
+        margin: 0px;
+      }
+
+      div.functions {
+        div.function {
+          padding: 5px;
+          margin: 5px;
+          border: 1px solid darkgray;
+
+          div.name {
+            font-weight: bold;
+            font-size: 1.2em;
+
+            span.name {
+              text-decoration: underline;
+
+              &:hover {
+                cursor: pointer;
+                color: blue;
+              }
+            }
+            span.signature {
+              color: darkgray;
+            }
+            span.module {
+              font-weight: normal;
+              font-size: 0.8em;
+              font-style: italic;
+              margin-left: 10px;
+            }
+          }
+          div.description {
+            padding: 5px;
+            font-size: 0.8em;
+          }
+        }
+      }
     }
 
     div.editorContainer {

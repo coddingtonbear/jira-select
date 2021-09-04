@@ -1,5 +1,5 @@
 import React from "react";
-import { useEditorContext } from "../queryBuilderSlice";
+import slice, { useEditorContext, useInsertString } from "../queryBuilderSlice";
 import { executeQuery } from "../thunks";
 
 import * as monaco from "monaco-editor";
@@ -11,9 +11,30 @@ import { PlayCircleOutline } from "@material-ui/icons";
 const DEFAULT_VALUE: string = "select:\n- key\nfrom: issues";
 
 const Editor: React.FC = () => {
+  const editorRef = React.useRef<monaco.editor.IStandaloneCodeEditor>();
+
   const [value, setValue] = React.useState<string | undefined>(DEFAULT_VALUE);
   const { error, running } = useEditorContext();
+  const insertString = useInsertString();
+
   const dispatch = useAppDispatch();
+
+  React.useEffect(() => {
+    if (insertString && editorRef.current) {
+      const range = editorRef.current.getSelection();
+
+      if (range) {
+        editorRef.current?.executeEdits("insert-string", [
+          {
+            range: range,
+            text: insertString,
+            forceMoveMarkers: true,
+          },
+        ]);
+      }
+    }
+    dispatch(slice.actions.insertTextAtCursorCompleted());
+  }, [insertString]);
 
   const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     lineNumbers: "off",
@@ -27,6 +48,10 @@ const Editor: React.FC = () => {
     dispatch(executeQuery(value ?? ""));
   }
 
+  function onEditorMounted(editor: monaco.editor.IStandaloneCodeEditor) {
+    editorRef.current = editor;
+  }
+
   return (
     <div className="editorContainer">
       <MonacoEditor
@@ -37,6 +62,7 @@ const Editor: React.FC = () => {
         width=""
         height=""
         options={editorOptions}
+        onMount={onEditorMounted}
       />
       {error && <div className="error">{error} </div>}
       <div className="buttons">
