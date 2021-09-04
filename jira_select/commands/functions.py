@@ -76,7 +76,7 @@ class Command(BaseCommand):
 
                 function_data.append(row)
             function_data.sort(key=lambda row: row["name"])
-            self.console.print(json.dumps(function_data, sort_keys=True, indent=4))
+            print(json.dumps(function_data, sort_keys=True, indent=4))
         else:
             table = Table(title="functions")
             table.add_column(header="name", style="green")

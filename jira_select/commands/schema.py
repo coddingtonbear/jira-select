@@ -88,7 +88,7 @@ class Command(BaseCommand):
                         "description": row.description,
                     }
                 )
-            self.console.print(json.dumps(fields, sort_keys=True, indent=4))
+            print(json.dumps(fields, sort_keys=True, indent=4))
         else:
             table = Table(title=self.options.source)
             table.add_column(header="id", style="green")
