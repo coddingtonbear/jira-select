@@ -1,14 +1,17 @@
 import React from "react";
 import { useEditorContext } from "../queryBuilderSlice";
+import { executeQuery } from "../thunks";
 
 import * as monaco from "monaco-editor";
 import MonacoEditor from "@monaco-editor/react";
+import { useAppDispatch } from "../../../store";
 
 const DEFAULT_VALUE: string = "select:\n- key\nfrom: issues";
 
 const Editor: React.FC = () => {
   const [value, setValue] = React.useState<string | undefined>(DEFAULT_VALUE);
   const { error, running } = useEditorContext();
+  const dispatch = useAppDispatch();
 
   const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     lineNumbers: "off",
@@ -17,6 +20,10 @@ const Editor: React.FC = () => {
     minimap: { enabled: false },
     scrollbar: { vertical: "hidden", horizontal: "hidden" },
   };
+
+  function onRunQuery() {
+    dispatch(executeQuery(value ?? ""));
+  }
 
   return (
     <div className="editorContainer">
@@ -31,6 +38,9 @@ const Editor: React.FC = () => {
       />
       {error && <div className="error">{error} </div>}
       {running && <div className="running">Query in progress...</div>}
+      <div className="buttons">
+        <button onClick={onRunQuery}>Run Query</button>
+      </div>
     </div>
   );
 };

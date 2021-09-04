@@ -75,6 +75,14 @@ div.queryBuilder {
         padding: 5px;
         flex: 0 0 40px;
       }
+      div.buttons {
+        padding: 5px;
+
+        button {
+          float: right;
+          padding: 5px;
+        }
+      }
     }
 
     div.gridContainer {
