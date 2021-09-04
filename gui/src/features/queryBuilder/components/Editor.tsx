@@ -1,13 +1,13 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { queryBuilderActions } from "../../../store";
-import { useEditorValue } from "../queryBuilderSlice";
+import { useEditorContext } from "../queryBuilderSlice";
 
 import * as monaco from "monaco-editor";
 import MonacoEditor from "@monaco-editor/react";
 
 const Editor: React.FC = () => {
-  const editorValue = useEditorValue();
+  const { value, error, running } = useEditorContext();
   const dispatch = useDispatch();
 
   function onEditorChange(value: string | undefined) {
@@ -23,15 +23,19 @@ const Editor: React.FC = () => {
   };
 
   return (
-    <MonacoEditor
-      language="yaml"
-      value={editorValue}
-      onChange={onEditorChange}
-      className="editor"
-      width=""
-      height=""
-      options={editorOptions}
-    />
+    <div className="editorContainer">
+      <MonacoEditor
+        language="yaml"
+        value={value}
+        onChange={onEditorChange}
+        className="editor"
+        width=""
+        height=""
+        options={editorOptions}
+      />
+      {error && <div className="error">{error} </div>}
+      {running && <div className="running">Query in progress...</div>}
+    </div>
   );
 };
 

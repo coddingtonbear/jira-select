@@ -54,19 +54,37 @@ div.queryBuilder {
       border: 1px solid blue;
     }
 
-    div.editor {
+    div.editorContainer {
       flex: 1;
       min-width: 300px;
+
+      display: flex;
+      flex-direction: column;
+
+      & > section {
+        flex: 1 1;
+        min-height: 0px;
+      }
+      div.error {
+        padding: 5px;
+        background-color: #ffdddd;
+        border: 1px solid #ff0000;
+        flex: 0 0 40px;
+      }
+      div.running {
+        padding: 5px;
+        flex: 0 0 40px;
+      }
     }
 
-    div.grid {
+    div.gridContainer {
       flex: 3;
       overflow: hidden;
 
       display: flex;
       flex-direction: column;
 
-      & > div {
+      div.grid {
         flex: 1;
       }
     }

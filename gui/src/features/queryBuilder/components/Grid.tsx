@@ -7,8 +7,12 @@ const Grid: React.FC = () => {
   const gridContext = useGridContext();
 
   return (
-    <div className="grid">
-      <DataGrid columns={gridContext.columns} rows={gridContext.rows} />
+    <div className="gridContainer">
+      <DataGrid
+        columns={gridContext.columns}
+        rows={gridContext.rows}
+        className="grid"
+      />
     </div>
   );
 };

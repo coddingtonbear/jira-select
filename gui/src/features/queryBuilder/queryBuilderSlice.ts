@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { Grid, QueryBuilderState } from "./types";
+import { Editor, Grid, QueryBuilderState } from "./types";
+import { executeQuery } from "./thunks";
 
 const initialState: QueryBuilderState = {
-  editor: { value: "select:\n- key\nfrom: issues" },
+  editor: { value: "select:\n- key\nfrom: issues", running: false },
   grid: { columns: [], rows: [] },
 };
 
@@ -28,12 +29,25 @@ const queryBuilderSlice = createSlice<
   name: "queryBuilder",
   initialState,
   reducers,
+  extraReducers: (builder) => {
+    builder.addCase(executeQuery.pending, (state) => {
+      state.editor.error = undefined;
+      state.editor.running = true;
+    });
+    builder.addCase(executeQuery.fulfilled, (state) => {
+      state.editor.running = false;
+    });
+    builder.addCase(executeQuery.rejected, (state, { error }) => {
+      state.editor.error = error.message;
+      state.editor.running = false;
+    });
+  },
 });
 
 export default queryBuilderSlice;
 
-export const useEditorValue = (): string =>
-  useSelector((s: RootState) => s.queryEditor.editor.value);
+export const useEditorContext = (): Editor =>
+  useSelector((s: RootState) => s.queryEditor.editor);
 
 export const useGridContext = (): Grid =>
   useSelector((s: RootState) => s.queryEditor.grid);

@@ -5,14 +5,14 @@ import Grid from "./Grid";
 import { PlayCircleFilled } from "@material-ui/icons";
 import { useAppDispatch } from "../../../store";
 import { executeQuery } from "../thunks";
-import { useEditorValue } from "../queryBuilderSlice";
+import { useEditorContext } from "../queryBuilderSlice";
 
 const QueryBuilder: React.FC = () => {
   const dispatch = useAppDispatch();
-  const editorValue = useEditorValue();
+  const { value } = useEditorContext();
 
   function onExecuteQuery() {
-    dispatch(executeQuery(editorValue));
+    dispatch(executeQuery(value));
   }
 
   return (

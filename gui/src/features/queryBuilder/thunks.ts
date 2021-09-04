@@ -7,6 +7,7 @@ export const executeQuery = createAsyncThunk<void, string>(
   "queryBuilder/executeQuery",
   async (payload, thunkAPI) => {
     const results = await client.executeQuery(payload);
+    const processedResults: Record<string, string>[] = [];
 
     const columns: Column[] = [];
     if (results) {
@@ -15,10 +16,28 @@ export const executeQuery = createAsyncThunk<void, string>(
       }
     }
 
+    for (const result of results) {
+      const processedResult: Record<string, string> = {};
+
+      for (const field in result) {
+        const value = result[field];
+
+        if (typeof value === "string") {
+          processedResult[field] = value;
+        } else if (typeof value === "number") {
+          processedResult[field] = value.toString();
+        } else {
+          processedResult[field] = JSON.stringify(value);
+        }
+      }
+
+      processedResults.push(processedResult);
+    }
+
     thunkAPI.dispatch(
       queryBuilderActions.updateGrid({
         columns: columns,
-        rows: results,
+        rows: processedResults,
       })
     );
   }

@@ -8,9 +8,13 @@ export interface Grid {
   rows: Record<string, any>[];
 }
 
+export interface Editor {
+  value: string;
+  error?: string;
+  running: boolean;
+}
+
 export interface QueryBuilderState {
-  editor: {
-    value: string;
-  };
+  editor: Editor;
   grid: Grid;
 }
