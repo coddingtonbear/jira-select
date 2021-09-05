@@ -5,8 +5,8 @@ import { executeQuery } from "../thunks";
 import * as monaco from "monaco-editor";
 import MonacoEditor from "@monaco-editor/react";
 import { useAppDispatch } from "../../../store";
-import ReactLoading from "react-loading";
 import { PlayCircleOutline } from "@material-ui/icons";
+import LoadingIndicator from "./LoadingIndicator";
 
 const DEFAULT_VALUE: string = "select:\n- key\nfrom: issues";
 
@@ -69,7 +69,7 @@ const Editor: React.FC = () => {
         <button onClick={onRunQuery}>
           <PlayCircleOutline />
         </button>
-        {running && <ReactLoading type="bars" />}
+        {running && <LoadingIndicator />}
       </div>
     </div>
   );
