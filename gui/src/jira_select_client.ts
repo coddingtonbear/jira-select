@@ -46,3 +46,23 @@ export async function getFunctions(): Promise<JiraSelectFunction[]> {
 
   return JSON.parse(result.stdout);
 }
+
+export interface JiraSelectSchemaItem {
+  id: string;
+  type: string;
+  description: string | null;
+}
+
+export async function getSchema(
+  schema: "boards" | "issues" | "sprints"
+): Promise<JiraSelectSchemaItem[]> {
+  const result = await execute(["schema", schema, "--json"]);
+
+  if (result.code !== 0) {
+    throw new Error(
+      `Error encountered while fetching scheamma for ${schema} ${result.code}: stderr: ${result.stderr}; stdout: ${result.stdout}`
+    );
+  }
+
+  return JSON.parse(result.stdout);
+}

@@ -87,6 +87,47 @@ div.queryBuilder {
         margin: 0px;
       }
 
+      div.schema {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        div.schema-list {
+          font-size: 0.8em;
+          overflow-y: scroll;
+
+          div.field {
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+            border: 1px solid darkgray;
+
+            div.id {
+              font-weight: bold;
+              text-decoration: underline;
+
+              &:hover {
+                cursor: pointer;
+                color: blue;
+              }
+            }
+            div.type {
+              font-weight: normal;
+              font-size: 0.8em;
+              font-style: italic;
+
+              margin: 5px;
+            }
+            div.description {
+              margin: 5px;
+              font-size: 0.8em;
+
+              white-space: pre-wrap;
+            }
+          }
+        }
+      }
+
       div.functions {
         display: flex;
         flex-direction: column;

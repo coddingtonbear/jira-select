@@ -51,3 +51,12 @@ export const populateFunctionList = createAsyncThunk<void, void>(
     thunkAPI.dispatch(queryBuilderSlice.actions.setFunctions(functions));
   }
 );
+
+export const populateIssueSchema = createAsyncThunk<void, void>(
+  "queryBuilder/populateIssueSchema",
+  async (_, thunkAPI) => {
+    const schema = await client.getSchema("issues");
+
+    thunkAPI.dispatch(queryBuilderSlice.actions.setIssueSchema(schema));
+  }
+);

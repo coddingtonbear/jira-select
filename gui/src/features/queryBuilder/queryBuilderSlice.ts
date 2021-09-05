@@ -9,12 +9,15 @@ import {
   SidebarOption,
 } from "./types";
 import { executeQuery } from "./thunks";
-import { JiraSelectFunction } from "../../jira_select_client";
+import {
+  JiraSelectFunction,
+  JiraSelectSchemaItem,
+} from "../../jira_select_client";
 
 const initialState: QueryBuilderState = {
   editor: { running: false },
   grid: { columns: [], rows: [] },
-  sidebar: { shown: false },
+  sidebar: { shown: false, schema: {} },
 };
 
 const reducers = {
@@ -45,6 +48,12 @@ const reducers = {
     action: PayloadAction<JiraSelectFunction[]>
   ) => {
     state.sidebar.functions = action.payload;
+  },
+  setIssueSchema: (
+    state: QueryBuilderState,
+    action: PayloadAction<JiraSelectSchemaItem[]>
+  ) => {
+    state.sidebar.schema.issue = action.payload;
   },
 };
 
@@ -85,5 +94,8 @@ export const useInsertString = (): string | undefined =>
 
 export const useFunctionList = (): JiraSelectFunction[] | undefined =>
   useSelector((s: RootState) => s.queryEditor.sidebar.functions);
+
+export const useIssueSchema = (): JiraSelectSchemaItem[] | undefined =>
+  useSelector((s: RootState) => s.queryEditor.sidebar.schema.issue);
 
 export default queryBuilderSlice;

@@ -1,4 +1,7 @@
-import { JiraSelectFunction } from "../../jira_select_client";
+import {
+  JiraSelectFunction,
+  JiraSelectSchemaItem,
+} from "../../jira_select_client";
 
 export type SidebarOption = "fieldnames" | "functions" | "code";
 
@@ -23,6 +26,9 @@ export interface Sidebar {
   shown: boolean;
 
   functions?: JiraSelectFunction[];
+  schema: {
+    issue?: JiraSelectSchemaItem[];
+  };
 }
 
 export interface QueryBuilderState {
