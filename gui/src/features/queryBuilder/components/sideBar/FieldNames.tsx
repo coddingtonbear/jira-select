@@ -6,7 +6,6 @@ import slice, {
   useIssueSchema,
   useSelectedInstance,
 } from "../../queryBuilderSlice";
-import { populateIssueSchema } from "../../thunks";
 import LoadingIndicator from "../LoadingIndicator";
 import Search from "../Search";
 
@@ -18,11 +17,6 @@ const FieldNames: React.FC = () => {
   const [searchText, setSearchText] = React.useState<string>("");
 
   const dispatch = useAppDispatch();
-
-  React.useEffect(() => {
-    dispatch(slice.actions.clearIssueSchema());
-    dispatch(populateIssueSchema());
-  }, [selectedInstance]);
 
   React.useEffect(() => {
     const filteredSchema: JiraSelectSchemaItem[] = [];

@@ -22,18 +22,20 @@ export interface Editor {
   insertString?: string;
 }
 
+export interface Schemas {
+  issue?: JiraSelectSchemaItem[];
+}
+
 export interface Sidebar {
   selected?: SidebarOption;
   shown: boolean;
-
-  schema: {
-    issue?: JiraSelectSchemaItem[];
-  };
 }
 
 export interface QueryBuilderState {
   selectedInstance?: string;
   instances: JiraSelectInstance[];
+
+  schema: Record<string, Schemas>;
 
   functions?: JiraSelectFunction[];
   expandedFunctions: string[];

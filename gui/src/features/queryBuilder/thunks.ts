@@ -73,6 +73,13 @@ export const populateIssueSchema = createAsyncThunk<
     throw Error("No instance selected");
   }
 
+  if (
+    state.queryEditor.schema[state.queryEditor.selectedInstance].issue !==
+    undefined
+  ) {
+    return;
+  }
+
   const schema = await client.getSchema(
     state.queryEditor.selectedInstance,
     "issues"

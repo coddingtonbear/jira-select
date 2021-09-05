@@ -7,6 +7,7 @@ import { Functions, Toc as FieldNames } from "@material-ui/icons";
 import slice, { useSidebarContext } from "../queryBuilderSlice";
 import { useAppDispatch } from "../../../store";
 import { SidebarOption } from "../types";
+import { populateFunctionList } from "../thunks";
 
 import FunctionsSidebar from "./sideBar/Functions";
 import FieldNamesSidebar from "./sideBar/FieldNames";
@@ -23,6 +24,10 @@ const QueryBuilder: React.FC = () => {
       dispatch(slice.actions.showSidebar(name));
     }
   }
+
+  React.useEffect(() => {
+    dispatch(populateFunctionList());
+  }, []);
 
   return (
     <div className="queryBuilder">

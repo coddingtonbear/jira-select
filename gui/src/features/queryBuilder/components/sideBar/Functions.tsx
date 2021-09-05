@@ -7,7 +7,6 @@ import slice, {
   useExpandedFunctions,
   useFunctionList,
 } from "../../queryBuilderSlice";
-import { populateFunctionList } from "../../thunks";
 import LoadingIndicator from "../LoadingIndicator";
 import Search from "../Search";
 
@@ -19,10 +18,6 @@ const Functions: React.FC = () => {
   const [searchText, setSearchText] = React.useState<string>("");
 
   const dispatch = useAppDispatch();
-
-  React.useEffect(() => {
-    dispatch(populateFunctionList());
-  }, []);
 
   React.useEffect(() => {
     const filteredFunctions: JiraSelectFunction[] = [];

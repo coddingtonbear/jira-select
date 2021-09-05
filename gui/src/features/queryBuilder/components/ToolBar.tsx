@@ -2,7 +2,7 @@ import React from "react";
 
 import { useAppDispatch } from "../../../store";
 import { useInstances, useSelectedInstance } from "../queryBuilderSlice";
-import { populateInstanceList } from "../thunks";
+import { populateInstanceList, populateIssueSchema } from "../thunks";
 import slice from "../queryBuilderSlice";
 
 const ToolBar: React.FC = () => {
@@ -13,7 +13,11 @@ const ToolBar: React.FC = () => {
 
   React.useEffect(() => {
     dispatch(populateInstanceList());
-  }, []);
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    dispatch(populateIssueSchema());
+  }, [dispatch, selectedInstance]);
 
   return (
     <div className="toolbar">
