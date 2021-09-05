@@ -20,6 +20,7 @@ const initialState: QueryBuilderState = {
   editor: { running: false },
   grid: { columns: [], rows: [] },
   sidebar: { shown: false, schema: {} },
+  expandedFunctions: [],
 };
 
 const reducers = {
@@ -49,7 +50,19 @@ const reducers = {
     state: QueryBuilderState,
     action: PayloadAction<JiraSelectFunction[]>
   ) => {
-    state.sidebar.functions = action.payload;
+    state.functions = action.payload;
+  },
+  toggleFunctionExpansion: (
+    state: QueryBuilderState,
+    action: PayloadAction<string>
+  ) => {
+    if (state.expandedFunctions.includes(action.payload)) {
+      state.expandedFunctions = state.expandedFunctions.filter(
+        (val) => val !== action.payload
+      );
+    } else {
+      state.expandedFunctions.push(action.payload);
+    }
   },
   clearIssueSchema: (state: QueryBuilderState) => {
     state.sidebar.schema.issue = undefined;
@@ -110,7 +123,7 @@ export const useInsertString = (): string | undefined =>
   useSelector((s: RootState) => s.queryEditor.editor.insertString);
 
 export const useFunctionList = (): JiraSelectFunction[] | undefined =>
-  useSelector((s: RootState) => s.queryEditor.sidebar.functions);
+  useSelector((s: RootState) => s.queryEditor.functions);
 
 export const useIssueSchema = (): JiraSelectSchemaItem[] | undefined =>
   useSelector((s: RootState) => s.queryEditor.sidebar.schema.issue);
@@ -120,5 +133,8 @@ export const useInstances = (): JiraSelectInstance[] =>
 
 export const useSelectedInstance = (): string | undefined =>
   useSelector((s: RootState) => s.queryEditor.selectedInstance);
+
+export const useExpandedFunctions = (): string[] =>
+  useSelector((s: RootState) => s.queryEditor.expandedFunctions);
 
 export default queryBuilderSlice;

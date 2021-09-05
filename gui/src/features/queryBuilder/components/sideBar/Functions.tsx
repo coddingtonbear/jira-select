@@ -1,13 +1,19 @@
+import classNames from "classnames";
 import React from "react";
 
 import { JiraSelectFunction } from "../../../../jira_select_client";
 import { useAppDispatch } from "../../../../store";
-import slice, { useFunctionList } from "../../queryBuilderSlice";
+import slice, {
+  useExpandedFunctions,
+  useFunctionList,
+} from "../../queryBuilderSlice";
 import { populateFunctionList } from "../../thunks";
 import LoadingIndicator from "../LoadingIndicator";
+import Search from "../Search";
 
 const Functions: React.FC = () => {
   const availableFunctions = useFunctionList();
+  const expandedFunctions = useExpandedFunctions();
 
   const [functions, setFunctions] = React.useState<JiraSelectFunction[]>([]);
   const [searchText, setSearchText] = React.useState<string>("");
@@ -47,25 +53,33 @@ const Functions: React.FC = () => {
     setFunctions(filteredFunctions);
   }, [searchText, availableFunctions]);
 
-  function onClickFunction(name: string) {
+  function onInsertFunctionName(name: string) {
     dispatch(slice.actions.insertTextAtCursor(name));
+  }
+
+  function onExpandFunction(name: string) {
+    dispatch(slice.actions.toggleFunctionExpansion(name));
   }
 
   return (
     <div className="functions">
-      <h2>Functions</h2>
-      <input
-        type="search"
-        placeholder="Search"
-        onChange={(evt) => setSearchText(evt.target.value)}
-      />
+      <Search onChange={setSearchText} placeholder="Search functions" />
       <div className="functions-list">
         {availableFunctions === undefined && <LoadingIndicator />}
         {functions.map((fn) => {
           return (
-            <div className="function" key={fn.dotpath + "." + fn.name}>
+            <div
+              className={classNames("function", {
+                expanded: expandedFunctions.includes(fn.name),
+              })}
+              key={fn.name}
+              onClick={() => onExpandFunction(fn.name)}
+            >
               <div className="name">
-                <span className="name" onClick={() => onClickFunction(fn.name)}>
+                <span
+                  className="name"
+                  onClick={() => onInsertFunctionName(fn.name)}
+                >
                   {fn.name}
                 </span>
                 <span className="signature">{fn.signature}</span>

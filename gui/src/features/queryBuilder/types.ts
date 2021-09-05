@@ -26,7 +26,6 @@ export interface Sidebar {
   selected?: SidebarOption;
   shown: boolean;
 
-  functions?: JiraSelectFunction[];
   schema: {
     issue?: JiraSelectSchemaItem[];
   };
@@ -35,6 +34,9 @@ export interface Sidebar {
 export interface QueryBuilderState {
   selectedInstance?: string;
   instances: JiraSelectInstance[];
+
+  functions?: JiraSelectFunction[];
+  expandedFunctions: string[];
 
   editor: Editor;
   grid: Grid;

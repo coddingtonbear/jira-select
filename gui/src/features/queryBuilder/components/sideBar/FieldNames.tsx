@@ -8,6 +8,7 @@ import slice, {
 } from "../../queryBuilderSlice";
 import { populateIssueSchema } from "../../thunks";
 import LoadingIndicator from "../LoadingIndicator";
+import Search from "../Search";
 
 const FieldNames: React.FC = () => {
   const availableIssueSchemaItems = useIssueSchema();
@@ -54,11 +55,7 @@ const FieldNames: React.FC = () => {
   return (
     <div className="schema">
       <h2>Issue Schema</h2>
-      <input
-        type="search"
-        placeholder="Search"
-        onChange={(evt) => setSearchText(evt.target.value)}
-      />
+      <Search onChange={setSearchText} />
       <div className="schema-list">
         {selectedInstance ? (
           <>
