@@ -60,7 +60,7 @@ class InstanceDefinition(BaseModel):
     url: Optional[str]
     username: Optional[str]
     password: Optional[str]
-    verify: Optional[Union[str, bool]] = True
+    verify: Optional[Union[bool, str]] = True
 
 
 class ConfigDict(BaseModel):
