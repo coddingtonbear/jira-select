@@ -57,10 +57,14 @@ div.queryBuilder {
       text-align: center;
       flex: 0 0 40px;
 
+      display: flex;
+      flex-direction: column;
+
       background-color: darkgray;
 
       svg {
         padding: 5px;
+        margin: 0 auto;
 
         &.selected {
           background-color: lightblue;

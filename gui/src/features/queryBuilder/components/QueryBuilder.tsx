@@ -4,10 +4,7 @@ import Grid from "./Grid";
 import classnames from "classnames";
 
 import { Functions, Toc as FieldNames } from "@material-ui/icons";
-import slice, {
-  useSelectedInstance,
-  useSidebarContext,
-} from "../queryBuilderSlice";
+import slice, { useSidebarContext } from "../queryBuilderSlice";
 import { useAppDispatch } from "../../../store";
 import { SidebarOption } from "../types";
 

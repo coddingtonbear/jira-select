@@ -81,11 +81,22 @@ export const populateIssueSchema = createAsyncThunk<
   thunkAPI.dispatch(queryBuilderSlice.actions.setIssueSchema(schema));
 });
 
-export const populateInstanceList = createAsyncThunk<void, void>(
-  "queryBuilder/populateInstanceList",
-  async (_, thunkAPI) => {
-    const instances = await client.getInstances();
+export const populateInstanceList = createAsyncThunk<
+  void,
+  void,
+  { state: RootState }
+>("queryBuilder/populateInstanceList", async (_, thunkAPI) => {
+  const instances = await client.getInstances();
 
-    thunkAPI.dispatch(queryBuilderSlice.actions.setInstances(instances));
+  const state = thunkAPI.getState();
+
+  thunkAPI.dispatch(queryBuilderSlice.actions.setInstances(instances));
+  if (
+    state.queryEditor.selectedInstance === undefined &&
+    instances.length > 0
+  ) {
+    thunkAPI.dispatch(
+      queryBuilderSlice.actions.setSelectedInstance(instances[0].name)
+    );
   }
-);
+});
