@@ -88,36 +88,48 @@ div.queryBuilder {
       }
 
       div.functions {
-        div.function {
-          padding: 5px;
-          margin: 5px;
-          border: 1px solid darkgray;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
 
-          div.name {
-            font-weight: bold;
-            font-size: 1.2em;
+        div.functions-list {
+          font-size: 0.8em;
+          overflow-y: scroll;
 
-            span.name {
-              text-decoration: underline;
+          div.function {
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+            border: 1px solid darkgray;
 
-              &:hover {
-                cursor: pointer;
-                color: blue;
+            div.name {
+              font-weight: bold;
+
+              span.name {
+                text-decoration: underline;
+
+                &:hover {
+                  cursor: pointer;
+                  color: blue;
+                }
+              }
+              span.signature {
+                color: darkgray;
               }
             }
-            span.signature {
-              color: darkgray;
-            }
-            span.module {
+            div.module {
               font-weight: normal;
               font-size: 0.8em;
               font-style: italic;
-              margin-left: 10px;
+
+              margin: 5px;
             }
-          }
-          div.description {
-            padding: 5px;
-            font-size: 0.8em;
+            div.description {
+              margin: 5px;
+              font-size: 0.8em;
+
+              white-space: pre-wrap;
+            }
           }
         }
       }
@@ -168,4 +180,9 @@ div.queryBuilder {
       }
     }
   }
+}
+
+input[type="search"] {
+  width: 100%;
+  padding: 5px;
 }

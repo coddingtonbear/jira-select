@@ -32,7 +32,7 @@ export interface JiraSelectFunction {
   name: string;
   description: string;
   dotpath: string;
-  signature: string;
+  signature?: string;
 }
 
 export async function getFunctions(): Promise<JiraSelectFunction[]> {

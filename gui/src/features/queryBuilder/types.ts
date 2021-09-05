@@ -1,3 +1,5 @@
+import { JiraSelectFunction } from "../../jira_select_client";
+
 export type SidebarOption = "fieldnames" | "functions" | "code";
 
 export interface Column {
@@ -19,6 +21,8 @@ export interface Editor {
 export interface Sidebar {
   selected?: SidebarOption;
   shown: boolean;
+
+  functions?: JiraSelectFunction[];
 }
 
 export interface QueryBuilderState {

@@ -1,22 +1,49 @@
 import React from "react";
-import {
-  getFunctions,
-  JiraSelectFunction,
-} from "../../../../jira_select_client";
+import { JiraSelectFunction } from "../../../../jira_select_client";
 import { useAppDispatch } from "../../../../store";
-import slice from "../../queryBuilderSlice";
+import slice, { useFunctionList } from "../../queryBuilderSlice";
+import { populateFunctionList } from "../../thunks";
 
 const Functions: React.FC = () => {
+  const availableFunctions = useFunctionList();
+
   const [functions, setFunctions] = React.useState<JiraSelectFunction[]>([]);
-  const [error, setError] = React.useState<string>();
+  const [searchText, setSearchText] = React.useState<string>("");
 
   const dispatch = useAppDispatch();
 
   React.useEffect(() => {
-    getFunctions()
-      .then((fns) => setFunctions(fns))
-      .catch((msg) => setError(msg));
+    dispatch(populateFunctionList());
   }, []);
+
+  React.useEffect(() => {
+    const filteredFunctions: JiraSelectFunction[] = [];
+
+    if (availableFunctions === undefined) {
+      setFunctions([]);
+      return;
+    }
+    if (searchText.length === 0) {
+      setFunctions(availableFunctions);
+      return;
+    }
+    for (const fn of availableFunctions) {
+      const searchFields: string[] = [
+        fn.description,
+        fn.dotpath,
+        fn.name,
+        fn.signature ?? "",
+      ];
+      for (const field of searchFields) {
+        if (field.toLowerCase().includes(searchText.toLowerCase())) {
+          filteredFunctions.push(fn);
+          break;
+        }
+      }
+    }
+
+    setFunctions(filteredFunctions);
+  }, [searchText, availableFunctions]);
 
   function onClickFunction(name: string) {
     dispatch(slice.actions.insertTextAtCursor(name));
@@ -25,21 +52,27 @@ const Functions: React.FC = () => {
   return (
     <div className="functions">
       <h2>Functions</h2>
-      {error && <div>{error}</div>}
-      {functions.map((fn) => {
-        return (
-          <div className="function" key={fn.dotpath + "." + fn.name}>
-            <div className="name">
-              <span className="name" onClick={() => onClickFunction(fn.name)}>
-                {fn.name}
-              </span>
-              <span className="signature">{fn.signature}</span>
-              <span className="module">{fn.dotpath}</span>
+      <input
+        type="search"
+        placeholder="Search"
+        onChange={(evt) => setSearchText(evt.target.value)}
+      />
+      <div className="functions-list">
+        {functions.map((fn) => {
+          return (
+            <div className="function" key={fn.dotpath + "." + fn.name}>
+              <div className="name">
+                <span className="name" onClick={() => onClickFunction(fn.name)}>
+                  {fn.name}
+                </span>
+                <span className="signature">{fn.signature}</span>
+              </div>
+              <div className="module">{fn.dotpath}</div>
+              <div className="description">{fn.description}</div>
             </div>
-            <div className="description">{fn.description}</div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };

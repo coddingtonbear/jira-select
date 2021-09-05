@@ -9,6 +9,7 @@ import {
   SidebarOption,
 } from "./types";
 import { executeQuery } from "./thunks";
+import { JiraSelectFunction } from "../../jira_select_client";
 
 const initialState: QueryBuilderState = {
   editor: { running: false },
@@ -38,6 +39,12 @@ const reducers = {
   },
   insertTextAtCursorCompleted: (state: QueryBuilderState) => {
     state.editor.insertString = undefined;
+  },
+  setFunctions: (
+    state: QueryBuilderState,
+    action: PayloadAction<JiraSelectFunction[]>
+  ) => {
+    state.sidebar.functions = action.payload;
   },
 };
 
@@ -75,5 +82,8 @@ export const useSidebarContext = (): Sidebar =>
 
 export const useInsertString = (): string | undefined =>
   useSelector((s: RootState) => s.queryEditor.editor.insertString);
+
+export const useFunctionList = (): JiraSelectFunction[] | undefined =>
+  useSelector((s: RootState) => s.queryEditor.sidebar.functions);
 
 export default queryBuilderSlice;

@@ -42,3 +42,12 @@ export const executeQuery = createAsyncThunk<void, string>(
     );
   }
 );
+
+export const populateFunctionList = createAsyncThunk<void, void>(
+  "queryBuilder/populateFunctions",
+  async (_, thunkAPI) => {
+    const functions = await client.getFunctions();
+
+    thunkAPI.dispatch(queryBuilderSlice.actions.setFunctions(functions));
+  }
+);
