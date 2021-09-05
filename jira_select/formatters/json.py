@@ -20,7 +20,7 @@ class Formatter(BaseFormatter):
 
     def close(self):
         wrapped = TextIOWrapper(self.stream, encoding="utf-8", write_through=True)
-        json.dump(self._rows, wrapped, sort_keys=True, indent=4)
+        json.dump(self._rows, wrapped, indent=4)
         wrapped.detach()
         super().close()
 
