@@ -11,10 +11,12 @@ import {
 import { executeQuery } from "./thunks";
 import {
   JiraSelectFunction,
+  JiraSelectInstance,
   JiraSelectSchemaItem,
 } from "../../jira_select_client";
 
 const initialState: QueryBuilderState = {
+  instances: [],
   editor: { running: false },
   grid: { columns: [], rows: [] },
   sidebar: { shown: false, schema: {} },
@@ -49,11 +51,26 @@ const reducers = {
   ) => {
     state.sidebar.functions = action.payload;
   },
+  clearIssueSchema: (state: QueryBuilderState) => {
+    state.sidebar.schema.issue = undefined;
+  },
   setIssueSchema: (
     state: QueryBuilderState,
     action: PayloadAction<JiraSelectSchemaItem[]>
   ) => {
     state.sidebar.schema.issue = action.payload;
+  },
+  setInstances: (
+    state: QueryBuilderState,
+    action: PayloadAction<JiraSelectInstance[]>
+  ) => {
+    state.instances = action.payload;
+  },
+  setSelectedInstance: (
+    state: QueryBuilderState,
+    action: PayloadAction<string>
+  ) => {
+    state.selectedInstance = action.payload;
   },
 };
 
@@ -97,5 +114,11 @@ export const useFunctionList = (): JiraSelectFunction[] | undefined =>
 
 export const useIssueSchema = (): JiraSelectSchemaItem[] | undefined =>
   useSelector((s: RootState) => s.queryEditor.sidebar.schema.issue);
+
+export const useInstances = (): JiraSelectInstance[] =>
+  useSelector((s: RootState) => s.queryEditor.instances);
+
+export const useSelectedInstance = (): string | undefined =>
+  useSelector((s: RootState) => s.queryEditor.selectedInstance);
 
 export default queryBuilderSlice;

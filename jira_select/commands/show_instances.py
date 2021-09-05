@@ -35,7 +35,7 @@ class Command(BaseCommand):
                         "url": instance_data.url,
                     }
                 )
-            self.console.print(json.dumps(instances, sort_keys=True, indent=4))
+            print(json.dumps(instances, sort_keys=True, indent=4))
         else:
             table = Table(title="Configured Instances")
             table.add_column("name", style="green")

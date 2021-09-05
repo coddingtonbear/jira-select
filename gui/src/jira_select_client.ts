@@ -16,8 +16,14 @@ export async function execute(
   return invoke<RpcResponse>("run_jira_select", { params, stdin: stdin ?? "" });
 }
 
-export async function executeQuery(query: string): Promise<QueryRow[]> {
-  const result = await execute(["run-query", "--format=json"], query);
+export async function executeQuery(
+  instance: string,
+  query: string
+): Promise<QueryRow[]> {
+  const result = await execute(
+    ["--instance-name", instance, "run-query", "--format=json"],
+    query
+  );
 
   if (result.code !== 0) {
     throw new Error(
@@ -54,13 +60,38 @@ export interface JiraSelectSchemaItem {
 }
 
 export async function getSchema(
+  instance: string,
   schema: "boards" | "issues" | "sprints"
 ): Promise<JiraSelectSchemaItem[]> {
-  const result = await execute(["schema", schema, "--json"]);
+  const result = await execute([
+    "--instance-name",
+    instance,
+    "schema",
+    schema,
+    "--json",
+  ]);
 
   if (result.code !== 0) {
     throw new Error(
-      `Error encountered while fetching scheamma for ${schema} ${result.code}: stderr: ${result.stderr}; stdout: ${result.stdout}`
+      `Error encountered while fetching schema for ${schema} ${result.code}: stderr: ${result.stderr}; stdout: ${result.stdout}`
+    );
+  }
+
+  return JSON.parse(result.stdout);
+}
+
+export interface JiraSelectInstance {
+  name: string;
+  url: string;
+  username: string;
+}
+
+export async function getInstances(): Promise<JiraSelectInstance[]> {
+  const result = await execute(["show-instances", "--json"]);
+
+  if (result.code !== 0) {
+    throw new Error(
+      `Error encountered while fetching instances ${result.code}: stderr: ${result.stderr}; stdout: ${result.stdout}`
     );
   }
 

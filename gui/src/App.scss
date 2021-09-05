@@ -39,7 +39,12 @@ div.queryBuilder {
 
   div.toolbar {
     flex: 0 0 40px;
-    background-color: black;
+    display: relative;
+    background-color: lightgray;
+
+    div.instance-selector {
+      float: right;
+    }
   }
 
   div.body {

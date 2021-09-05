@@ -2,12 +2,16 @@ import React from "react";
 
 import { JiraSelectSchemaItem } from "../../../../jira_select_client";
 import { useAppDispatch } from "../../../../store";
-import slice, { useIssueSchema } from "../../queryBuilderSlice";
+import slice, {
+  useIssueSchema,
+  useSelectedInstance,
+} from "../../queryBuilderSlice";
 import { populateIssueSchema } from "../../thunks";
 import LoadingIndicator from "../LoadingIndicator";
 
 const FieldNames: React.FC = () => {
   const availableIssueSchemaItems = useIssueSchema();
+  const selectedInstance = useSelectedInstance();
 
   const [schema, setSchema] = React.useState<JiraSelectSchemaItem[]>([]);
   const [searchText, setSearchText] = React.useState<string>("");
@@ -15,8 +19,9 @@ const FieldNames: React.FC = () => {
   const dispatch = useAppDispatch();
 
   React.useEffect(() => {
+    dispatch(slice.actions.clearIssueSchema());
     dispatch(populateIssueSchema());
-  }, []);
+  }, [selectedInstance]);
 
   React.useEffect(() => {
     const filteredSchema: JiraSelectSchemaItem[] = [];
@@ -55,18 +60,24 @@ const FieldNames: React.FC = () => {
         onChange={(evt) => setSearchText(evt.target.value)}
       />
       <div className="schema-list">
-        {availableIssueSchemaItems === undefined && <LoadingIndicator />}
-        {schema.map((fn) => {
-          return (
-            <div className="field" key={fn.id}>
-              <div className="id" onClick={() => onClickFunction(fn.id)}>
-                {fn.id}
-              </div>
-              <div className="type">{fn.type}</div>
-              <div className="description">{fn.description}</div>
-            </div>
-          );
-        })}
+        {selectedInstance ? (
+          <>
+            {availableIssueSchemaItems === undefined && <LoadingIndicator />}
+            {schema.map((fn) => {
+              return (
+                <div className="field" key={fn.id}>
+                  <div className="id" onClick={() => onClickFunction(fn.id)}>
+                    {fn.id}
+                  </div>
+                  <div className="type">{fn.type}</div>
+                  <div className="description">{fn.description}</div>
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          <p>No Instance selected</p>
+        )}
       </div>
     </div>
   );

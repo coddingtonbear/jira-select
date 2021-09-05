@@ -3,13 +3,17 @@ import Editor from "./Editor";
 import Grid from "./Grid";
 import classnames from "classnames";
 
-import { Functions, Code, Toc as FieldNames } from "@material-ui/icons";
-import slice, { useSidebarContext } from "../queryBuilderSlice";
+import { Functions, Toc as FieldNames } from "@material-ui/icons";
+import slice, {
+  useSelectedInstance,
+  useSidebarContext,
+} from "../queryBuilderSlice";
 import { useAppDispatch } from "../../../store";
 import { SidebarOption } from "../types";
 
 import FunctionsSidebar from "./sideBar/Functions";
 import FieldNamesSidebar from "./sideBar/FieldNames";
+import ToolBar from "./ToolBar";
 
 const QueryBuilder: React.FC = () => {
   const { selected, shown } = useSidebarContext();
@@ -25,7 +29,7 @@ const QueryBuilder: React.FC = () => {
 
   return (
     <div className="queryBuilder">
-      <div className="toolbar"></div>
+      <ToolBar />
       <div className="body">
         <div className="sideBar">
           <FieldNames
@@ -40,10 +44,12 @@ const QueryBuilder: React.FC = () => {
               selected: shown && selected === "functions",
             })}
           />
+          {/*
           <Code
             onClick={() => onToggleSidebar("code")}
             className={classnames({ selected: shown && selected === "code" })}
           />
+          */}
         </div>
         <div
           className={classnames("sidebarContainer", {

@@ -1,5 +1,6 @@
 import {
   JiraSelectFunction,
+  JiraSelectInstance,
   JiraSelectSchemaItem,
 } from "../../jira_select_client";
 
@@ -32,6 +33,9 @@ export interface Sidebar {
 }
 
 export interface QueryBuilderState {
+  selectedInstance?: string;
+  instances: JiraSelectInstance[];
+
   editor: Editor;
   grid: Grid;
   sidebar: Sidebar;
