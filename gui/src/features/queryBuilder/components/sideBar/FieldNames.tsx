@@ -54,8 +54,7 @@ const FieldNames: React.FC = () => {
 
   return (
     <div className="schema">
-      <h2>Issue Schema</h2>
-      <Search onChange={setSearchText} />
+      <Search onChange={setSearchText} placeholder="Search fields" />
       <div className="schema-list">
         {selectedInstance ? (
           <>
