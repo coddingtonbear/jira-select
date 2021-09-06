@@ -33,7 +33,7 @@ const AddInstance: React.FC = () => {
       if (result.meta.requestStatus === "rejected") {
         setError("Could not connect to Jira using this information.");
       } else {
-        dispatch(slice.actions.closeModal());
+        dispatch(slice.actions.closeModal("createNew"));
       }
     });
   };

@@ -33,6 +33,7 @@ export interface Sidebar {
 
 export interface ModalsShown {
   createNew?: boolean;
+  error?: boolean;
 }
 
 export interface QueryBuilderState {

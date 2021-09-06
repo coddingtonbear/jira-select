@@ -95,8 +95,15 @@ const reducers = {
   ) => {
     state.modalsShown[action.payload] = true;
   },
-  closeModal: (state: QueryBuilderState) => {
-    state.modalsShown = {};
+  closeModal: (
+    state: QueryBuilderState,
+    action: PayloadAction<keyof ModalsShown | undefined>
+  ) => {
+    if (action.payload) {
+      state.modalsShown[action.payload] = undefined;
+    } else {
+      state.modalsShown = {};
+    }
   },
 };
 
