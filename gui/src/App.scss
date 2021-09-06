@@ -388,8 +388,9 @@ div.modal-background {
   height: 100vh;
 
   div.modal {
-    background-color: var(--gray2);
+    background-color: var(--white);
     border: 1px solid var(--gray);
+    color: var(--gray);
     border-radius: 20px;
 
     padding: 20px;
