@@ -37,7 +37,7 @@ export interface ModalsShown {
 
 export interface QueryBuilderState {
   selectedInstance?: string;
-  instances: JiraSelectInstance[];
+  instances?: JiraSelectInstance[];
 
   schema: Record<string, Schemas>;
 

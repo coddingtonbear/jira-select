@@ -17,7 +17,6 @@ import {
 } from "../../jira_select_client";
 
 const initialState: QueryBuilderState = {
-  instances: [],
   editor: { running: false },
   grid: { columns: [], rows: [] },
   sidebar: { shown: false },
@@ -146,7 +145,7 @@ export const useIssueSchema = (): JiraSelectSchemaItem[] | undefined =>
       : []
   );
 
-export const useInstances = (): JiraSelectInstance[] =>
+export const useInstances = (): JiraSelectInstance[] | undefined =>
   useSelector((s: RootState) => s.queryEditor.instances);
 
 export const useSelectedInstance = (): string | undefined =>

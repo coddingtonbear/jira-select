@@ -7,10 +7,16 @@ import { Functions, Toc as FieldNames, Settings } from "@material-ui/icons";
 import slice, {
   useModalIsShown,
   useSidebarContext,
+  useSelectedInstance,
+  useInstances,
 } from "../queryBuilderSlice";
 import { useAppDispatch } from "../../../store";
 import { SidebarOption } from "../types";
-import { populateFunctionList } from "../thunks";
+import {
+  populateInstanceList,
+  populateIssueSchema,
+  populateFunctionList,
+} from "../thunks";
 
 import FunctionsSidebar from "./sideBar/Functions";
 import FieldNamesSidebar from "./sideBar/FieldNames";
@@ -20,8 +26,24 @@ import AddInstance from "./modal/AddInstance";
 const QueryBuilder: React.FC = () => {
   const { selected, shown } = useSidebarContext();
   const dispatch = useAppDispatch();
+  const selectedInstance = useSelectedInstance();
+  const instances = useInstances();
 
   const addInstanceModalShown = useModalIsShown("createNew");
+
+  React.useEffect(() => {
+    dispatch(populateInstanceList());
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (instances && instances.length === 0) {
+      dispatch(slice.actions.showModal("createNew"));
+    }
+  }, [instances]);
+
+  React.useEffect(() => {
+    dispatch(populateIssueSchema());
+  }, [dispatch, selectedInstance]);
 
   function onToggleSidebar(name: SidebarOption) {
     if (shown && selected === name) {
