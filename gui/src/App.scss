@@ -70,6 +70,8 @@ div.queryBuilder {
       text-align: center;
       flex: 0 0 40px;
 
+      padding-top: 10px;
+
       display: flex;
       flex-direction: column;
 
@@ -101,10 +103,35 @@ div.queryBuilder {
       transition: all 0.5s ease;
       background-color: var(--gray2);
       border-right: 1px solid var(--green1);
+      overflow: hidden;
 
       &.displayed {
         min-width: 300px;
         max-width: auto;
+      }
+
+      div.sidebarContainerInner {
+        min-width: 300px;
+      }
+
+      h2 {
+        text-align: center;
+        font-size: 1.2em;
+        font-weight: bold;
+        background-color: var(--green1);
+        color: var(--white);
+        margin: 0;
+        margin-bottom: 20px;
+      }
+
+      div.settings {
+        div.setting {
+          margin: 5px;
+
+          label {
+            padding: 5px;
+          }
+        }
       }
 
       div.schema {

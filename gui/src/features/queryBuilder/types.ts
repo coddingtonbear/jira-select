@@ -4,7 +4,7 @@ import {
   JiraSelectSchemaItem,
 } from "../../jira_select_client";
 
-export type SidebarOption = "fieldnames" | "functions" | "code";
+export type SidebarOption = "fieldnames" | "functions" | "code" | "settings";
 
 export interface Column {
   key: string;
