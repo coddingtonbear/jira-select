@@ -16,7 +16,7 @@ const Settings: React.FC = () => {
       <h2>Configuration</h2>
 
       <div className="setting">
-        <label>Jira Instance:</label>
+        <label className="settingName">Jira Instance:</label>
         <div className="instance-selector">
           <select
             value={selectedInstance}
@@ -39,8 +39,8 @@ const Settings: React.FC = () => {
           <button
             onClick={() => dispatch(slice.actions.showModal("createNew"))}
           >
-            <Add />
             <label>Add another instance</label>
+            <Add />
           </button>
         </div>
       </div>

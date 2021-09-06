@@ -128,7 +128,7 @@ div.queryBuilder {
         div.setting {
           margin: 5px;
 
-          label {
+          label.settingName {
             padding: 5px;
           }
         }
@@ -349,37 +349,41 @@ button {
   -webkit-appearance: none;
   -moz-appearance: none;
 
-  background-color: transparent;
-  border: none;
+  background-color: var(--green2);
+  border: 1px solid var(--green1);
+  border-radius: 10px;
+  padding: 10px;
 
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-content: center;
+  cursor: pointer;
 
   color: var(--white);
 
   svg.MuiSvgIcon-root {
-    height: 1em;
+    height: 24px;
     display: block;
   }
   label {
-    line-height: 1em;
+    line-height: 24px;
     font-size: 1em;
+    cursor: pointer;
   }
 
   &:disabled {
     color: var(--gray);
-    cursor: pointer;
 
     &:hover {
+      background-color: var(--green2);
       color: var(--gray);
     }
   }
 
   &:hover {
+    background-color: var(--green1);
     color: var(--green4);
-    cursor: pointer;
   }
 }
 
