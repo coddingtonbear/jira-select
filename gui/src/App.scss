@@ -1,3 +1,17 @@
+:root {
+  --gray: #504b43;
+  --gray2: #645e54;
+
+  --green1: #6f8f72;
+  --green2: #77ad78;
+  --green3: #7dba84;
+  --green4: #8fd694;
+
+  --white: #e0e0e0;
+
+  --error: #ca4640;
+}
+
 .App {
   text-align: center;
   display: flex;
@@ -6,7 +20,8 @@
 
 p.error {
   padding: 10px;
-  border: 1px solid red;
+  background-color: var(--error);
+  color: var(--white);
 }
 
 .App div.query {
@@ -16,6 +31,7 @@ p.error {
 
 html {
   height: 100%;
+  color: var(--white);
 }
 
 div#root {
@@ -36,7 +52,8 @@ div.queryBuilder {
   div.toolbar {
     flex: 0 0 40px;
     display: relative;
-    background-color: black;
+    background-color: var(--gray);
+    border-bottom: 1px solid var(--green1);
 
     div.instance-selector {
       float: right;
@@ -56,19 +73,24 @@ div.queryBuilder {
       display: flex;
       flex-direction: column;
 
-      background-color: darkgray;
+      background-color: var(--gray);
 
       svg {
         padding: 5px;
         margin: 0 auto;
 
         &.selected {
-          background-color: lightblue;
+          background-color: var(--green4);
+          color: var(--gray);
         }
       }
       svg:hover {
-        background-color: lightblue;
+        color: var(--green4);
         cursor: pointer;
+
+        &.selected {
+          color: var(--green1);
+        }
       }
     }
 
@@ -77,19 +99,12 @@ div.queryBuilder {
       max-width: 0px;
       min-width: 0px;
       transition: all 0.5s ease;
-      background-color: lightgray;
-      border-right: 1px solid black;
+      background-color: var(--gray2);
+      border-right: 1px solid var(--green1);
 
       &.displayed {
         min-width: 300px;
         max-width: auto;
-      }
-
-      h2 {
-        background-color: #b3b3b3;
-        border-bottom: 1px solid black;
-        text-align: center;
-        margin: 0px;
       }
 
       div.schema {
@@ -102,10 +117,9 @@ div.queryBuilder {
           overflow-y: scroll;
 
           div.field {
-            border-radius: 5px;
             padding: 5px;
             margin: 5px;
-            border: 1px solid darkgray;
+            border-bottom: 1px solid var(--gray);
 
             div.id {
               font-weight: bold;
@@ -113,7 +127,16 @@ div.queryBuilder {
 
               &:hover {
                 cursor: pointer;
-                color: blue;
+                color: var(--green4);
+              }
+
+              svg {
+                float: right;
+                color: var(--gray);
+
+                &:hover {
+                  color: var(--green4);
+                }
               }
             }
             div.type {
@@ -146,8 +169,9 @@ div.queryBuilder {
             border-radius: 5px;
             padding: 5px;
             margin: 5px;
-            border: 1px solid darkgray;
-            cursor: pointer;
+            border-bottom: 1px solid var(--gray);
+
+            min-height: 30px;
 
             div.name {
               font-weight: bold;
@@ -157,11 +181,20 @@ div.queryBuilder {
 
                 &:hover {
                   cursor: pointer;
-                  color: blue;
+                  color: var(--green4);
                 }
               }
               span.signature {
                 color: darkgray;
+              }
+
+              svg {
+                float: right;
+                color: var(--gray);
+
+                &:hover {
+                  color: var(--green4);
+                }
               }
             }
             div.module {
@@ -214,19 +247,24 @@ div.queryBuilder {
         max-height: 25%;
         min-height: 25%;
         overflow-y: scroll;
-        background-color: #ffdddd;
-        border: 1px solid #ff0000;
+        background-color: var(--error);
+        color: var(--white);
         flex: 0 0 40px;
       }
       div.buttons {
-        background-color: lightgray;
+        background-color: var(--gray);
+        color: var(--white);
         padding: 5px;
         flex: 0 0 64px;
 
-        button {
-          height: 100%;
+        svg {
           float: right;
-          padding: 5px;
+          height: 100%;
+          font-size: 2.5em;
+
+          &:hover {
+            color: var(--green4);
+          }
         }
       }
     }
@@ -276,4 +314,5 @@ div.searchBar {
 
 div.loading-indicator {
   margin: 0 auto;
+  color: var(--green4);
 }

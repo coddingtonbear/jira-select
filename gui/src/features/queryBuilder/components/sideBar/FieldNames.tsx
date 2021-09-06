@@ -7,6 +7,7 @@ import slice, {
   useSelectedInstance,
 } from "../../queryBuilderSlice";
 import LoadingIndicator from "../LoadingIndicator";
+import { InputRounded } from "@material-ui/icons";
 import Search from "../Search";
 
 const FieldNames: React.FC = () => {
@@ -56,8 +57,13 @@ const FieldNames: React.FC = () => {
             {schema.map((fn) => {
               return (
                 <div className="field" key={fn.id}>
-                  <div className="id" onClick={() => onClickFunction(fn.id)}>
+                  <div
+                    className="id"
+                    onClick={() => onClickFunction(fn.id)}
+                    title="Insert field name into query"
+                  >
                     {fn.id}
+                    <InputRounded />
                   </div>
                   <div className="type">{fn.type}</div>
                   <div className="description">{fn.description}</div>

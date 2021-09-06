@@ -66,9 +66,7 @@ const Editor: React.FC = () => {
       />
       {error && <div className="error">{error} </div>}
       <div className="buttons">
-        <button onClick={onRunQuery}>
-          <PlayCircleOutline />
-        </button>
+        <PlayCircleOutline onClick={onRunQuery} />
         {running && <LoadingIndicator />}
       </div>
     </div>

@@ -9,6 +9,7 @@ import slice, {
 } from "../../queryBuilderSlice";
 import LoadingIndicator from "../LoadingIndicator";
 import Search from "../Search";
+import { InputRounded } from "@material-ui/icons";
 
 const Functions: React.FC = () => {
   const availableFunctions = useFunctionList();
@@ -74,7 +75,9 @@ const Functions: React.FC = () => {
                 <span
                   className="name"
                   onClick={() => onInsertFunctionName(fn.name)}
+                  title="Insert function name into query"
                 >
+                  <InputRounded />
                   {fn.name}
                 </span>
                 <span className="signature">{fn.signature}</span>
