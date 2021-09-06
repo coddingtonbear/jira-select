@@ -34,7 +34,7 @@ const Editor: React.FC = () => {
       }
     }
     dispatch(slice.actions.insertTextAtCursorCompleted());
-  }, [insertString]);
+  }, [insertString, dispatch]);
 
   const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     lineNumbers: "off",

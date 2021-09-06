@@ -39,7 +39,7 @@ const QueryBuilder: React.FC = () => {
     if (instances && instances.length === 0) {
       dispatch(slice.actions.showModal("createNew"));
     }
-  }, [instances]);
+  }, [instances, dispatch]);
 
   React.useEffect(() => {
     dispatch(populateIssueSchema());
@@ -55,7 +55,7 @@ const QueryBuilder: React.FC = () => {
 
   React.useEffect(() => {
     dispatch(populateFunctionList());
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="queryBuilder">
