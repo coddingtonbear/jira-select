@@ -4,6 +4,7 @@ import { useAppDispatch } from "../../../../store";
 import { useInstances, useSelectedInstance } from "../../queryBuilderSlice";
 import { populateInstanceList, populateIssueSchema } from "../../thunks";
 import slice from "../../queryBuilderSlice";
+import { Add } from "@material-ui/icons";
 
 const Settings: React.FC = () => {
   const instances = useInstances();
@@ -32,7 +33,6 @@ const Settings: React.FC = () => {
               dispatch(slice.actions.setSelectedInstance(evt.target.value))
             }
           >
-            {selectedInstance === undefined && <option></option>}
             {instances.map((instance) => {
               return (
                 <option value={instance.name} key={instance.name}>
@@ -41,6 +41,15 @@ const Settings: React.FC = () => {
               );
             })}
           </select>
+        </div>
+
+        <div className="instance-buttons">
+          <button
+            onClick={() => dispatch(slice.actions.showModal("createNew"))}
+          >
+            <Add />
+            <label>Add another instance</label>
+          </button>
         </div>
       </div>
     </div>

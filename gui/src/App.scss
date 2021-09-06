@@ -343,3 +343,99 @@ div.loading-indicator {
   margin: 0 auto;
   color: var(--green4);
 }
+
+button {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-color: transparent;
+  border: none;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+
+  color: var(--white);
+
+  svg.MuiSvgIcon-root {
+    height: 1em;
+    display: block;
+  }
+  label {
+    line-height: 1em;
+    font-size: 1em;
+  }
+
+  &:disabled {
+    color: var(--gray);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--gray);
+    }
+  }
+
+  &:hover {
+    color: var(--green4);
+    cursor: pointer;
+  }
+}
+
+div.modal-background {
+  position: absolute;
+  background-color: rgba(80, 75, 67, 0.9);
+  width: 100vw;
+  height: 100vh;
+
+  div.modal {
+    background-color: var(--gray2);
+    border: 1px solid var(--gray);
+    border-radius: 20px;
+
+    padding: 20px;
+    width: 50%;
+    height: 60%;
+
+    margin: 100px auto;
+
+    overflow: scroll;
+  }
+}
+
+div.modal.add-instance {
+  h3 {
+    text-align: center;
+  }
+
+  div.form {
+    width: 500px;
+    margin: 0 auto;
+
+    div.field {
+      label {
+        display: block;
+        font-weight: bold;
+      }
+      p {
+        margin: 0.25em 0em;
+        font-size: 0.9em;
+      }
+      input {
+        width: 100%;
+
+        &:focus {
+          outline: auto 2px var(--green4);
+        }
+      }
+      margin-bottom: 0.5em;
+    }
+    div.buttons {
+      float: right;
+    }
+    p.error {
+      float: left;
+    }
+  }
+}

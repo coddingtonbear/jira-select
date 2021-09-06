@@ -97,3 +97,29 @@ export async function getInstances(): Promise<JiraSelectInstance[]> {
 
   return JSON.parse(result.stdout);
 }
+
+export async function setupInstance(
+  url: string,
+  username: string,
+  password: string,
+  name: string
+): Promise<void> {
+  const result = await execute(
+    [
+      "--instance-name",
+      name,
+      "--instance-url",
+      url,
+      "--username",
+      username,
+      "setup-instance",
+    ],
+    password
+  );
+
+  if (result.code !== 0) {
+    throw new Error(
+      `Error encountered while setting-up instance ${result.code}: stderr: ${result.stderr}; stdout: ${result.stdout}`
+    );
+  }
+}

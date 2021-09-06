@@ -4,6 +4,7 @@ import { RootState } from "../../store";
 import {
   Editor,
   Grid,
+  ModalsShown,
   QueryBuilderState,
   Sidebar,
   SidebarOption,
@@ -22,6 +23,7 @@ const initialState: QueryBuilderState = {
   sidebar: { shown: false },
   expandedFunctions: [],
   schema: {},
+  modalsShown: {},
 };
 
 const reducers = {
@@ -88,6 +90,15 @@ const reducers = {
     }
     state.selectedInstance = action.payload;
   },
+  showModal: (
+    state: QueryBuilderState,
+    action: PayloadAction<keyof ModalsShown>
+  ) => {
+    state.modalsShown[action.payload] = true;
+  },
+  closeModal: (state: QueryBuilderState) => {
+    state.modalsShown = {};
+  },
 };
 
 const queryBuilderSlice = createSlice<
@@ -143,5 +154,8 @@ export const useSelectedInstance = (): string | undefined =>
 
 export const useExpandedFunctions = (): string[] =>
   useSelector((s: RootState) => s.queryEditor.expandedFunctions);
+
+export const useModalIsShown = (name: keyof ModalsShown): boolean =>
+  useSelector((s: RootState) => Boolean(s.queryEditor.modalsShown[name]));
 
 export default queryBuilderSlice;

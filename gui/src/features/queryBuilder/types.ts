@@ -31,6 +31,10 @@ export interface Sidebar {
   shown: boolean;
 }
 
+export interface ModalsShown {
+  createNew?: boolean;
+}
+
 export interface QueryBuilderState {
   selectedInstance?: string;
   instances: JiraSelectInstance[];
@@ -43,4 +47,6 @@ export interface QueryBuilderState {
   editor: Editor;
   grid: Grid;
   sidebar: Sidebar;
+
+  modalsShown: ModalsShown;
 }

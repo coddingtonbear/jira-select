@@ -107,3 +107,25 @@ export const populateInstanceList = createAsyncThunk<
     );
   }
 });
+
+export interface SetupInstanceRequest {
+  username: string;
+  password: string;
+  url: string;
+  name: string;
+}
+
+export const setupInstance = createAsyncThunk<
+  void,
+  SetupInstanceRequest,
+  { state: RootState }
+>("queryBuilder/setupInstance", async (params, thunkAPI) => {
+  await client.setupInstance(
+    params.url,
+    params.username,
+    params.password,
+    params.name
+  );
+
+  thunkAPI.dispatch(populateInstanceList());
+});

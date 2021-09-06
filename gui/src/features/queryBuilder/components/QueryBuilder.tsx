@@ -4,7 +4,10 @@ import Grid from "./Grid";
 import classnames from "classnames";
 
 import { Functions, Toc as FieldNames, Settings } from "@material-ui/icons";
-import slice, { useSidebarContext } from "../queryBuilderSlice";
+import slice, {
+  useModalIsShown,
+  useSidebarContext,
+} from "../queryBuilderSlice";
 import { useAppDispatch } from "../../../store";
 import { SidebarOption } from "../types";
 import { populateFunctionList } from "../thunks";
@@ -12,10 +15,13 @@ import { populateFunctionList } from "../thunks";
 import FunctionsSidebar from "./sideBar/Functions";
 import FieldNamesSidebar from "./sideBar/FieldNames";
 import SettingsSidebar from "./sideBar/Settings";
+import AddInstance from "./modal/AddInstance";
 
 const QueryBuilder: React.FC = () => {
   const { selected, shown } = useSidebarContext();
   const dispatch = useAppDispatch();
+
+  const addInstanceModalShown = useModalIsShown("createNew");
 
   function onToggleSidebar(name: SidebarOption) {
     if (shown && selected === name) {
@@ -73,6 +79,7 @@ const QueryBuilder: React.FC = () => {
         <Editor />
         <Grid />
       </div>
+      {addInstanceModalShown && <AddInstance />}
     </div>
   );
 };
