@@ -21,7 +21,7 @@ const Settings: React.FC = () => {
 
   return (
     <div className="settings">
-      <h2>Settings</h2>
+      <h2>Configuration</h2>
 
       <div className="setting">
         <label>Jira Instance:</label>

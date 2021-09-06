@@ -7,7 +7,7 @@
   --green3: #7dba84;
   --green4: #8fd694;
 
-  --white: #e0e0e0;
+  --white: #f0f0f0;
 
   --error: #ca4640;
 }
@@ -116,10 +116,10 @@ div.queryBuilder {
 
       h2 {
         text-align: center;
-        font-size: 1.2em;
-        font-weight: bold;
-        background-color: var(--green1);
+        font-size: 1em;
+        font-weight: normal;
         color: var(--white);
+        border-bottom: 1px solid var(--gray);
         margin: 0;
         margin-bottom: 20px;
       }
