@@ -278,20 +278,13 @@ div.queryBuilder {
         color: var(--white);
         flex: 0 0 40px;
       }
-      div.buttons {
+      div.footer {
         background-color: var(--gray);
         color: var(--white);
-        padding: 5px;
-        flex: 0 0 64px;
+        height: 64px;
 
-        svg {
+        div.buttons {
           float: right;
-          height: 100%;
-          font-size: 2.5em;
-
-          &:hover {
-            color: var(--green4);
-          }
         }
       }
     }
@@ -369,6 +362,7 @@ button {
   label {
     line-height: 24px;
     font-size: 1em;
+    margin-right: 5px;
     cursor: pointer;
   }
 

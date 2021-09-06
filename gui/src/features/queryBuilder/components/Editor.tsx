@@ -65,8 +65,13 @@ const Editor: React.FC = () => {
         onMount={onEditorMounted}
       />
       {error && <div className="error">{error} </div>}
-      <div className="buttons">
-        <PlayCircleOutline onClick={onRunQuery} />
+      <div className="footer">
+        <div className="buttons">
+          <button>
+            <label>Run</label>
+            <PlayCircleOutline onClick={onRunQuery} />
+          </button>
+        </div>
         {running && <LoadingIndicator />}
       </div>
     </div>
