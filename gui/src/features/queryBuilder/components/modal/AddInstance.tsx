@@ -66,7 +66,10 @@ const AddInstance: React.FC = () => {
         </div>
         <div className="field">
           <label>Password</label>
-          <p>The password for your account above, or an API token.</p>
+          <p>
+            The password for your account above, or an API token. This will be
+            stored in your system keyring.
+          </p>
           <input
             type="password"
             value={password}
