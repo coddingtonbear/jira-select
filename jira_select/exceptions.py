@@ -20,3 +20,7 @@ class QueryError(UserError):
 
 class FieldNameError(QueryError):
     pass
+
+
+class ExpressionParameterMissing(QueryError):
+    pass

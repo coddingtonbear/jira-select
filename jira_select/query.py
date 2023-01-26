@@ -14,7 +14,9 @@ from typing import Optional
 from typing import Tuple
 from typing import Type
 from typing import Union
+import re
 
+from dotmap import DotMap
 from jira import JIRA
 from jira import Issue
 from rich.progress import BarColumn
@@ -23,6 +25,7 @@ from rich.progress import TaskID
 from rich.progress import TimeRemainingColumn
 
 from .cache import MinimumRecencyCache
+from .exceptions import ExpressionParameterMissing
 from .plugin import BaseSource
 from .plugin import get_installed_functions
 from .plugin import get_installed_sources
@@ -39,6 +42,9 @@ from .utils import get_field_data
 from .utils import get_row_dict
 from .utils import parse_select_definition
 from .utils import parse_sort_by_definition
+
+
+PARAM_FINDER = re.compile(r"{params\.([^}]+)}")
 
 
 @total_ordering
@@ -91,6 +97,13 @@ class Result(metaclass=ABCMeta):
         field_name_map: Optional[Dict[str, str]] = None,
         functions: Optional[Dict[str, Callable]] = None,
     ):
+        expression_params = PARAM_FINDER.findall(expression)
+        for expression_param in expression_params:
+            if expression_param not in field_name_map.get('params', {}):
+                raise ExpressionParameterMissing(
+                    "Parameter {params.%s} found in expression, but no parameter was specified!" % expression_param
+                )
+
         if group_by is None:
             group_by = []
 
@@ -333,6 +346,7 @@ class Executor:
         definition: QueryDefinition,
         enable_cache: bool = True,
         progress_bar: bool = False,
+        parameters: Optional[Dict[str, str]] = None
     ):
         self._query: Query = Query(jira, definition)
         # self._definition: QueryDefinition = clean_query_definition(definition)
@@ -344,6 +358,7 @@ class Executor:
         if enable_cache:
             self._cache = MinimumRecencyCache(get_cache_path())
 
+        self._parameters: Dict[str, str] = parameters or {}
         self._field_name_map: Dict[str, str] = FieldNameMap()
 
     @property
@@ -368,7 +383,7 @@ class Executor:
             for jira_field in self.jira.fields():
                 self._field_name_map[jira_field["name"]] = jira_field["id"]
 
-        return self._field_name_map
+        return DotMap(self._field_name_map | {"params": self._parameters})
 
     def _get_jql(self) -> str:
         query = " AND ".join(f"({q})" for q in self.query.where)

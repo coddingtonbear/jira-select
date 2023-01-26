@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import sys
 from typing import Optional
+from typing import Tuple
 
 from yaml import safe_load
 
@@ -13,6 +14,10 @@ from ..plugin import BaseCommand
 from ..plugin import get_installed_formatters
 from ..query import Executor
 from ..types import QueryDefinition
+
+
+def parameter_tuple(value: str) -> Tuple[str, str]:
+    return value.split("=", 1)
 
 
 class Command(BaseCommand):
@@ -60,6 +65,13 @@ class Command(BaseCommand):
             action="store_true",
             help="Launch viewer immediately after completing query.",
         )
+        parser.add_argument(
+            "--param",
+            "-p",
+            dest="parameters",
+            nargs="*",
+            type=parameter_tuple
+        )
 
     @classmethod
     def get_help(cls) -> str:
@@ -82,6 +94,7 @@ class Command(BaseCommand):
             self.jira,
             query_definition,
             progress_bar=self.options.output is not sys.stdout,
+            parameters=dict(self.options.parameters or [])
         )
         with formatter_cls(query, self.options.output) as formatter:
             for row in query:
