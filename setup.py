@@ -117,6 +117,7 @@ setup(
             "simple_filter = jira_select.functions.simple_filter:Function",
             "simple_filter_any = jira_select.functions.simple_filter_any:Function",
             "parse_datetime = jira_select.functions.parse_datetime:Function",
+            "json_dumps = jira_select.functions.json_dumps:Function",
         ],
         "jira_select.sources": [
             "issues = jira_select.sources.issues:Source",

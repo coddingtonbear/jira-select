@@ -102,7 +102,6 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     ),
     # JSON
     "json_loads": json.loads,
-    "json_dumps": json.dumps,
 }
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 
