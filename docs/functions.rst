@@ -133,6 +133,65 @@ Jira
    have an entry having particular characteristics.
 
 
+Time Analysis
+-------------
+
+.. py:function:: workdays_in_state(changelog, state: str, start_hour: int = 9, end_hour: int = 17, timezone_name: str | None \ None, work_days: list[int] = [1, 2, 3, 4, 5], min_date: datetime.date = datetime.date(1, 1, 1), max_date: datetime.date = datetime.date(9999, 1, 1)) -> float
+
+   Calculates how many "work days" your returned Jira issue was in a given state
+   during the time period specified.
+
+   As we all know, it's very difficult to get an actual understanding of how much
+   time a given assignee has spent working on a given issue without asking them to
+   track it directly, but this function intends to get us at least a reasonably
+   good understanding of that by making some imperfect generalizations.
+
+   This function has one important caveat to note: it ignores any time an issue spends
+   in the relevant state outside the hours you specify for ``start_hour`` and
+   ``end_hour``; this compromise is made so we can get somewhat closer to the
+   actual amount of time a given issue was actively in progress.  The alternative
+   is that we count the hours when everybody is asleep and no issues are
+   changing status, and doing that would generally make it less clear how much
+   actual time an issue had a human's attention.  If you would like the alternative
+   behavior, specify a ``start_hour`` and ``end_hour`` of ``None``.
+
+   .. note::
+
+      You must use the ``expand`` option of ``changelog`` for Jira to
+      return to you changelog information in your query; eg:
+
+      .. code-block:: yaml
+
+         select:
+         - flatten_changelog(changelog)
+         from: issues
+         expand:
+         - changelog
+
+      If you do not provide the necessary ``expand`` option, this
+      function will raise an error.
+
+   Parameters:
+
+   - ``state``: The name of the state you would like to count time for
+     (e.g. "In Progress")
+   - ``start_hour``: The work day starting hour.  Defaults to 9 (i.e. 9 AM)
+   - ``end_hour``: The work day ending hour.  Defaults to 17 (i.e 5 PM)
+   - ``timezone_name``: The timezone to interpret ``start_hour`` and
+     ``end_hour`` in.
+   - ``work_days``: The days of the week to count as work days; 0 = Sunday,
+      1 = Monday... 6 = Saturday.
+   - ``min_date``: The minmimum date to use when processing changelog entries.
+     If an issue is in the relevant state at ``min_date`` at ``start_hour``,
+     ``min_date`` and ``start_hour`` will be used for calculating the time range
+     during which the issue was in the relevant state instead of using issue's
+     actual time range in that state.
+   - ``max_date``: The maximuim date to use when processing changelog entries.
+     If an issue is in the relevant state at ``max_date`` at ``end_hour``,
+     ``max_date`` and ``end_hour`` will be used for calculating the time range
+     during which the issue was in the relevant state instead of using issue's
+     actual time range in that state.
+
 Data Traversal
 --------------
 
@@ -176,6 +235,13 @@ Dates
 .. py:function:: parse_datetime(datetime_string: str, *args, **kwargs) -> datetime.datetime
 
    Parse a date string into a datetime object.
+
+   This relies on `python-dateutil`; there are many additional options available
+   that you can find documented `here <https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.parse>`_.
+
+.. py:function:: parse_date(date_string: str, *args, **kwargs) -> datetime.date
+
+   Parse a date string into a date object.
 
    This relies on `python-dateutil`; there are many additional options available
    that you can find documented `here <https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.parse>`_.
