@@ -44,8 +44,8 @@ but know that in real life, you're very unlikely to use them all at once:
 
 Below, we'll go over what each of these sections are for in detail.
 
-Overview
---------
+Query Structure Overview
+------------------------
 
 .. csv-table:: Jira-select Query Sections
    :file: evaluation_location.csv
