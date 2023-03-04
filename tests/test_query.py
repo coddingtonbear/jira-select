@@ -1,9 +1,12 @@
+import uuid
 from unittest.mock import Mock
 
+import pytest
 from dotmap import DotMap
 from jira import Issue
 from jira.resources import Resource
 
+from jira_select.exceptions import ExpressionParameterMissing
 from jira_select.query import Executor
 from jira_select.types import QueryDefinition
 
@@ -403,3 +406,38 @@ class TestQuery(JiraSelectTestCase):
         expected_results = 105
 
         assert expected_results == actual_results
+
+    def test_param_specified(self):
+        arbitrary_value = str(uuid.uuid4())
+
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["'{params.ok}' as \"value\""],
+                "from": "issues",
+                "where": [
+                    "'{params.ok}'",
+                ],
+                "cap": 1,
+            }
+        )
+
+        query = Executor(self.mock_jira, query, parameters={"ok": arbitrary_value})
+        results = list(query)
+
+        assert results[0]["value"] == arbitrary_value
+
+    def test_param_unspecified(self):
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["'{params.ok}'"],
+                "from": "issues",
+                "where": [
+                    "'{params.ok}'",
+                ],
+            }
+        )
+
+        query = Executor(self.mock_jira, query)
+
+        with pytest.raises(ExpressionParameterMissing):
+            list(query)
