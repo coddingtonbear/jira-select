@@ -17,7 +17,7 @@ from ..types import QueryDefinition
 
 
 def parameter_tuple(value: str) -> Tuple[str, str]:
-    return tuple(value.split("=", 1))
+    return tuple(value.split("=", 1))  # type: ignore
 
 
 class Command(BaseCommand):
@@ -72,6 +72,14 @@ class Command(BaseCommand):
             action="append",
             type=parameter_tuple,
         )
+        parser.add_argument(
+            "--no-cache",
+            "-n",
+            default=False,
+            action="store_true",
+            help="Do not use cached data.",
+            dest="no_cache",
+        )
 
     @classmethod
     def get_help(cls) -> str:
@@ -95,6 +103,7 @@ class Command(BaseCommand):
             query_definition,
             progress_bar=self.options.output is not sys.stdout,
             parameters=dict(self.options.parameters or []),
+            enable_cache=not self.options.no_cache,
         )
         with formatter_cls(query, self.options.output) as formatter:
             for row in query:

@@ -301,26 +301,6 @@ class NullProgressbar:
         pass
 
 
-class NullCache:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __getitem__(self, key):
-        raise KeyError(key)
-
-    def get(self, key, default=None, **kwargs) -> Optional[Any]:
-        return default
-
-    def touch(self, key, **kwargs):
-        return
-
-    def set(self, key, value, **kwargs):
-        return
-
-    def add(self, key, value, **kwargs):
-        return
-
-
 class CounterChannel:
     def __init__(self):
         self._counter: int = 2**32
@@ -358,10 +338,9 @@ class Executor:
         self._functions: Dict[str, Callable] = get_installed_functions(jira)
         self._progress_bar_enabled = progress_bar
 
-        self._cache: Union[MinimumRecencyCache, NullCache] = NullCache()
-        if enable_cache:
-            self._cache = MinimumRecencyCache(get_cache_path())
+        self._cache = MinimumRecencyCache(get_cache_path())
 
+        self._enable_cache = enable_cache
         self._parameters: Dict[str, str] = parameters or {}
         self._field_name_map: Dict[str, str] = FieldNameMap()
 
@@ -370,7 +349,7 @@ class Executor:
         return self._jira
 
     @property
-    def cache(self) -> Union[MinimumRecencyCache, NullCache]:
+    def cache(self) -> MinimumRecencyCache:
         return self._cache
 
     @property
@@ -421,7 +400,7 @@ class Executor:
             ]
         )
 
-        if self.query.cache:
+        if self.query.cache and self._enable_cache:
             try:
                 min_recency, _ = self.query.cache
                 if min_recency is None:
