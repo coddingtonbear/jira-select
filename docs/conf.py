@@ -19,7 +19,7 @@ from typing import Dict
 # -- Project information -----------------------------------------------------
 
 project = "Jira-Select"
-copyright = "2020, Adam Coddington"
+copyright = "2022, Adam Coddington"
 author = "Adam Coddington"
 
 # The short X.Y version

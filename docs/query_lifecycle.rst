@@ -13,8 +13,8 @@ Query Lifecycle
           end
         end
         subgraph Local
-            limit-->filter
-            filter-->group_by
+            limit-->filt[Filter]
+            filt[Filter]-->group_by
             group_by-->having
             having-->sort_by
             sort_by-->cap
