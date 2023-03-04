@@ -40,6 +40,7 @@ if TYPE_CHECKING:
 FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
 SORT_BY_DESC_FN = re.compile(r"^(?P<expression>.*) DESC", re.IGNORECASE)
 SORT_BY_ASC_FN = re.compile(r"^(?P<expression>.*) ASC", re.IGNORECASE)
+PARAM_FINDER = re.compile(r"{params\.([^}]+)}")
 
 
 logger = logging.getLogger(__name__)
@@ -278,3 +279,14 @@ def launch_default_viewer(relpath: str) -> None:
             "Could not determine method of launching default "
             f"interpreter for platform {sys.platform}."
         )
+
+
+def find_missing_parameters(expression: str, known_params: List[str]) -> List[str]:
+    missing_parameters: List[str] = []
+
+    expression_params = PARAM_FINDER.findall(expression)
+    for expression_param in expression_params:
+        if expression_param not in known_params:
+            missing_parameters.append(expression_param)
+
+    return missing_parameters

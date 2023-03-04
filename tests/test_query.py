@@ -407,16 +407,13 @@ class TestQuery(JiraSelectTestCase):
 
         assert expected_results == actual_results
 
-    def test_param_specified(self):
+    def test_param_expression_specified(self):
         arbitrary_value = str(uuid.uuid4())
 
         query = QueryDefinition.parse_obj(
             {
                 "select": ["'{params.ok}' as \"value\""],
                 "from": "issues",
-                "where": [
-                    "'{params.ok}'",
-                ],
                 "cap": 1,
             }
         )
@@ -426,14 +423,12 @@ class TestQuery(JiraSelectTestCase):
 
         assert results[0]["value"] == arbitrary_value
 
-    def test_param_unspecified(self):
+    def test_param_expression_unspecified(self):
         query = QueryDefinition.parse_obj(
             {
                 "select": ["'{params.ok}'"],
                 "from": "issues",
-                "where": [
-                    "'{params.ok}'",
-                ],
+                "cap": 1,
             }
         )
 
@@ -441,3 +436,38 @@ class TestQuery(JiraSelectTestCase):
 
         with pytest.raises(ExpressionParameterMissing):
             list(query)
+
+    def test_param_jql_specified(self):
+        arbitrary_value = str(uuid.uuid4())
+
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["'{params.ok}' as \"value\""],
+                "from": "issues",
+                "where": [
+                    '"{params.ok}"',
+                ],
+                "cap": 1,
+            }
+        )
+
+        query = Executor(self.mock_jira, query, parameters={"ok": arbitrary_value})
+
+        assert arbitrary_value in query._get_jql()
+
+    def test_param_jql_unspecified(self):
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["'{params.ok}' as \"value\""],
+                "from": "issues",
+                "where": [
+                    '"{params.ok}"',
+                ],
+                "cap": 1,
+            }
+        )
+
+        query = Executor(self.mock_jira, query)
+
+        with pytest.raises(ExpressionParameterMissing):
+            query._get_jql()

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from abc import ABCMeta
 from abc import abstractmethod
 from functools import total_ordering
@@ -15,6 +14,7 @@ from typing import Optional
 from typing import Tuple
 from typing import Type
 from typing import Union
+from typing import cast
 
 from dotmap import DotMap
 from jira import JIRA
@@ -37,13 +37,12 @@ from .types import SelectFieldDefinition
 from .types import WhereParamDict
 from .utils import calculate_result_hash
 from .utils import expression_includes_group_by
+from .utils import find_missing_parameters
 from .utils import get_cache_path
 from .utils import get_field_data
 from .utils import get_row_dict
 from .utils import parse_select_definition
 from .utils import parse_sort_by_definition
-
-PARAM_FINDER = re.compile(r"{params\.([^}]+)}")
 
 
 @total_ordering
@@ -93,19 +92,21 @@ class Result(metaclass=ABCMeta):
         self,
         expression: Expression,
         group_by: Optional[ExpressionList] = None,
-        field_name_map: Optional[Dict[str, str]] = None,
+        field_name_map: Optional[Dict[str, Any]] = None,
         functions: Optional[Dict[str, Callable]] = None,
     ):
-        expression_params = PARAM_FINDER.findall(expression)
-        for expression_param in expression_params:
-            if (
-                field_name_map is not None
-                and expression_param not in field_name_map.get("params", {})
-            ):
-                raise ExpressionParameterMissing(
-                    "Parameter {params.%s} found in expression, but no parameter was specified!"
-                    % expression_param
-                )
+        params: Dict[str, str] = cast(
+            Dict[str, str],
+            field_name_map.get("params", {}) if field_name_map is not None else {},
+        )
+        if missing := find_missing_parameters(
+            expression,
+            list(params.keys()),
+        ):
+            raise ExpressionParameterMissing(
+                "Parameter {params.%s} found in expression, but no parameter was specified!"
+                % missing[0]
+            )
 
         if group_by is None:
             group_by = []
@@ -392,6 +393,15 @@ class Executor:
 
     def _get_jql(self) -> str:
         query = " AND ".join(f"({q})" for q in self.query.where)
+
+        if missing := find_missing_parameters(query, list(self._parameters.keys())):
+            raise ExpressionParameterMissing(
+                "Parameter {params.%s} found in expression, but no parameter was specified!"
+                % missing[0]
+            )
+
+        query = query.format(params=DotMap(self._parameters))
+
         order_by_fields = ", ".join(self.query.order_by)
 
         if order_by_fields:
