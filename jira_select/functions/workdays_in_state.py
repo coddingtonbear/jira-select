@@ -1,5 +1,6 @@
 import datetime
 from typing import Any
+from typing import Optional
 
 from dateutil.tz import tzlocal
 from pytz import UTC
@@ -17,9 +18,9 @@ class Function(BaseFunction):
         self,
         changelog: Any,
         state: str,
-        start_hour: int | None = 9,
-        end_hour: int | None = 17,
-        timezone_name: str | None = None,
+        start_hour: Optional[int] = 9,
+        end_hour: Optional[int] = 17,
+        timezone_name: Optional[str] = None,
         work_days: list[int] = [1, 2, 3, 4, 5],
         min_date: datetime.date = datetime.date(1, 1, 1),
         max_date: datetime.date = datetime.date(9999, 1, 1),
