@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from abc import ABCMeta
 from abc import abstractmethod
 from functools import total_ordering
@@ -14,7 +15,6 @@ from typing import Optional
 from typing import Tuple
 from typing import Type
 from typing import Union
-import re
 
 from dotmap import DotMap
 from jira import JIRA
@@ -42,7 +42,6 @@ from .utils import get_field_data
 from .utils import get_row_dict
 from .utils import parse_select_definition
 from .utils import parse_sort_by_definition
-
 
 PARAM_FINDER = re.compile(r"{params\.([^}]+)}")
 
@@ -99,9 +98,13 @@ class Result(metaclass=ABCMeta):
     ):
         expression_params = PARAM_FINDER.findall(expression)
         for expression_param in expression_params:
-            if expression_param not in field_name_map.get('params', {}):
+            if (
+                field_name_map is not None
+                and expression_param not in field_name_map.get("params", {})
+            ):
                 raise ExpressionParameterMissing(
-                    "Parameter {params.%s} found in expression, but no parameter was specified!" % expression_param
+                    "Parameter {params.%s} found in expression, but no parameter was specified!"
+                    % expression_param
                 )
 
         if group_by is None:
@@ -319,7 +322,7 @@ class NullCache:
 
 class CounterChannel:
     def __init__(self):
-        self._counter: int = 2 ** 32
+        self._counter: int = 2**32
 
     def zero(self):
         self._counter = 0
@@ -346,7 +349,7 @@ class Executor:
         definition: QueryDefinition,
         enable_cache: bool = True,
         progress_bar: bool = False,
-        parameters: Optional[Dict[str, str]] = None
+        parameters: Optional[Dict[str, str]] = None,
     ):
         self._query: Query = Query(jira, definition)
         # self._definition: QueryDefinition = clean_query_definition(definition)
@@ -378,12 +381,15 @@ class Executor:
         return self._functions
 
     @property
-    def field_name_map(self) -> Dict[str, str]:
+    def field_name_map(self) -> DotMap:
         if not self._field_name_map:
             for jira_field in self.jira.fields():
                 self._field_name_map[jira_field["name"]] = jira_field["id"]
 
-        return DotMap(self._field_name_map | {"params": self._parameters})
+        field_name_map: Dict[str, Any] = self._field_name_map
+        field_name_map["params"] = self._parameters
+
+        return DotMap(field_name_map)
 
     def _get_jql(self) -> str:
         query = " AND ".join(f"({q})" for q in self.query.where)

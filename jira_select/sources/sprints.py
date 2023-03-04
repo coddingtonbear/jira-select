@@ -23,8 +23,8 @@ class Source(BaseSource):
 
     def __iter__(self) -> Iterator[Dict]:
         start_at = 0
-        max_results = 2 ** 32
-        result_limit = self.query.limit or 2 ** 32
+        max_results = 2**32
+        result_limit = self.query.limit or 2**32
 
         if self.query.order_by:
             raise QueryError(

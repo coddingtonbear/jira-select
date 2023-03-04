@@ -1,8 +1,10 @@
 import errno
 import time
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
 
-from diskcache.core import Cache, EVICTION_POLICY
+from diskcache.core import EVICTION_POLICY
+from diskcache.core import Cache
 
 
 class MinimumRecencyCache(Cache):
@@ -14,7 +16,7 @@ class MinimumRecencyCache(Cache):
         expire_time=False,
         tag=False,
         retry=False,
-        min_recency=2 ** 32,
+        min_recency=2**32,
     ) -> Optional[Any]:
         """Retrieve value from cache. If `key` is missing, return `default`.
 
