@@ -2,7 +2,6 @@ from typing import Any
 from typing import Optional
 
 from dateutil.parser import parse as parse_datetime
-from pytz import UTC
 
 from jira_select.plugin import BaseFunction
 
