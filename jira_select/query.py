@@ -381,15 +381,14 @@ class Executor:
         return self._functions
 
     @property
-    def field_name_map(self) -> DotMap:
+    def field_name_map(self) -> Dict[str, Any]:
         if not self._field_name_map:
             for jira_field in self.jira.fields():
                 self._field_name_map[jira_field["name"]] = jira_field["id"]
 
-        field_name_map: Dict[str, Any] = self._field_name_map
-        field_name_map["params"] = self._parameters
+            self._field_name_map["params"] = DotMap(self._parameters)
 
-        return DotMap(field_name_map)
+        return self._field_name_map
 
     def _get_jql(self) -> str:
         query = " AND ".join(f"({q})" for q in self.query.where)

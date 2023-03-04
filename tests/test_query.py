@@ -251,6 +251,7 @@ class TestQuery(JiraSelectTestCase):
         expected_result = {
             "Story Points": "customfield10010",
             "Sprint": "customfield10011",
+            "params": DotMap(),
         }
         actual_result = query.field_name_map
 
