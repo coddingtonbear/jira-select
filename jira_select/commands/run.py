@@ -17,7 +17,7 @@ from ..types import QueryDefinition
 
 
 def parameter_tuple(value: str) -> Tuple[str, str]:
-    return value.split("=", 1)
+    return tuple(value.split("=", 1))
 
 
 class Command(BaseCommand):
@@ -69,8 +69,8 @@ class Command(BaseCommand):
             "--param",
             "-p",
             dest="parameters",
-            nargs="*",
-            type=parameter_tuple
+            action="append",
+            type=parameter_tuple,
         )
 
     @classmethod
@@ -94,7 +94,7 @@ class Command(BaseCommand):
             self.jira,
             query_definition,
             progress_bar=self.options.output is not sys.stdout,
-            parameters=dict(self.options.parameters or [])
+            parameters=dict(self.options.parameters or []),
         )
         with formatter_cls(query, self.options.output) as formatter:
             for row in query:
