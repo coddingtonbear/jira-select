@@ -146,14 +146,39 @@ Time Analysis
    track it directly, but this function intends to get us at least a reasonably
    good understanding of that by making some imperfect generalizations.
 
-   This function has one important caveat to note: it ignores any time an issue spends
-   in the relevant state outside the hours you specify for ``start_hour`` and
-   ``end_hour``; this compromise is made so we can get somewhat closer to the
-   actual amount of time a given issue was actively in progress.  The alternative
-   is that we count the hours when everybody is asleep and no issues are
-   changing status, and doing that would generally make it less clear how much
-   actual time an issue had a human's attention.  If you would like the alternative
-   behavior, specify a ``start_hour`` and ``end_hour`` of ``None``.
+   .. note::
+
+      A naive implementation of this function might use actual clock time, but
+      consider the following two situations:
+
+      - MYPROJECT-01 moves from "To Do" into "In Progress" at 4:55PM, just
+        five minutes before the end of the day, then the next day moves
+        from "In Progress" into "Done" at 9:05AM, five minutes after the
+        beginning of the next day.
+      - MYPROJECT-02 moves from "To Do" into "In Progress" at 10:00AM and
+        in the same day from "In Progress" into "Done" at 4:00PM.
+
+      Clearly, MYPROJECT-02 was being "worked on" for more time than
+      MYPROJECT-01, but let's see how various algorithms might measure
+      that time.
+
+      If we use clock time:
+
+      - MYPROJECT-01: 16.2h (81 times more than the actual working time)
+      - MYPROJECT-02: 6h
+
+      If we only measure time happening between 9A and 5P:
+
+      - MYPROJECT-01: 0.2h (the actual working time)
+      - MYPROJECT-02: 6h (the actual working time)
+
+      Of course, this does introduce one inaccuracy that may, depending on
+      how predicable your team's working hours are: time spent working on
+      an issue outside of business hours isn't counted.
+
+      If you would like to instead use clock time even knowing the
+      distortions using that may create, you can do so by specifying
+      a ``start_hour`` and ``end_hour`` of ``None``.
 
    .. note::
 
