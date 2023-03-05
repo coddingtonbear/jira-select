@@ -4,6 +4,7 @@ env/
 *.pyc
 *.egg-info
 .eggs
+.python-version
 build/
 dist/
 pyinstaller/build/
