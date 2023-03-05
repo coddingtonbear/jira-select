@@ -4,24 +4,24 @@ Query Lifecycle
 .. mermaid::
 
    graph LR
-        req([Request])
-        req-->where
-        subgraph Cacheable
-          subgraph Remote
-              where-->order_by
-              order_by-->limit
-          end
-        end
-        subgraph Local
-            limit-->filt[Filter]
-            filt[Filter]-->group_by
-            group_by-->having
-            having-->sort_by
-            sort_by-->cap
-            cap-->select
-        end
-        result([Display])
-        select-->result
+     req([Request])
+     req-->where
+     subgraph Cacheable
+       subgraph Remote
+           where-->order_by
+           order_by-->limit
+       end
+     end
+     subgraph Local
+       limit-->filt[filter]
+       filt[filter]-->group_by
+       group_by-->having
+       having-->sort_by
+       sort_by-->cap
+       cap-->select
+     end
+     result([Display])
+     select-->result
 
 Jira-select queries are evaluated in many steps across two phases:
 
