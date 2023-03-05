@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import io
+import os
 from glob import glob
 from os.path import basename
 from os.path import dirname
@@ -9,6 +10,18 @@ from os.path import splitext
 
 from setuptools import find_packages
 from setuptools import setup
+
+requirements_path = os.path.join(
+    os.path.dirname(__file__),
+    "requirements.txt",
+)
+requirements = []
+with open(requirements_path, "r") as in_:
+    requirements = [
+        req.strip()
+        for req in in_.readlines()
+        if not req.startswith("-") and not req.startswith("#")
+    ]
 
 
 def read(*names, **kwargs):
@@ -62,25 +75,7 @@ setup(
         "sql",
     ],
     python_requires=">=3.6",
-    install_requires=[
-        "rich>=3.3.2,<4.0.0",
-        "appdirs>=1.4.4,<2.0.0",
-        "keyring>=21.2.1,<23.0.0",
-        "jira>=2.0.0,<3.0.0",
-        "python-dateutil>=2.8.1,<3.0.0",
-        "pyyaml>=5.3.1,<6.0.0",
-        "simpleeval>=0.9.10,<1.0",
-        "prompt-toolkit>=3.0.5,<4.0.0",
-        "dotmap>=1.3.17,<2.0.0",
-        "typing_extensions>=3.7.4.2,<4.0.0.0",
-        "visidata>=1.0.0",
-        "pygments>=2.6.1,<3.0.0",
-        "diskcache>=4.1.0,<5.0.0",
-        "queryablelist>=3.1.0,<4.0.0",
-        "pytz",
-        "safdie>=2.0.0,<3.0",
-        "pydantic>=1.8.2,<2.0",
-    ],
+    install_requires=requirements,
     extras_require={},
     entry_points={
         "console_scripts": ["jira-select = jira_select.cmdline:main"],
