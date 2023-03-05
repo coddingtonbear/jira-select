@@ -1,10 +1,10 @@
-rich>=3.3.2,<4.0.0
+rich>=13.3.2,<14.0
 appdirs>=1.4.4,<2.0.0
 keyring>=21.2.1,<23.0.0
 jira>=2.0.0,<3.0.0
 python-dateutil>=2.8.1,<3.0.0
 pyyaml>=5.3.1,<6.0.0
-git+https://github.com/danthedeckie/simpleeval.git@8b4b377e7394e3e0361dc12a04aa1da1864bc519#egg=simpleeval
+simpleeval>=0.9.13,<1.0
 prompt-toolkit>=3.0.5,<4.0.0
 dotmap>=1.3.17,<2.0.0
 typing_extensions>=4.5.0,<5.0
