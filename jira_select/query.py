@@ -72,13 +72,27 @@ class NullAcceptableSort:
 
 
 class Result(metaclass=ABCMeta):
-    def __getattr__(self, name):
-        result = self.as_dict()
+    _overlays: List[Dict[str, Any]]
 
+    def __init__(self):
+        self._overlays = []
+
+        super().__init__()
+
+    def __getattr__(self, name) -> Any:
+        # If our overlays contain this field, return that instead
+        for overlay in self._overlays:
+            if name in overlay:
+                return overlay[name]
+
+        # Otherwise, return from the jira row (or group of jira rows)
+        result = self.as_dict()
         if name not in result:
             raise AttributeError(name)
-
         return result[name]
+
+    def add_overlay(self, data: Dict[str, Any]) -> None:
+        self._overlays.append(data)
 
     @abstractmethod
     def as_dict(self) -> Dict[str, Any]:
@@ -127,8 +141,12 @@ class Result(metaclass=ABCMeta):
 
 
 class SingleResult(Result):
+    _row: Issue
+
     def __init__(self, row: Any):
         self._row = row
+
+        super().__init__()
 
     def as_dict(self) -> Dict[str, Any]:
         return get_row_dict(self._row)
@@ -150,6 +168,8 @@ class GroupedFieldContainer(list):
 
 
 class GroupedResult(Result):
+    _rows: List[SingleResult]
+
     def __init__(
         self,
         rows: List[SingleResult] = None,
@@ -452,6 +472,24 @@ class Executor:
 
             self.progress.update(task, advance=1)
 
+    def _process_select(
+        self,
+        iterator: Iterator[Result],
+        task: TaskID,
+        input_channel: CounterChannel,
+        output_channel: CounterChannel,
+    ) -> Iterator[Result]:
+        output_channel.zero()
+
+        for row in iterator:
+            self.progress.update(task, total=input_channel.get(), visible=True)
+
+            row.add_overlay(self._generate_row_dict(row))
+
+            yield row
+
+            self.progress.update(task, advance=1)
+
     def _process_group_by(
         self,
         iterator: Iterator[Result],
@@ -584,6 +622,13 @@ class Executor:
                     group_by_task,
                 ),
             )
+        select_task = self.progress.add_task("select", total=0, visible=False)
+        phases.append(
+            (
+                self._process_select,
+                select_task,
+            )
+        )
         if self.query.having:
             having_task = self.progress.add_task("having", total=0, visible=False)
             phases.append(
@@ -600,7 +645,6 @@ class Executor:
                     sort_by_task,
                 ),
             )
-        select_task = self.progress.add_task("select", total=0, visible=False)
 
         # Link up each generator with its source; these will vary
         # depending on what query feature are in use
@@ -612,9 +656,10 @@ class Executor:
             channel = output_channel
 
         for row in cursor:
-            self.progress.update(select_task, total=channel.get(), visible=True)
-            yield self._generate_row_dict(row)
-            self.progress.update(select_task, advance=1)
+            yield {
+                field_defn.column: getattr(row, field_defn.column)
+                for field_defn in self.query.select
+            }
 
     @property
     def progress(self) -> Union[Progress, NullProgressbar]:

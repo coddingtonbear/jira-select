@@ -15,13 +15,13 @@ Query Lifecycle
      subgraph Local
        limit-->filt[filter]
        filt[filter]-->group_by
-       group_by-->having
+       group_by-->select
+       select-->having
        having-->sort_by
        sort_by-->cap
-       cap-->select
+       cap-->result
      end
      result([Display])
-     select-->result
 
 Jira-select queries are evaluated in many steps across two phases:
 
