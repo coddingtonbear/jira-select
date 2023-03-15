@@ -52,6 +52,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--disable-progressbars",
+            "-b",
             action="store_false",
             default=True,
             dest="enable_progressbars",

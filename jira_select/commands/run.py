@@ -74,11 +74,19 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--no-cache",
-            "-n",
-            default=False,
-            action="store_true",
+            "-c",
+            default=True,
+            action="store_false",
             help="Do not use cached data.",
-            dest="no_cache",
+            dest="cache",
+        )
+        parser.add_argument(
+            "--disable-progressbars",
+            "-b",
+            default=True,
+            action="store_false",
+            help="",
+            dest="progressbar",
         )
 
     @classmethod
@@ -101,9 +109,11 @@ class Command(BaseCommand):
         query = Executor(
             self.jira,
             query_definition,
-            progress_bar=self.options.output is not sys.stdout,
+            progress_bar=(self.options.output is not sys.stdout.buffer)
+            if self.options.progressbar
+            else False,
             parameters=dict(self.options.parameters or []),
-            enable_cache=not self.options.no_cache,
+            enable_cache=self.options.cache,
         )
         with formatter_cls(query, self.options.output) as formatter:
             for row in query:
