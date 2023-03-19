@@ -72,12 +72,6 @@ Jira
            - {Story Points} as "Story Points"
          from: issues
 
-   .. note::
-
-      You will almost certainly want to provide the parameter named ``_``
-      (an underscore) as the first argument to this function.
-      Jira-select provides the raw row data to functions under this variable name.
-
    In Jira, custom fields are usually named something like ``customfield_10024``
    which is, for most people, somewhat difficult to remember.  You can use
    this function to get the field value for a field by its display name instead
@@ -88,7 +82,7 @@ Jira
    .. code-block:: yaml
 
       select
-        - field_by_name(_, "Story Points") as "Story Points"
+        - field_by_name(issue, "Story Points") as "Story Points"
       from: issues
 
 .. py:function:: estimate_to_days(estimate_string: str, day_hour_count=8) -> Optional[float]
