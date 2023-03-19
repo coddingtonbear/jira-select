@@ -18,7 +18,6 @@ from typing import cast
 
 from dotmap import DotMap
 from jira import JIRA
-from jira import Issue
 from rich.progress import BarColumn
 from rich.progress import Progress
 from rich.progress import TaskID
@@ -412,7 +411,7 @@ class Executor:
                 source.update_count(len(cached_results))
                 source.remove_progress()
                 for result in cached_results:
-                    yield SingleResult(Issue({}, None, result))
+                    yield SingleResult(source.rehydrate(result))
                 return
             except KeyError:
                 pass

@@ -1,3 +1,4 @@
+import weakref
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -105,4 +106,19 @@ class Source(BaseSource):
                     break
 
     def rehydrate(self, value: Dict) -> Issue:
-        return Issue({}, None, value)
+        issue = Issue({}, None, value)
+
+        if hasattr(issue, "changelog"):
+            # the `changelog` contains only the _changes_ that have taken
+            # place to the issue, but provides no way of undersatnding
+            # the issue's original state.  Given that most uses of
+            # the changelog in this tool depend on our being able to do
+            # things like, e.g. understand the state of an issue at
+            # a particular point in time, that's a problem because
+            # the issue's initial state is not recorded in the changelog
+            # and we'd need the issue object itself for calculating it.
+            # Let's retain a weak reference to that original issue object
+            # so we can do that when necessary.
+            issue.changelog._issue = weakref.proxy(issue)
+
+        return issue
