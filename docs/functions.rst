@@ -136,8 +136,41 @@ Jira
    have an entry having particular characteristics.
 
 
-Time Analysis
--------------
+Changelog Analysis
+------------------
+
+.. py:function:: changelog_time_ranges(issue, **constraints) -> List[Tuple[datetime.datetime, datetime.datetime]]
+
+   ..
+
+     This is going to be a little complex.
+
+     1. Understanding how `fromValue` and `fromString` differ from the field's
+        actual value.
+     2. Constructing the initial state by playing the issue changelog backward.
+
+   ::
+
+      changelog_time_ranges(
+         issue,
+         field_name="X"
+         another_field="Y"
+      )
+
+.. py:function:: changelog_transitions(issue, **constraints) -> List[ChangelogEntry]
+
+   ..
+
+      This one is a bit simpler than `changelog_time_ranges`; we just need to
+      use `simple_filter` on the flattened changelog.
+
+   ::
+
+      changelog_transitions(
+         issue,
+         fromString="",
+         toString="",
+      )
 
 .. py:function:: workdays_in_state(changelog, state: str, start_hour: int = 9, end_hour: int = 17, timezone_name: str | None \ None, work_days: list[int] = [1, 2, 3, 4, 5], min_date: datetime.date = datetime.date(1, 1, 1), max_date: datetime.date = datetime.date(9999, 1, 1)) -> float
 
