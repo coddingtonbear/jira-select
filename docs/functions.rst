@@ -7,6 +7,15 @@ add your own if these are not enough.
 Jira
 ----
 
+.. py:function:: get_issue(ticket_number: str) -> jira.resources.Issue
+
+   Fetch a Jira issue by its issue key (e.g. ``MYPROJECT-1045``).
+
+   This will return a ``jira.resources.Issue`` object; you can access
+   most fields via its ``fields`` property, eg::
+
+      get_issue(field_holding_issue_key).fields.summary
+
 .. py:function:: sprint_name(sprint_blob: str) -> Optional[str]
 
    Shortcut for returning the name of a sprint via its ID.  Equivalent

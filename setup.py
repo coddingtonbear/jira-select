@@ -114,6 +114,7 @@ setup(
             "parse_datetime = jira_select.functions.parse_datetime:Function",
             "parse_date = jira_select.functions.parse_date:Function",
             "json_dumps = jira_select.functions.json_dumps:Function",
+            "get_issue = jira_select.functions.get_issue:Function",
             "workdays_in_state = jira_select.functions.workdays_in_state:Function",
         ],
         "jira_select.sources": [
