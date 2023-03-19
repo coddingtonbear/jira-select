@@ -148,8 +148,8 @@ Time Analysis
 
    .. note::
 
-      A naive implementation of this function might use actual clock time, but
-      consider the following two situations:
+      A naive implementation of this function might use actual, raw clock time,
+      but consider the following two situations:
 
       - MYPROJECT-01 moves from "To Do" into "In Progress" at 4:55PM, just
         five minutes before the end of the day, then the next day moves
@@ -162,7 +162,7 @@ Time Analysis
       MYPROJECT-01, but let's see how various algorithms might measure
       that time.
 
-      If we use clock time:
+      If we use raw clock time:
 
       - MYPROJECT-01: 16.2h (81 times more than the actual working time)
       - MYPROJECT-02: 6h
@@ -172,11 +172,17 @@ Time Analysis
       - MYPROJECT-01: 0.2h (the actual working time)
       - MYPROJECT-02: 6h (the actual working time)
 
-      Of course, this does introduce one inaccuracy that may, depending on
-      how predicable your team's working hours are: time spent working on
-      an issue outside of business hours isn't counted.
+      Of course, this does introduce one inaccuracy that may,
+      depending on how predicable your team's working hours are,
+      make this behavior undesirable:
+      time spent working on an issue outside of business hours isn't counted.
+      Typically, though,
+      the amount of time an issue might be worked on outside those hours
+      will be much smaller
+      than the amount of excess time
+      using raw clock time directly would count.
 
-      If you would like to instead use clock time even knowing the
+      If you would like to instead use raw clock time even knowing the
       distortions using that may create, you can do so by specifying
       a ``start_hour`` and ``end_hour`` of ``None``.
 
