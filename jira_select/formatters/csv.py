@@ -8,6 +8,8 @@ from ..plugin import BaseFormatter
 
 
 class Formatter(BaseFormatter):
+    delimiter = ","
+
     @classmethod
     def get_file_extension(cls) -> str:
         return "csv"
@@ -26,7 +28,9 @@ class Formatter(BaseFormatter):
             self.stream, encoding="utf-8", write_through=True, newline=""
         )
         self.out = csv.DictWriter(
-            self._wrapped_stream, fieldnames=self._generate_fieldnames()
+            self._wrapped_stream,
+            fieldnames=self._generate_fieldnames(),
+            delimiter=self.delimiter,
         )
         self.out.writeheader()
 
