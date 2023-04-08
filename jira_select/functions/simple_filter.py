@@ -7,6 +7,12 @@ from QueryableList import QueryableListMixed
 from ..plugin import BaseFunction
 
 
+def simple_filter(iterable: Iterable[Any], **query: Dict[str, Any]) -> Iterable[Any]:
+    queryable = QueryableListMixed(iterable)
+
+    return queryable.filter(**query)
+
+
 class Function(BaseFunction):
     """Returns entries in an iterable matching a provided django-style query.
 
@@ -18,6 +24,4 @@ class Function(BaseFunction):
     def __call__(  # type: ignore[override]
         self, iterable: Iterable[Any], **query: Dict[str, Any]
     ) -> Iterable[Any]:
-        queryable = QueryableListMixed(iterable)
-
-        return queryable.filter(**query)
+        return simple_filter(iterable, **query)

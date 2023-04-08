@@ -1,6 +1,6 @@
 import datetime
 from typing import Any
-from typing import List
+from typing import Iterable
 from typing import Optional
 
 from dateutil.tz import tzlocal
@@ -9,7 +9,7 @@ from pytz import timezone
 
 from jira_select.plugin import BaseFunction
 
-from .flatten_changelog import Function as FlattenChangelog
+from .flatten_changelog import flatten_changelog
 
 
 class Function(BaseFunction):
@@ -22,14 +22,14 @@ class Function(BaseFunction):
         start_hour: Optional[int] = 9,
         end_hour: Optional[int] = 17,
         timezone_name: Optional[str] = None,
-        work_days: List[int] = [1, 2, 3, 4, 5],
+        work_days: Iterable[int] = (1, 2, 3, 4, 5),
         min_date: datetime.date = datetime.date(1, 1, 1),
         max_date: datetime.date = datetime.date(9999, 1, 1),
-    ):
+    ) -> float:
         tz = timezone(timezone_name) if timezone_name is not None else tzlocal()
 
         flattened_changelog = sorted(
-            FlattenChangelog(self.jira)(changelog),
+            flatten_changelog(changelog),
             key=lambda row: row.created if row.created else datetime.date(1, 1, 1),
         )
 

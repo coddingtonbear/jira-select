@@ -1,6 +1,7 @@
 import datetime
 from dataclasses import dataclass
 from typing import Any
+from typing import Iterator
 from typing import List
 from typing import Optional
 
@@ -23,6 +24,26 @@ class ChangelogEntry:
     toString: Optional[str] = None
 
 
+def flatten_changelog(changelog: Any) -> Iterator[ChangelogEntry]:
+    for entry in changelog.histories:
+        author = str(entry.author)
+        created = parse_date(entry.created)
+        id = int(entry.id)
+
+        for item in entry.items:
+            yield ChangelogEntry(
+                author=author,
+                created=created,
+                id=id,
+                field=item.field,
+                fieldtype=item.fieldtype,
+                fromValue=getattr(item, "from"),  # noqa
+                fromString=item.fromString,
+                toValue=getattr(item, "to"),  # noqa
+                toString=item.toString,
+            )
+
+
 class Function(BaseFunction):
     """Returns a flattened list of changelog entries.
 
@@ -38,26 +59,4 @@ class Function(BaseFunction):
                 "option of ``changelog`` in your query?"
             )
 
-        flattened: List[ChangelogEntry] = []
-
-        for entry in changelog.histories:
-            author = str(entry.author)
-            created = parse_date(entry.created)
-            id = int(entry.id)
-
-            for item in entry.items:
-                flattened.append(
-                    ChangelogEntry(
-                        author=author,
-                        created=created,
-                        id=id,
-                        field=item.field,
-                        fieldtype=item.fieldtype,
-                        fromValue=getattr(item, "from"),  # noqa
-                        fromString=item.fromString,
-                        toValue=getattr(item, "to"),  # noqa
-                        toString=item.toString,
-                    )
-                )
-
-        return flattened
+        return list(flatten_changelog(changelog))
