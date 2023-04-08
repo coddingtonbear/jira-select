@@ -99,6 +99,7 @@ setup(
             "html = jira_select.formatters.html:Formatter",
             "json = jira_select.formatters.json:Formatter",
             "table = jira_select.formatters.table:Formatter",
+            "raw = jira_select.formatters.raw:Formatter",
         ],
         "jira_select.functions": [
             "sprint_details = jira_select.functions.sprint_details:Function",

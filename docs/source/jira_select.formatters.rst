@@ -20,6 +20,14 @@ jira\_select.formatters.csv module
    :undoc-members:
    :show-inheritance:
 
+jira\_select.formatters.tsv module
+----------------------------------
+
+.. automodule:: jira_select.formatters.tsv
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 jira\_select.formatters.html module
 -----------------------------------
 
@@ -36,6 +44,13 @@ jira\_select.formatters.table module
    :undoc-members:
    :show-inheritance:
 
+jira\_select.formatters.raw module
+----------------------------------
+
+.. automodule:: jira_select.formatters.raw
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
