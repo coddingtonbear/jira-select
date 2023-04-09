@@ -14,7 +14,7 @@ from ..plugin import BaseFunction
 @dataclass
 class ChangelogEntry:
     author: str = ""
-    created: Optional[datetime.datetime] = None
+    created: datetime.datetime = datetime.datetime.utcnow()
     id: int = -1
     field: str = ""
     fieldtype: str = ""

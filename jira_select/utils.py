@@ -239,7 +239,7 @@ def get_field_data(
         return normalize_value(
             evaluate_expression(
                 expression,
-                names={"_": row, **row.as_dict()},
+                names={"_": row, "issue": row, **row.as_dict()},
                 functions=functions,
                 interpolations=interpolations,
             )

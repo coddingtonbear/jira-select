@@ -16,6 +16,38 @@ Jira
 
       get_issue(field_holding_issue_key).fields.summary
 
+.. py::function:: get_issue_snapshot_on_date(issue: jira.resources.Issue) -> jira_select.types.IssueSnapshot:
+
+   Reconstruct the state of an issue at a particular point in time
+   using the issue's ``changelog``.
+
+   You will want to pass the literal value ``issue`` as the first parameter of this function.
+   Jira-select provides the ``jira.resources.Issue`` object itself under that name,
+   and this function will use both that object and the changes recorded in the ``changelog`` field
+   for getting an understanding of what the issue looked liked at a particular point in time.
+
+   This function requires that you set the query ``expand`` option
+   such that it includes ``changelog`` for this to work correctly --
+   if you do not do that, this function will fail.
+
+   .. code-block:: yaml
+
+      select:
+      - get_issue_snapshot_on_date(issue, parse_datetime('2022-01-01'))
+      from: issues
+      expand:
+      - changelog
+
+   The returned snapshot is *not* a ``jira.resources.Issue`` object,
+   but instead a ``jira_select.types.IssueSnapshot`` object
+   due to limitations around what kinds of data can be gathered
+   from the snapshot information.
+   The most important difference between a ``jira_select.types.IssueSnapshot`` and a ``jira.resources.Issue`` object is
+   that the ``jira_select.types.IssueSnapshot`` object is
+   a simple ``dict[str,str]`` object in which
+   the value of the ``dict`` entries is always the ``str``-ified
+   field value.
+
 .. py:function:: sprint_name(sprint_blob: str) -> Optional[str]
 
    Shortcut for returning the name of a sprint via its ID.  Equivalent

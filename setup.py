@@ -118,6 +118,7 @@ setup(
             "json_dumps = jira_select.functions.json_dumps:Function",
             "get_issue = jira_select.functions.get_issue:Function",
             "workdays_in_state = jira_select.functions.workdays_in_state:Function",
+            "get_issue_snapshot_on_date = jira_select.functions.get_issue_snapshot_on_date:Function",
         ],
         "jira_select.sources": [
             "issues = jira_select.sources.issues:Source",
