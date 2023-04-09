@@ -5,6 +5,7 @@ from typing import Dict
 from typing import List
 
 from ..plugin import BaseFormatter
+from ..utils import JiraSelectJsonEncoder
 
 
 class Formatter(BaseFormatter):
@@ -20,7 +21,7 @@ class Formatter(BaseFormatter):
 
     def close(self):
         wrapped = TextIOWrapper(self.stream, encoding="utf-8", write_through=True)
-        json.dump(self._rows, wrapped, indent=4, default=str)
+        json.dump(self._rows, wrapped, cls=JiraSelectJsonEncoder, indent=4)
         wrapped.detach()
         super().close()
 

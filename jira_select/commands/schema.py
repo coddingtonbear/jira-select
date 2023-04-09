@@ -10,6 +10,7 @@ from ..exceptions import JiraSelectError
 from ..plugin import BaseCommand
 from ..plugin import get_installed_functions
 from ..plugin import get_installed_sources
+from ..utils import JiraSelectJsonEncoder
 from ..utils import evaluate_expression
 
 
@@ -88,7 +89,9 @@ class Command(BaseCommand):
                         "description": row.description,
                     }
                 )
-            self.console.print(json.dumps(fields, sort_keys=True, indent=4))
+            self.console.print(
+                json.dumps(fields, cls=JiraSelectJsonEncoder, sort_keys=True, indent=4)
+            )
         else:
             table = Table(title=self.options.source)
             table.add_column(header="id", style="green")

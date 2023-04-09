@@ -7,6 +7,7 @@ from rich.table import Table
 from ..plugin import BaseCommand
 from ..plugin import BaseFunction
 from ..plugin import get_installed_functions
+from ..utils import JiraSelectJsonEncoder
 from ..utils import evaluate_expression
 
 
@@ -76,7 +77,11 @@ class Command(BaseCommand):
 
                 function_data.append(row)
             function_data.sort(key=lambda row: row["name"])
-            self.console.print(json.dumps(function_data, sort_keys=True, indent=4))
+            self.console.print(
+                json.dumps(
+                    function_data, cls=JiraSelectJsonEncoder, sort_keys=True, indent=4
+                )
+            )
         else:
             table = Table(title="functions")
             table.add_column(header="name", style="green")

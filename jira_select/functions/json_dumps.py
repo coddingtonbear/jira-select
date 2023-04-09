@@ -1,38 +1,8 @@
-import datetime
 import json
-from typing import Any
 from typing import Optional
 
-from pytz import UTC
-
-from jira_select.plugin import BaseFunction
-
-from .flatten_changelog import ChangelogEntry
-
-ISO_FORMAT = "%Y-%m-%d %H:%M:%SZ"
-
-
-class JiraSelectJsonEncoder(json.JSONEncoder):
-    def default(self, obj: Any) -> Any:
-        if isinstance(obj, datetime.datetime):
-            return UTC.normalize(obj).strftime(ISO_FORMAT)
-        elif isinstance(obj, ChangelogEntry):
-            return {
-                "author": obj.author,
-                "created": UTC.normalize(obj.created).strftime(ISO_FORMAT)
-                if obj.created
-                else None,
-                "field": obj.field,
-                "fieldtype": obj.fieldtype,
-                "fromValue": obj.fromValue,
-                "fromString": obj.fromString,
-                "toValue": obj.toValue,
-                "toString": obj.toString,
-            }
-        try:
-            return super().default(obj)
-        except TypeError:
-            return str(obj)
+from ..plugin import BaseFunction
+from ..utils import JiraSelectJsonEncoder
 
 
 class Function(BaseFunction):

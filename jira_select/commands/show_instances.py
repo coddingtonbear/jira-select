@@ -4,6 +4,7 @@ import json
 from rich.table import Table
 
 from ..plugin import BaseCommand
+from ..utils import JiraSelectJsonEncoder
 
 
 class Command(BaseCommand):
@@ -35,7 +36,11 @@ class Command(BaseCommand):
                         "url": instance_data.url,
                     }
                 )
-            self.console.print(json.dumps(instances, sort_keys=True, indent=4))
+            self.console.print(
+                json.dumps(
+                    instances, cls=JiraSelectJsonEncoder, sort_keys=True, indent=4
+                )
+            )
         else:
             table = Table(title="Configured Instances")
             table.add_column("name", style="green")

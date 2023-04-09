@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import datetime
 import hashlib
+import json
 import logging
 import os
 import re
@@ -20,6 +22,7 @@ from typing import Union
 import simpleeval
 from appdirs import user_config_dir
 from jira.resources import Resource
+from pytz import UTC
 from simpleeval import EvalWithCompoundTypes
 from yaml import safe_dump
 from yaml import safe_load
@@ -29,6 +32,7 @@ from .exceptions import FieldNameError
 from .exceptions import JiraSelectError
 from .exceptions import QueryError
 from .exceptions import UnhandledConditionError
+from .functions.flatten_changelog import ChangelogEntry
 from .types import ConfigDict
 from .types import Expression
 from .types import ExpressionList
@@ -42,8 +46,33 @@ SORT_BY_DESC_FN = re.compile(r"^(?P<expression>.*) DESC", re.IGNORECASE)
 SORT_BY_ASC_FN = re.compile(r"^(?P<expression>.*) ASC", re.IGNORECASE)
 PARAM_FINDER = re.compile(r"{params\.([^}]+)}")
 
+ISO_FORMAT = "%Y-%m-%d %H:%M:%SZ"
+
 
 logger = logging.getLogger(__name__)
+
+
+class JiraSelectJsonEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, datetime.datetime):
+            return UTC.normalize(obj).strftime(ISO_FORMAT)
+        elif isinstance(obj, ChangelogEntry):
+            return {
+                "author": obj.author,
+                "created": UTC.normalize(obj.created).strftime(ISO_FORMAT)
+                if obj.created
+                else None,
+                "field": obj.field,
+                "fieldtype": obj.fieldtype,
+                "fromValue": obj.fromValue,
+                "fromString": obj.fromString,
+                "toValue": obj.toValue,
+                "toString": obj.toString,
+            }
+        try:
+            return super().default(obj)
+        except TypeError:
+            return str(obj)
 
 
 def get_config_dir() -> str:
