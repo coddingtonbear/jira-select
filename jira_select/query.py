@@ -228,6 +228,12 @@ class Query:
         return self._definition.from_
 
     @property
+    def subqueries(self) -> dict[str, 'QueryDefinition']:
+        return {
+            subquery_name: QueryDefinition.parse_obj(subquery_value) for subquery_name, subquery_value in self._definition.subqueries.items()
+        }
+
+    @property
     def where(self) -> Union[JqlList, WhereParamDict]:
         where = self._definition.where
         if isinstance(where, list):
@@ -334,7 +340,7 @@ class Executor:
         self._query: Query = Query(jira, definition)
         # self._definition: QueryDefinition = clean_query_definition(definition)
         self._jira: JIRA = jira
-        self._functions: Dict[str, Callable] = get_installed_functions(jira)
+        self._functions: Dict[str, Callable] = get_installed_functions(jira, self._query)
         self._progress_bar_enabled = progress_bar
 
         self._cache = MinimumRecencyCache(get_cache_path())
@@ -360,6 +366,10 @@ class Executor:
         return self._functions
 
     @property
+    def parameters(self) -> Dict[str, str]:
+        return self._parameters
+
+    @property
     def field_name_map(self) -> Dict[str, Any]:
         if not self._field_name_map:
             for jira_field in self.jira.fields():
@@ -368,24 +378,6 @@ class Executor:
             self._field_name_map["params"] = DotMap(self._parameters)
 
         return self._field_name_map
-
-    def _get_jql(self) -> str:
-        query = " AND ".join(f"({q})" for q in self.query.where)
-
-        if missing := find_missing_parameters(query, list(self._parameters.keys())):
-            raise ExpressionParameterMissing(
-                "Parameter {params.%s} found in expression, but no parameter was specified!"
-                % missing[0]
-            )
-
-        query = query.format(params=DotMap(self._parameters))
-
-        order_by_fields = ", ".join(self.query.order_by)
-
-        if order_by_fields:
-            query = f"{query} ORDER BY {order_by_fields}"
-
-        return query
 
     def _get_cached(self, source: BaseSource) -> Iterator[Result]:
         cache_key = ":".join(

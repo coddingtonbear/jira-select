@@ -1,0 +1,20 @@
+select:
+- json_dumps(intervals_matching(issue, status="In Progress"))
+- json_dumps(subquery("children", issue=issue))
+from: issues
+subqueries:
+  children:
+    select:
+    - intervals_matching(issue, status='In Progress')
+    from: issues
+    where:
+    - parent = {params.issue.key}
+    expand:
+    - changelog
+where:
+- project = 'ORC'
+- key = 'ORC-4509'
+expand:
+- changelog
+cache: 86400
+limit: 1
