@@ -177,6 +177,15 @@ Jira
 Time Analysis
 -------------
 
+.. py:function:: intervals_matching(issue, **query_params: dict[str, Any]) -> List[portion.Interval]
+
+   See `simple_filter function` for information about how to specify ``query_params``.
+
+   Will return a list of intervals in which the provided issue
+   matches the conditions specified by ``query_params``.
+
+   Note that `portion.Interval` objects can be used with logical operations like `|`, `&`, and `-`.
+
 .. py:function:: workdays_in_state(changelog, state: str, start_hour: int = 9, end_hour: int = 17, timezone_name: str | None \ None, work_days: list[int] = [1, 2, 3, 4, 5], min_date: datetime.date = datetime.date(1, 1, 1), max_date: datetime.date = datetime.date(9999, 1, 1)) -> float
 
    Calculates how many "work days" your returned Jira issue was in a given state
@@ -440,6 +449,8 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 
 Filtering & Mapping
 -------------------
+
+.. _simple_filter function:
 
 .. py:function:: simple_filter(iterable: Iterable[Any], **query_params: Dict[str, Any]) -> Iterable[Any]
 .. py:function:: simple_filter_any(iterable: Iterable[Any], **query_params: Dict[str, Any]) -> Iterable[Any]
