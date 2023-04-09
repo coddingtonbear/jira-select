@@ -6,7 +6,7 @@ from typing import Dict
 from typing import Iterable
 
 from rich.console import Console
-from rich.traceback import install as enable_rich_traceback
+from rich.logging import RichHandler
 from safdie import SafdieRunner
 
 from .constants import COMMAND_ENTRYPOINT
@@ -92,6 +92,7 @@ class Runner(SafdieRunner):
                 "Print logging messages of the specified level and above "
                 "to the console."
             ),
+            default="INFO",
         )
         return super().add_arguments(parser)
 
@@ -103,13 +104,25 @@ class Runner(SafdieRunner):
         handle_args: Iterable[Any],
         handle_kwargs: Dict[str, Any],
     ) -> Any:
-        if args.log_level:
-            logging.basicConfig(level=logging.getLevelName(args.log_level))
+        console = Console()
+        logging.basicConfig(
+            level=logging.getLevelName(args.log_level),
+            format="%(message)s",
+            datefmt="[%X]",
+            handlers=[RichHandler(rich_tracebacks=True)],
+        )
 
         if args.debugger:
             import debugpy
 
-            debugpy.listen(("0.0.0.0", 5678))
+            debugger_host = "0.0.0.0"
+            debugger_port = 5678
+
+            debugpy.listen((debugger_host, debugger_port))
+
+            console.print(
+                f"[magenta]Waiting for debugger connection on {debugger_host}:{debugger_port}[/magenta]..."
+            )
 
             # Pause the program until a remote debugger is attached
             debugpy.wait_for_client()
@@ -121,8 +134,6 @@ class Runner(SafdieRunner):
 
 
 def main():
-    enable_rich_traceback()
-
     console = Console()
 
     try:

@@ -257,7 +257,14 @@ def get_field_data(
         IndexError,
         TypeError,
         AttributeError,
-    ):
+    ) as e:
+        logger.warning(
+            "%s while evaluating expression %s for issue(s) %s: %s",
+            e.__class__.__name__,
+            expression,
+            row.key,
+            e,
+        )
         if not error_returns_null:
             raise
         return None
