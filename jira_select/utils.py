@@ -22,6 +22,7 @@ from typing import Union
 import simpleeval
 from appdirs import user_config_dir
 from jira.resources import Resource
+from portion import Interval
 from pytz import UTC
 from simpleeval import EvalWithCompoundTypes
 from yaml import safe_dump
@@ -32,7 +33,6 @@ from .exceptions import FieldNameError
 from .exceptions import JiraSelectError
 from .exceptions import QueryError
 from .exceptions import UnhandledConditionError
-from .functions.flatten_changelog import ChangelogEntry
 from .types import ConfigDict
 from .types import Expression
 from .types import ExpressionList
@@ -54,6 +54,8 @@ logger = logging.getLogger(__name__)
 
 class JiraSelectJsonEncoder(json.JSONEncoder):
     def default(self, obj: Any) -> Any:
+        from .functions.flatten_changelog import ChangelogEntry
+
         if isinstance(obj, datetime.datetime):
             return UTC.normalize(obj).strftime(ISO_FORMAT)
         elif isinstance(obj, ChangelogEntry):
@@ -69,6 +71,16 @@ class JiraSelectJsonEncoder(json.JSONEncoder):
                 "toValue": obj.toValue,
                 "toString": obj.toString,
             }
+        elif isinstance(obj, Interval):
+            interval_list = []
+            for interval in list(obj):
+                interval_list.append(
+                    (
+                        interval.lower,
+                        interval.upper,
+                    )
+                )
+            return interval_list
         try:
             return super().default(obj)
         except TypeError:
