@@ -174,6 +174,35 @@ Jira
    have an entry having particular characteristics.
 
 
+Subquery
+--------
+
+.. py:function:: subquery(subquery_name, **params) -> Any:
+
+   Runs a subquery by name with the provided parameters.
+
+   For example: you can get the time intervals during which an issue
+   and its associated subtasks were in the "In Progress" status with
+   a query like so:
+
+   .. code-block:: yaml
+
+      select:
+      - intervals_matching(issue, status="In Progress") | union(subquery("children", issue=issue))
+      from: issues
+      subqueries:
+         children:
+            select:
+            - intervals_matching(issue, status='In Progress')
+            from: issues
+            where:
+            - parent = {params.issue.key}
+            expand:
+            - changelog
+      expand:
+      - changelog
+
+
 Time Analysis
 -------------
 
@@ -419,6 +448,11 @@ See more in information in `Python's Documentation <https://docs.python.org/3/li
 .. py:function:: oct(value: int) -> str
 
 .. py:function:: ord(value: str) -> int
+
+List Operations
+---------------
+
+.. py:function:: union(iterable: Iterable[X]) -> X
 
 Types
 -----
