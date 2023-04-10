@@ -33,6 +33,7 @@ ExpressionList = List[Expression]
 class QueryDefinition(BaseModel):
     select: List[Field]
     from_: str = ModelField(alias="from")
+    subqueries: Dict[str, "QueryDefinition"] = ModelField(default_factory=dict)
     where: Union[JqlList, WhereParamDict] = ModelField(default_factory=list)
     order_by: JqlList = ModelField(default_factory=list)
     filter_: ExpressionList = ModelField(alias="filter", default_factory=list)
@@ -46,6 +47,9 @@ class QueryDefinition(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+
+
+QueryDefinition.update_forward_refs()
 
 
 class SchemaRow(BaseModel):

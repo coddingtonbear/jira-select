@@ -423,11 +423,28 @@ class TestQuery(JiraSelectTestCase):
 
         assert results[0]["value"] == arbitrary_value
 
-    def test_param_expression_unspecified(self):
+    def test_param_expression_unspecified_select(self):
         query = QueryDefinition.parse_obj(
             {
                 "select": ["'{params.ok}'"],
                 "from": "issues",
+                "cap": 1,
+            }
+        )
+
+        query = Executor(self.mock_jira, query)
+
+        with pytest.raises(ExpressionParameterMissing):
+            list(query)
+
+    def test_param_expression_unspecified_where(self):
+        query = QueryDefinition.parse_obj(
+            {
+                "select": ["True"],
+                "from": "issues",
+                "where": [
+                    "'{params.ok}'",
+                ],
                 "cap": 1,
             }
         )
@@ -451,23 +468,10 @@ class TestQuery(JiraSelectTestCase):
             }
         )
 
-        query = Executor(self.mock_jira, query, parameters={"ok": arbitrary_value})
-
-        assert arbitrary_value in query._get_jql()
-
-    def test_param_jql_unspecified(self):
-        query = QueryDefinition.parse_obj(
-            {
-                "select": ["'{params.ok}' as \"value\""],
-                "from": "issues",
-                "where": [
-                    '"{params.ok}"',
-                ],
-                "cap": 1,
-            }
+        query = list(
+            Executor(self.mock_jira, query, parameters={"ok": arbitrary_value})
         )
 
-        query = Executor(self.mock_jira, query)
+        args, _ = self.mock_jira.search_issues.call_args
 
-        with pytest.raises(ExpressionParameterMissing):
-            query._get_jql()
+        assert arbitrary_value in args[0]

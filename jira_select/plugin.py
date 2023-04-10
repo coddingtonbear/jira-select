@@ -223,7 +223,9 @@ def register_function(fn: Callable):
     REGISTERED_FUNCTIONS[fn.__name__] = fn
 
 
-def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
+def get_installed_functions(
+    jira: JIRA = None, query: Query = None
+) -> Dict[str, Callable]:
     possible_commands: Dict[str, Callable] = copy.copy(BUILTIN_FUNCTIONS)
 
     # Import any modules in the custom functions directory; as a
@@ -258,14 +260,19 @@ def get_installed_functions(jira: JIRA = None) -> Dict[str, Callable]:
     possible_commands.update(REGISTERED_FUNCTIONS)
 
     for fn_name, fn in get_entrypoints(FUNCTION_ENTRYPOINT, BaseFunction).items():
-        possible_commands[fn_name] = fn(jira)
+        possible_commands[fn_name] = fn(jira, query=query)
 
     return possible_commands
 
 
 class BaseFunction(metaclass=ABCMeta):
-    def __init__(self, jira: Optional[JIRA]):
+    def __init__(self, jira: Optional[JIRA], query: Optional[Query]):
         self._jira = jira
+        self._query = query
+
+    @property
+    def query(self) -> Optional[Query]:
+        return self._query
 
     @property
     def jira(self):

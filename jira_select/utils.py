@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 FIELD_DISPLAY_DEFN_RE = re.compile(r'^(?P<expression>.*) as "(?P<column>.*)"$')
 SORT_BY_DESC_FN = re.compile(r"^(?P<expression>.*) DESC", re.IGNORECASE)
 SORT_BY_ASC_FN = re.compile(r"^(?P<expression>.*) ASC", re.IGNORECASE)
-PARAM_FINDER = re.compile(r"{params\.([^}]+)}")
+PARAM_FINDER = re.compile(r"{params\.([^}.]+)(?:.[^}.]+)?}")
 
 ISO_FORMAT = "%Y-%m-%d %H:%M:%SZ"
 

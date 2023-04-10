@@ -91,7 +91,7 @@ class Command(BaseCommand):
 
     @classmethod
     def get_help(cls) -> str:
-        return "Interactively generates a query definition (in yaml format)."
+        return "Runs a query definition specified in yaml format."
 
     def handle(self) -> None:
         if self.options.view and self.options.output is sys.stdout:

@@ -9,11 +9,13 @@ from jira import JIRA
 from jira.resources import Issue
 from simpleeval import NameNotDefined
 
+from ..exceptions import ExpressionParameterMissing
 from ..exceptions import QueryError
 from ..plugin import BaseSource
 from ..plugin import get_installed_functions
 from ..types import SchemaRow
 from ..utils import evaluate_expression
+from ..utils import find_missing_parameters
 
 
 class Source(BaseSource):
@@ -65,6 +67,17 @@ class Source(BaseSource):
         assert isinstance(self.query.where, list)
 
         query = " AND ".join(f"({q})" for q in self.query.where)
+
+        if missing := find_missing_parameters(
+            query, list(self._executor.parameters.keys())
+        ):
+            raise ExpressionParameterMissing(
+                "Parameter {params.%s} found in expression, but no parameter was specified!"
+                % missing[0]
+            )
+
+        query = query.format(params=DotMap(self._executor.parameters))
+
         order_by_fields = ", ".join(self.query.order_by)
 
         if order_by_fields:
