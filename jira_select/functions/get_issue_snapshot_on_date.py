@@ -9,6 +9,7 @@ from dateutil.parser import parse as parse_datetime
 from dotmap import DotMap
 from jira import JIRA
 from jira.resources import Issue
+from pytz import UTC
 
 from jira_select.plugin import BaseFunction
 from jira_select.plugin import get_installed_sources
@@ -66,7 +67,7 @@ def snapshot_iterator(issue: Issue, field_name_map: dict[str, str]) -> Iterator[
         },
         field_name_map,
     )
-    snapshot_validity_end = datetime.datetime.utcnow()
+    snapshot_validity_end = datetime.datetime.utcnow().replace(tzinfo=UTC)
 
     flattened_changelog = sorted(
         flatten_changelog(issue.changelog),
