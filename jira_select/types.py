@@ -6,6 +6,7 @@ from typing import Tuple
 from typing import Union
 
 from pydantic import BaseModel
+from pydantic import Extra
 from pydantic import Field as ModelField
 
 JiraFieldName = str
@@ -47,6 +48,7 @@ class QueryDefinition(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+        extra = Extra.forbid
 
 
 QueryDefinition.update_forward_refs()
