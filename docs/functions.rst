@@ -188,12 +188,12 @@ Subquery
    .. code-block:: yaml
 
       select:
-      - intervals_matching(issue, status="In Progress") | union(subquery("children", issue=issue))
+      - interval_matching(issue, status="In Progress") | union(subquery("children", issue=issue))
       from: issues
       subqueries:
          children:
             select:
-            - intervals_matching(issue, status='In Progress')
+            - interval_matching(issue, status='In Progress')
             from: issues
             where:
             - parent = {params.issue.key}
@@ -206,12 +206,18 @@ Subquery
 Time Analysis
 -------------
 
-.. py:function:: intervals_matching(issue, **query_params: dict[str, Any]) -> portion.Interval
+.. py:function:: interval_matching(issue, **query_params: dict[str, Any]) -> portion.Interval
 
    See `simple_filter function` for information about how to specify ``query_params``.
 
    Will return an interval covering segments in which the provided issue
    matches the conditions specified by ``query_params``.
+
+   .. note::
+
+      Contrary to what you might guess,
+      a single `portion.Interval` object
+      can represnt multiple ranges of time.
 
    Note that `portion.Interval` objects can be used with logical operations like `|`, `&`, and `-`.
 
