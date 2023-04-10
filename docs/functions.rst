@@ -206,14 +206,19 @@ Subquery
 Time Analysis
 -------------
 
-.. py:function:: intervals_matching(issue, **query_params: dict[str, Any]) -> List[portion.Interval]
+.. py:function:: intervals_matching(issue, **query_params: dict[str, Any]) -> portion.Interval
 
    See `simple_filter function` for information about how to specify ``query_params``.
 
-   Will return a list of intervals in which the provided issue
+   Will return an interval covering segments in which the provided issue
    matches the conditions specified by ``query_params``.
 
    Note that `portion.Interval` objects can be used with logical operations like `|`, `&`, and `-`.
+
+.. py:function:: interval_size(interval: portion.Interval) -> datetime.timedelta
+
+   For a provided interval, return the total amount of time that the interval's
+   segments span.
 
 .. py:function:: workdays_in_state(changelog, state: str, start_hour: int = 9, end_hour: int = 17, timezone_name: str | None \ None, work_days: list[int] = [1, 2, 3, 4, 5], min_date: datetime.date = datetime.date(1, 1, 1), max_date: datetime.date = datetime.date(9999, 1, 1)) -> float
 
