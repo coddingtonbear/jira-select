@@ -2,6 +2,7 @@ import datetime
 from typing import Any
 from typing import Iterable
 from typing import Optional
+from warnings import warn
 
 from dateutil.tz import tzlocal
 from pytz import UTC
@@ -26,6 +27,12 @@ class Function(BaseFunction):
         min_date: datetime.date = datetime.date(1, 1, 1),
         max_date: datetime.date = datetime.date(9999, 1, 1),
     ) -> float:
+        warn(
+            "The `workdays_in_state` function is deprecated; see `interval_business_hours` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         tz = timezone(timezone_name) if timezone_name is not None else tzlocal()
 
         flattened_changelog = sorted(

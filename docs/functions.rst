@@ -226,20 +226,29 @@ Time Analysis
    For a provided interval, return the total amount of time that the interval's
    segments span.
 
-.. py:function:: workdays_in_state(changelog, state: str, start_hour: int = 9, end_hour: int = 17, timezone_name: str | None \ None, work_days: list[int] = [1, 2, 3, 4, 5], min_date: datetime.date = datetime.date(1, 1, 1), max_date: datetime.date = datetime.date(9999, 1, 1)) -> float
+.. py:function:: interval_business_hours(min_date: datetime.date | None = None, max_date: datetime.date | None = None, start_hour: int = 9, end_hour: int = 17, timezone_name: str | None = None, work_days: Iterable[int] = (1, 2, 3, 4, 5)) -> portion.Interval:
 
-   Calculates how many "work days" your returned Jira issue was in a given state
-   during the time period specified.
+   Returns an interval having segments that correspond with the "business hours"
+   specified by your paramters.
 
-   As we all know, it's very difficult to get an actual understanding of how much
-   time a given assignee has spent working on a given issue without asking them to
-   track it directly, but this function intends to get us at least a reasonably
-   good understanding of that by making some imperfect generalizations.
+   This is particularly useful when used in conjunction with `interval_matching`
+   and `interval_size` above for determining the amount of time an issue was
+   actively in a particular state, for example:
+
+   .. code-block:: yaml
+
+      select:
+      - interval_size(interval_matching(issue, status="In Progress") & interval_business_hours(parse_date(created)))
+      from: issues
+
+   This will find all segments of time during which the relevant issue was
+   in the "In Progress" status during business hours, then return the
+   amount of time that those segments spanned.
 
    .. note::
 
-      A naive implementation of this function might use actual, raw clock time,
-      but consider the following two situations:
+      A naive implementation of this sort of time analysis might use actual,
+      raw clock time, but consider the following two situations:
 
       - MYPROJECT-01 moves from "To Do" into "In Progress" at 4:55PM, just
         five minutes before the end of the day, then the next day moves
@@ -272,46 +281,16 @@ Time Analysis
       than the amount of excess time
       using raw clock time directly would count.
 
-      If you would like to instead use raw clock time even knowing the
-      distortions using that may create, you can do so by specifying
-      a ``start_hour`` and ``end_hour`` of ``None``.
-
-   .. note::
-
-      You must use the ``expand`` option of ``changelog`` for Jira to
-      return to you changelog information in your query; eg:
-
-      .. code-block:: yaml
-
-         select:
-         - flatten_changelog(changelog)
-         from: issues
-         expand:
-         - changelog
-
-      If you do not provide the necessary ``expand`` option, this
-      function will raise an error.
-
-   Parameters:
-
-   - ``state``: The name of the state you would like to count time for
-     (e.g. "In Progress")
+   - ``min_date``: The minimum date to add the business hours of to your interval.
+     By default, 365 days before now.
+   - ``max_date``: The (exclusive) maximum date to add the business hours of to
+     your interval.  By default: tomorrow.
    - ``start_hour``: The work day starting hour.  Defaults to 9 (i.e. 9 AM)
    - ``end_hour``: The work day ending hour.  Defaults to 17 (i.e 5 PM)
    - ``timezone_name``: The timezone to interpret ``start_hour`` and
      ``end_hour`` in.
    - ``work_days``: The days of the week to count as work days; 0 = Sunday,
       1 = Monday... 6 = Saturday.
-   - ``min_date``: The minmimum date to use when processing changelog entries.
-     If an issue is in the relevant state at ``min_date`` at ``start_hour``,
-     ``min_date`` and ``start_hour`` will be used for calculating the time range
-     during which the issue was in the relevant state instead of using issue's
-     actual time range in that state.
-   - ``max_date``: The maximuim date to use when processing changelog entries.
-     If an issue is in the relevant state at ``max_date`` at ``end_hour``,
-     ``max_date`` and ``end_hour`` will be used for calculating the time range
-     during which the issue was in the relevant state instead of using issue's
-     actual time range in that state.
 
 Data Traversal
 --------------

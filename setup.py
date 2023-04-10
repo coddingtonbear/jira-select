@@ -119,6 +119,7 @@ setup(
             "get_issue = jira_select.functions.get_issue:Function",
             "workdays_in_state = jira_select.functions.workdays_in_state:Function",
             "get_issue_snapshot_on_date = jira_select.functions.get_issue_snapshot_on_date:Function",
+            "interval_business_hours = jira_select.functions.interval_business_hours:Function",
             "interval_matching = jira_select.functions.interval_matching:Function",
             "interval_size = jira_select.functions.interval_size:Function",
             "subquery = jira_select.functions.subquery:Function",
