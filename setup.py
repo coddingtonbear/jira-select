@@ -121,6 +121,7 @@ setup(
             "get_issue_snapshot_on_date = jira_select.functions.get_issue_snapshot_on_date:Function",
             "intervals_matching = jira_select.functions.intervals_matching:Function",
             "subquery = jira_select.functions.subquery:Function",
+            "union = jira_select.functions.union:Function",
         ],
         "jira_select.sources": [
             "issues = jira_select.sources.issues:Source",
