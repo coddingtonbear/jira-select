@@ -109,7 +109,7 @@ class Runner(SafdieRunner):
             level=logging.getLevelName(args.log_level),
             format="%(message)s",
             datefmt="[%X]",
-            handlers=[RichHandler(rich_tracebacks=True)],
+            handlers=[RichHandler(rich_tracebacks=True, console=Console(stderr=True))],
         )
 
         if args.debugger:
