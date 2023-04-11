@@ -196,8 +196,8 @@ def calculate_result_hash(
     return int(hashlib.sha1(":".join(params).encode("UTF-8")).hexdigest(), 16)
 
 
-def get_row_dict(row: Any) -> Dict[str, Any]:
-    names: Dict[str, Any] = {}
+def get_row_dict(row: Any, overlay: dict[str, Any] | None = None) -> Dict[str, Any]:
+    names: dict[str, Any] = {}
 
     if hasattr(row, "fields"):
         for field_name in dir(row.fields):
@@ -208,6 +208,8 @@ def get_row_dict(row: Any) -> Dict[str, Any]:
     for key in dir(row):
         if key != "fields" and not key.startswith("_") and not key.upper() == key:
             names[key] = getattr(row, key)
+
+    names.update(overlay if overlay is not None else {})
 
     return names
 

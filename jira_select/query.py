@@ -10,6 +10,7 @@ from typing import Generator
 from typing import Iterable
 from typing import Iterator
 from typing import List
+from typing import Mapping
 from typing import Optional
 from typing import Tuple
 from typing import Type
@@ -30,6 +31,7 @@ from .plugin import get_installed_functions
 from .plugin import get_installed_sources
 from .types import Expression
 from .types import ExpressionList
+from .types import Field
 from .types import JqlList
 from .types import QueryDefinition
 from .types import SelectFieldDefinition
@@ -128,9 +130,13 @@ class Result(metaclass=ABCMeta):
 class SingleResult(Result):
     def __init__(self, row: Any):
         self._row = row
+        self._overlay: dict[str, Any] = {}
+
+    def __setitem__(self, name, value):
+        self._overlay[name] = value
 
     def as_dict(self) -> Dict[str, Any]:
-        return get_row_dict(self._row)
+        return get_row_dict(self._row, self._overlay)
 
     def single(self) -> SingleResult:
         return self
@@ -211,31 +217,40 @@ class Query:
 
         return source.get_all_fields(self._jira)
 
-    @property
-    def select(self) -> List[SelectFieldDefinition]:
+    def _get_select_calculate_fields(
+        self, field_data: List[Field] | Mapping[str, str | None]
+    ) -> List[SelectFieldDefinition]:
         fields: List[SelectFieldDefinition] = []
 
-        if isinstance(self._definition.select, str):
-            field = self._definition.select
+        if isinstance(field_data, str):
+            field = field_data
             if field == "*":
                 fields.extend(self._get_all_fields())
             else:
                 fields.append(parse_select_definition(field))
-        if isinstance(self._definition.select, dict):
-            for column, expression in self._definition.select.items():
+        if isinstance(field_data, dict):
+            for column, expression in field_data.items():
                 fields.append(
                     SelectFieldDefinition(
                         expression=expression if expression else column, column=column
                     )
                 )
-        elif isinstance(self._definition.select, list):
-            for field in self._definition.select:
+        elif isinstance(field_data, list):
+            for field in field_data:
                 if field == "*":
                     fields.extend(self._get_all_fields())
                 else:
                     fields.append(parse_select_definition(field))
 
         return fields
+
+    @property
+    def select(self) -> List[SelectFieldDefinition]:
+        return self._get_select_calculate_fields(self._definition.select)
+
+    @property
+    def calculate(self) -> List[SelectFieldDefinition]:
+        return self._get_select_calculate_fields(self._definition.calculate)
 
     @property
     def from_(self) -> str:
@@ -435,6 +450,26 @@ class Executor:
             if max_store is not None:
                 self.cache.set(cache_key, cache, expire=max_store)
 
+    def _process_calculate(
+        self,
+        iterator: Iterator[Result],
+        task: TaskID,
+        input_channel: CounterChannel,
+        output_channel: CounterChannel,
+    ) -> Iterator[Result]:
+        for row in iterator:
+            output_channel.set(input_channel.get())
+            self.progress.update(task, total=input_channel.get(), visible=True)
+
+            for definition in self.query.calculate:
+                row[definition.column] = self.evaluate_expression(
+                    row, definition.expression
+                )
+
+            yield row
+
+            self.progress.update(task, advance=1)
+
     def _process_filter(
         self,
         iterator: Iterator[Result],
@@ -575,6 +610,9 @@ class Executor:
                 TaskID,
             ]
         ] = []
+        if self.query.calculate:
+            calculate_task = self.progress.add_task("calculate", total=0, visible=False)
+            phases.append((self._process_calculate, calculate_task))
         if self.query.filter:
             filter_task = self.progress.add_task("filter", total=0, visible=False)
             phases.append(

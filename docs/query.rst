@@ -303,6 +303,31 @@ because they either require local functions or operate on grouped data.
 
 You **can** use custom functions in this section.
 
+``calculate``
+~~~~~~~~~~~~~
+
+Perhaps you have an expression you'd like to calculate once
+and use multiple times across your query
+(e.g. multiple times across ``select`` columns,
+or in both ``select`` and ``filter`` at the same time).
+You can use the ``calculate`` section for performing those calculations
+once and then referencing their result in other expressions; for example:
+
+.. code-block:: yaml
+
+   select:
+     Hours in Progress: round(in_progress_seconds / 3600)
+   calculate:
+     in_progress_seconds: interval_size(interval_matching(issue, status="In Progress") & interval_business_hours(parse_date(created))).total_seconds() / 28800
+   from: issues
+   filter:
+   - in_progress_seconds > 60
+   expand:
+   - changelog
+
+The above example will calculate the total amount of time issues were in progress
+in hours while excluding results where they were in progress for fewer than sixty seconds.
+
 ``sort_by``
 ~~~~~~~~~~~
 

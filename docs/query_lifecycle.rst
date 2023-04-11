@@ -13,7 +13,8 @@ Query Lifecycle
        end
      end
      subgraph Local
-       limit-->filt[filter]
+       limit-->calculate
+       calculate-->filt[filter]
        filt[filter]-->group_by
        group_by-->having
        having-->sort_by
@@ -31,6 +32,7 @@ Jira-select queries are evaluated in many steps across two phases:
 
 * Local
 
+  * Calculating (``calculate``)
   * Filtering (``filter``)
   * Grouping (``group_by``)
   * Filtering (``having``)
