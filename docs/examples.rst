@@ -6,8 +6,7 @@ Finding all issues assigned to a particular user
 
 .. code-block:: yaml
 
-   select:
-   - "*"
+   select: "*"
    from: issues
    where:
    - assignee = "some-user@some-company.com"
@@ -19,7 +18,7 @@ Summing the number of story points assigned in a particular sprint
 .. code-block:: yaml
 
    select:
-   - sum({Story Points}) as "Total Story Points"
+     Total Story Points: sum({Story Points})
    from: issues
    where:
    - project = "MYPROJECT"
@@ -62,8 +61,8 @@ Summing the total estimated size of issues per-person for a given sprint
 .. code-block:: yaml
 
    select:
-   - assignee
-   - sum(map(estimate_to_days, timeestimate.originalEstimate))
+     Assignee: assignee
+     Total Size: sum(map(estimate_to_days, timeestimate.originalEstimate))
    from: issues
    where:
    - project = "MYPROJECT"
@@ -103,8 +102,8 @@ Summing story points of issues resolved during a particular sprint
 .. code-block:: yaml
 
    select:
-   - assignee
-   - sum({Story Points})
+     Assignee: assignee
+     Story Points: sum({Story Points})
    from: issues
    where:
    - project = 'My Project'
@@ -141,7 +140,7 @@ Summing worklog entries
 .. code-block:: yaml
 
    select:
-   - sum(extract(flatten_list(worklogs.worklogs), "timespentSeconds")) as "total seconds"
+     Total Seconds: sum(extract(flatten_list(worklogs.worklogs), "timespentSeconds"))
    from: issues
    group_by:
    - True

@@ -14,7 +14,7 @@ be used when interpreting the query.
 .. code-block:: yaml
 
    select:
-   - key
+     Issue Key: key
    from: issues
    where:
    - project = "{params.project}"

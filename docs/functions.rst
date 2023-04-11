@@ -33,7 +33,7 @@ Jira
    .. code-block:: yaml
 
       select:
-      - get_issue_snapshot_on_date(issue, parse_datetime('2022-01-01'))
+        snapshot: get_issue_snapshot_on_date(issue, parse_datetime('2022-01-01'))
       from: issues
       expand:
       - changelog
@@ -101,7 +101,7 @@ Jira
       .. code-block::
 
          select
-           - "{Story Points} as \"Story Points\""
+           Story Points: "{Story Points}"
          from: issues
 
    .. note::
@@ -145,7 +145,7 @@ Jira
       .. code-block:: yaml
 
          select:
-         - flatten_changelog(changelog)
+           changelog: flatten_changelog(changelog)
          from: issues
          expand:
          - changelog
@@ -188,12 +188,12 @@ Subquery
    .. code-block:: yaml
 
       select:
-      - interval_matching(issue, status="In Progress") | union(subquery("children", issue=issue))
+        self_and_child_intervals_in_progress: interval_matching(issue, status="In Progress") | union(subquery("children", issue=issue))
       from: issues
       subqueries:
          children:
             select:
-            - interval_matching(issue, status='In Progress')
+              in_progress_intervals: interval_matching(issue, status='In Progress')
             from: issues
             where:
             - parent = {params.issue.key}
@@ -238,7 +238,7 @@ Time Analysis
    .. code-block:: yaml
 
       select:
-      - interval_size(interval_matching(issue, status="In Progress") & interval_business_hours(parse_date(created)))
+        total_time_in_progress: interval_size(interval_matching(issue, status="In Progress") & interval_business_hours(parse_date(created)))
       from: issues
 
    This will find all segments of time during which the relevant issue was
@@ -492,8 +492,7 @@ Filtering & Mapping
 
    .. code-block:: yaml
 
-      select:
-      - "*"
+      select: "*"
       from: issues
       filter:
       - simple_filter(

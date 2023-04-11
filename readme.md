@@ -70,8 +70,8 @@ to you:
 
 ```yaml
 select:
-  - key
-  - summary
+ Issue Key: key
+ Issue Summary: summary
 from: issues
 where:
   - assignee = "your-email@somecompany.com"

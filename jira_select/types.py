@@ -32,7 +32,7 @@ ExpressionList = List[Expression]
 
 
 class QueryDefinition(BaseModel):
-    select: List[Field]
+    select: List[Field] | Dict[str, str | None]
     from_: str = ModelField(alias="from")
     subqueries: Dict[str, "QueryDefinition"] = ModelField(default_factory=dict)
     where: Union[JqlList, WhereParamDict] = ModelField(default_factory=list)

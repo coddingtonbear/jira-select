@@ -215,11 +215,25 @@ class Query:
     def select(self) -> List[SelectFieldDefinition]:
         fields: List[SelectFieldDefinition] = []
 
-        for field in self._definition.select:
+        if isinstance(self._definition.select, str):
+            field = self._definition.select
             if field == "*":
                 fields.extend(self._get_all_fields())
             else:
                 fields.append(parse_select_definition(field))
+        if isinstance(self._definition.select, dict):
+            for column, expression in self._definition.select.items():
+                fields.append(
+                    SelectFieldDefinition(
+                        expression=expression if expression else column, column=column
+                    )
+                )
+        elif isinstance(self._definition.select, list):
+            for field in self._definition.select:
+                if field == "*":
+                    fields.extend(self._get_all_fields())
+                else:
+                    fields.append(parse_select_definition(field))
 
         return fields
 
@@ -339,7 +353,6 @@ class Executor:
         parameters: Optional[Dict[str, Any]] = None,
     ):
         self._query: Query = Query(jira, definition)
-        # self._definition: QueryDefinition = clean_query_definition(definition)
         self._jira: JIRA = jira
         self._functions: Dict[str, Callable] = get_installed_functions(
             jira, self._query

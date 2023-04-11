@@ -18,11 +18,11 @@ Format data using functions
 .. code-block:: yaml
 
    select:
-     - status
-     - summary
-     - customfield_10069 as "Story Points"
-     - len(customfield_10010) as "Sprint Count"
-     - sprint_name(customfield_10010[-1]) as "Sprint Name"
+     Status: status
+     Summary: summary
+     Story Points: "{Story Points}"
+     Spring Count: len(customfield_10010)
+     Sprint Name: sprint_name(customfield_10010[-1])
    from: issues
 
 In the above example, two of the displayed columns are processed with
@@ -39,9 +39,9 @@ Filter results using functions
 .. code-block:: yaml
 
    select:
-     - status as "Status"
-     - summary as "Summary"
-     - customfield_10069 as "Story Points"
+     Status: status
+     Summary: summary
+     Story Points: "{Story Points}"
    from: issues
    having:
      # The quoting below is required only because the first character of line
@@ -69,8 +69,8 @@ You can group and/or aggregate your returned rows by using ``group_by``:
 .. code-block:: yaml
 
    select:
-     - status
-     - count(key)
+     Status: status
+     Count: count(key)
    from: issues
    group_by:
      - status
@@ -86,8 +86,8 @@ You can order your entries using any expression, too:
 .. code-block:: yaml
 
    select:
-     - status
-     - count(key)
+     Status: status
+     Count: count(key)
    from: issues
    group_by:
      - status
@@ -112,9 +112,9 @@ You can limit the number of results returned by adding a ``limit`` to your query
 .. code-block:: yaml
 
    select:
-     - key
-     - status
-     - summary
+     Key: key
+     Status: status
+     Summary: summary
    from: issues
    where:
      - assignee = "me@adamcoddington.net"
@@ -132,9 +132,9 @@ You can ask Jira to expand issue fields by adding an ``expand`` element to your 
 .. code-block:: yaml
 
    select:
-     - key
-     - status
-     - summary
+     Key: key
+     Status: status
+     Summary: summary
    from: issues
    expand:
      - transitions

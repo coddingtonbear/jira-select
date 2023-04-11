@@ -38,7 +38,7 @@ of the field; e.g.
 .. code-block:: yaml
 
    select:
-   - issuetype.raw
+     Raw Issue Data: issuetype.raw
    from: issues
 
 I can't connect because my Jira instance uses a self-signed certificate
@@ -80,5 +80,5 @@ for example:
 .. code-block:: yaml
 
    select:
-   - '{Story Points}'
+     Story Points: '{Story Points}'
    from: issues

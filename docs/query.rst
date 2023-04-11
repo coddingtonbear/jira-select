@@ -9,20 +9,20 @@ Here's a simple example that will return all Jira issues assigned to you:
 .. code-block:: yaml
 
    select:
-   - key
-   - summary
+   - Issue Key: key
+   - Issue Summary: summary
    from: issues
    where:
    - assignee = "your-email@your-company.net"
 
-Here's a query that uses _all_ of the possible sections,
+Here's a query that uses many more of the possible sections,
 but know that in real life, you're very unlikely to use them all at once:
 
 .. code-block:: yaml
 
    select:
-   - assignee
-   - len(key)
+     My Assignee: assignee
+     Key Length: len(key)
    from: issues
    expand:
    - changelog
@@ -92,21 +92,61 @@ Ubiquitous
 ~~~~~~~~~~
 
 This section defines what data you would like to include in your report.
-It should be a list of fields you would like to include in your document,
-and *can* use custom functions (see :ref:`Query Functions` for options).
+It should be a dictionary mapping the column name with the expression
+you would like to display in that column.
+This section *can* use custom functions (see :ref:`Query Functions` for options).
 
-By default, the column will be named to match your field definition,
-but you can overide that by providing a name using the format ``EXPRESSION as "NAME"``::
-
-    somefunction(my_field) as "My Field Name"
-
-If you would like to return *all* fields values,
-use the expression ``*`` in your search statement:
+For example:
 
 .. code-block:: yaml
 
    select:
-   - "*"
+     My Field Name: somefunction(my_field)
+
+.. note::
+
+   This section supports a handful of formats
+   in addition to the one discussed here
+   that you may find in some documentation
+   or in other examples including:
+
+   You can specify columns as a list:
+
+   .. code-block:: yaml
+
+      select:
+      - somefunction(my_field) as "My Field Name"
+
+   You can specify a single column as a string:
+
+   .. code-block:: yaml
+
+      select: somefunction(my_field) as "My Field Name"
+
+   The above formats will be supported for the foreseeable future,
+   but the dictionary-based format discussed outside this box is the
+   preferred format for writing queries.
+
+As a shorthand, if you do not provide a value for your dictionary entry,
+the dictionary entry's name will be used as the expression for your column:
+
+.. code-block:: yaml
+
+   select:
+     issuetype:
+     key:
+     summary:
+   from: issues
+
+In the above example, the fields ``issuetype``, ``key``, and ``summary``
+will be displayed in columns matching their field name.
+
+If you would like to return *all* fields values,
+use the expression ``*`` as a stirng value to your `select` statement:
+
+.. code-block:: yaml
+
+   select: "*"
    from: issues
 
 .. important::
@@ -218,8 +258,8 @@ you could run the following query:
 .. code-block:: yaml
 
    select:
-   - issuetype
-   - len(key)
+     Issue Type: issuetype
+     Key Length: len(key)
    from: issues
    where:
    - assignee = "your-email@your-company.net"
@@ -246,7 +286,7 @@ causing all rows to be grouped together:
 .. code-block:: yaml
 
    select:
-   - len(key)
+     Key Length: len(key)
    from: issues
    where:
    - assignee = "your-email@your-company.net"
