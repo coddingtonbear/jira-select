@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from types import SimpleNamespace
 from unittest.mock import Mock

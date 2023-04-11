@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 from unittest.mock import ANY
 from unittest.mock import Mock
