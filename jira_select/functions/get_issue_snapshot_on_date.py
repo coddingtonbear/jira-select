@@ -84,15 +84,15 @@ def snapshot_iterator(issue: Issue, field_name_map: dict[str, str]) -> Iterator[
                 "validity_end": snapshot_validity_end,
             }
         )
-        snapshot[entry.field] = (
-            str(entry.fromString) if entry.fromString is not None else None
-        )
 
         yield DotMap(copy.deepcopy(snapshot))
 
         snapshot_validity_end = entry.created
+        snapshot[entry.field] = (
+            str(entry.fromString) if entry.fromString is not None else None
+        )
 
-    return DotMap(snapshot)
+    yield DotMap(copy.deepcopy(snapshot))
 
 
 class Function(BaseFunction):
