@@ -54,7 +54,6 @@ class Function(BaseFunction):
         timezone_name: str | None = None,
         work_days: Iterable[int] = (1, 2, 3, 4, 5),
     ) -> portion.Interval:
-
         if min_date is None:
             min_date = datetime.datetime.now().date() - datetime.timedelta(days=365)
         if max_date is None:
