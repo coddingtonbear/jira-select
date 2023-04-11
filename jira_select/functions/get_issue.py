@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 import jira.resources
 
 from jira_select.plugin import BaseFunction
@@ -9,7 +13,7 @@ class Function(BaseFunction):
     def __call__(  # type: ignore[override]
         self,
         ticket_number: str,
-    ) -> jira.resources.Issue | None:
+    ) -> Optional[jira.resources.Issue]:
         if ticket_number:
             return self.jira.issue(ticket_number)
 
