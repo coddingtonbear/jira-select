@@ -34,9 +34,10 @@ operations including grouping, aggregation, custom functions, and more.
 
    quickstart.rst
    query.rst
-   how_to.rst
    query_lifecycle.rst
+   functions.rst
    parameters.rst
+   how_to.rst
    examples.rst
    commands.rst
    extending.rst
