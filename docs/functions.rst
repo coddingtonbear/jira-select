@@ -16,7 +16,7 @@ Jira
 
       get_issue(field_holding_issue_key).fields.summary
 
-.. py::function:: get_issue_snapshot_on_date(issue: jira.resources.Issue) -> jira_select.types.IssueSnapshot:
+.. py:function:: get_issue_snapshot_on_date(issue: jira.resources.Issue) -> jira_select.types.IssueSnapshot:
 
    Reconstruct the state of an issue at a particular point in time
    using the issue's ``changelog``.
