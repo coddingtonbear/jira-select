@@ -188,7 +188,7 @@ Subquery
    .. code-block:: yaml
 
       select:
-        self_and_child_intervals_in_progress: interval_matching(issue, status="In Progress") | union(subquery("children", issue=issue))
+        self_and_child_intervals_in_progress: interval_matching(issue, status="In Progress") | union(subquery("children", key=issue.key))
       from: issues
       subqueries:
          children:
@@ -196,12 +196,35 @@ Subquery
               in_progress_intervals: interval_matching(issue, status='In Progress')
             from: issues
             where:
-            - parent = {params.issue.key}
+            - parent = {params.key}
             expand:
             - changelog
       expand:
       - changelog
 
+   Your specified ``**params`` will become available to the subquery via ``{params.*}``;
+   in the above example, ``{params.key}`` will be set to the value of the outer query's
+   ``issue.key``.
+
+   Unless specifically specified,
+   a subquery will use the same cache settings as the parent query.
+
+   .. warning::
+
+      If you would like your subquery's cache to be effective,
+      only pass simple values in ``**params``.
+
+      The string representation of an object is used for calculating cache
+      keys, and many objects include information in their default
+      string representations that vary between instantiations.
+      If things like, for example, the memory address of an object appears in
+      its string representation, the cache key will never match,
+      and the cached value will not be used.
+
+      A common way that this problem might occur is if you were to pass the
+      entire ``issue`` object to the subquery.
+      Instead of passing the entire ``issue`` object to the subquery,
+      pass simple values from it as shown in the example above.
 
 Time Analysis
 -------------
