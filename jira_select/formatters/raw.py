@@ -11,5 +11,5 @@ class Formatter(BaseFormatter):
 
     def writerow(self, row: Dict[str, Any]):
         for value in row.values():
-            self.stream.write(value.encode("utf-8"))
+            self.stream.write(str(value).encode("utf-8"))
             self.stream.write("\n".encode("utf-8"))
