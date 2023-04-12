@@ -12,6 +12,7 @@ from pytz import UTC
 
 from jira_select.plugin import BaseFunction
 
+from ..exceptions import QueryError
 from .flatten_changelog import flatten_changelog
 
 
@@ -62,11 +63,17 @@ def snapshot_iterator(issue: Issue, field_name_map: dict[str, str]) -> Iterator[
     )
     snapshot_validity_end = datetime.datetime.utcnow().replace(tzinfo=UTC)
 
-    flattened_changelog = sorted(
-        flatten_changelog(issue.changelog),
-        key=lambda row: row.created if row.created else datetime.date(1, 1, 1),
-        reverse=True,
-    )
+    try:
+        flattened_changelog = sorted(
+            flatten_changelog(issue.changelog),
+            key=lambda row: row.created if row.created else datetime.date(1, 1, 1),
+            reverse=True,
+        )
+    except AttributeError as exc:
+        raise QueryError(
+            "'expand' option of 'changelog' is required for snapshot iteration; "
+        ) from exc
+
     for entry in flattened_changelog:
         if entry.field in non_snapshottable:
             continue
