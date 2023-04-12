@@ -19,11 +19,13 @@ from typing import cast
 
 from dotmap import DotMap
 from jira import JIRA
+from pydantic import BaseModel
 from rich.progress import BarColumn
 from rich.progress import Progress
 from rich.progress import TaskID
 from rich.progress import TimeRemainingColumn
 
+from . import __version__
 from .cache import MinimumRecencyCache
 from .exceptions import ExpressionParameterMissing
 from .plugin import BaseSource
@@ -34,6 +36,7 @@ from .types import ExpressionList
 from .types import Field
 from .types import JqlList
 from .types import QueryDefinition
+from .types import SchemaRow
 from .types import SelectFieldDefinition
 from .types import WhereParamDict
 from .utils import calculate_result_hash
@@ -197,6 +200,11 @@ class GroupedResult(Result):
             )
 
         return result
+
+
+class CachedResults(BaseModel):
+    source_schema: List[SchemaRow]
+    rows: List[Dict]
 
 
 class Query:
@@ -374,11 +382,12 @@ class Executor:
         )
         self._progress_bar_enabled = progress_bar
 
-        self._cache = MinimumRecencyCache(get_cache_path())
-
         self._enable_cache = enable_cache
-        self._parameters: Dict[str, Any] = parameters or {}
+        self._cache = MinimumRecencyCache(get_cache_path())
+        self._source_schema: List[SchemaRow] = []
         self._field_name_map: Dict[str, str] = FieldNameMap()
+
+        self._parameters: Dict[str, Any] = parameters or {}
 
     @property
     def jira(self) -> JIRA:
@@ -400,11 +409,23 @@ class Executor:
     def parameters(self) -> Dict[str, Any]:
         return self._parameters
 
+    def get_source_schema(self) -> List[SchemaRow]:
+        if not self._source_schema:
+            sources = get_installed_sources()
+            source = sources[self.query.from_]
+
+            self._source_schema = source.get_schema(self.jira)
+
+        return self._source_schema
+
     @property
     def field_name_map(self) -> Dict[str, Any]:
         if not self._field_name_map:
-            for jira_field in self.jira.fields():
-                self._field_name_map[jira_field["name"]] = jira_field["id"]
+            for schema_row in self.get_source_schema():
+                if not schema_row.description:
+                    continue
+
+                self._field_name_map[schema_row.description] = schema_row.id
 
             self._field_name_map["params"] = DotMap(self._parameters)
 
@@ -413,6 +434,7 @@ class Executor:
     def _get_cached(self, source: BaseSource) -> Iterator[Result]:
         cache_key = ":".join(
             [
+                __version__,
                 str(self.jira.client_info()),
                 str(self.query.from_),
                 str(self.query.where),
@@ -427,28 +449,37 @@ class Executor:
                 min_recency, _ = self.query.cache
                 if min_recency is None:
                     raise KeyError(cache_key)
-                cached_results = self.cache.get(cache_key, min_recency=min_recency)
-                if not cached_results:
+                cached_results_raw = self.cache.get(cache_key, min_recency=min_recency)
+                if not cached_results_raw:
                     raise KeyError(cache_key)
 
-                source.update_count(len(cached_results))
+                cached_results = CachedResults.parse_obj(cached_results_raw)
+
+                self._source_schema = cached_results.source_schema
+
+                source.update_count(len(cached_results.rows))
                 source.remove_progress()
-                for result in cached_results:
+                for result in cached_results.rows:
                     yield SingleResult(source.rehydrate(result))
                 return
             except KeyError:
                 pass
 
-        cache = []
+        cached_rows = []
+        cached_schema = self.get_source_schema()
 
         for result in source:
-            cache.append(result)
+            cached_rows.append(result)
             yield SingleResult(source.rehydrate(result))
 
         if self.query.cache:
             _, max_store = self.query.cache
             if max_store is not None:
-                self.cache.set(cache_key, cache, expire=max_store)
+                self.cache.set(
+                    cache_key,
+                    CachedResults(source_schema=cached_schema, rows=cached_rows).dict(),
+                    expire=max_store,
+                )
 
     def _process_calculate(
         self,
