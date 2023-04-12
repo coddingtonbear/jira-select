@@ -40,11 +40,13 @@ from .types import SchemaRow
 from .types import SelectFieldDefinition
 from .types import WhereParamDict
 from .utils import calculate_result_hash
+from .utils import evaluate_expression
 from .utils import expression_includes_group_by
 from .utils import find_missing_parameters
 from .utils import get_cache_path
 from .utils import get_field_data
 from .utils import get_row_dict
+from .utils import normalize_value
 from .utils import parse_select_definition
 from .utils import parse_sort_by_definition
 
@@ -76,6 +78,9 @@ class NullAcceptableSort:
 
 
 class Result(metaclass=ABCMeta):
+    def __init__(self):
+        self._overlay: dict[str, Any] = {}
+
     def __getattr__(self, name):
         result = self.as_dict()
 
@@ -129,14 +134,14 @@ class Result(metaclass=ABCMeta):
             interpolations=field_name_map,
         )
 
+    def __setitem__(self, name, value):
+        self._overlay[name] = value
+
 
 class SingleResult(Result):
     def __init__(self, row: Any):
         self._row = row
-        self._overlay: dict[str, Any] = {}
-
-    def __setitem__(self, name, value):
-        self._overlay[name] = value
+        super().__init__()
 
     def as_dict(self) -> Dict[str, Any]:
         return get_row_dict(self._row, self._overlay)
@@ -186,6 +191,7 @@ class GroupedResult(Result):
 
     def as_dict(self) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
+        result.update(self._overlay)
 
         for field in self.all_fields:
             # Exclude empty rows -- in SQL when you run an aggregation
@@ -255,6 +261,10 @@ class Query:
     @property
     def select(self) -> List[SelectFieldDefinition]:
         return self._get_select_calculate_fields(self._definition.select)
+
+    @property
+    def static(self) -> List[SelectFieldDefinition]:
+        return self._get_select_calculate_fields(self._definition.static)
 
     @property
     def calculate(self) -> List[SelectFieldDefinition]:
@@ -479,6 +489,22 @@ class Executor:
                     expire=max_store,
                 )
 
+    def _get_static_results(
+        self,
+    ) -> Dict[str, Any]:
+        shared: Dict[str, Any] = {}
+
+        for definition in self.query.static:
+            shared[definition.column] = normalize_value(
+                evaluate_expression(
+                    definition.expression,
+                    names={},
+                    functions=self.functions,
+                )
+            )
+
+        return shared
+
     def _process_calculate(
         self,
         iterator: Iterator[Result],
@@ -616,6 +642,8 @@ class Executor:
     def _get_iterator(self) -> Generator[Dict[str, Any], None, None]:
         sources = get_installed_sources()
 
+        static_results = self._get_static_results()
+
         try:
             iterator = sources[self.query.from_]
         except KeyError:
@@ -687,6 +715,10 @@ class Executor:
 
         for row in cursor:
             self.progress.update(select_task, total=channel.get(), visible=True)
+
+            for shared_result_name, shared_result_value in static_results.items():
+                row[shared_result_name] = shared_result_value
+
             yield self._generate_row_dict(row)
             self.progress.update(select_task, advance=1)
 
