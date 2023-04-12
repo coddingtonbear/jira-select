@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -16,6 +17,8 @@ from ..plugin import get_installed_functions
 from ..types import SchemaRow
 from ..utils import evaluate_expression
 from ..utils import find_missing_parameters
+
+logger = logging.getLogger(__name__)
 
 
 class Source(BaseSource):
@@ -82,6 +85,8 @@ class Source(BaseSource):
 
         if order_by_fields:
             query = f"{query} ORDER BY {order_by_fields}"
+
+        logger.debug("Executing JIRA query with JQL %s", query)
 
         return query
 
