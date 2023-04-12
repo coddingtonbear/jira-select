@@ -206,7 +206,13 @@ def get_row_dict(row: Any, overlay: dict[str, Any] | None = None) -> Dict[str, A
 
     # Gather any top-level keys, too, to make sure we fetch any expansions
     for key in dir(row):
-        if key != "fields" and not key.startswith("_") and not key.upper() == key:
+        field_value = getattr(row, key)
+        if (
+            key != "fields"
+            and not key.startswith("_")
+            and not key.upper() == key
+            and not callable(field_value)
+        ):
             names[key] = getattr(row, key)
 
     names.update(overlay if overlay is not None else {})
