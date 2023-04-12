@@ -7,12 +7,10 @@ from typing import Iterator
 
 from dateutil.parser import parse as parse_datetime
 from dotmap import DotMap
-from jira import JIRA
 from jira.resources import Issue
 from pytz import UTC
 
 from jira_select.plugin import BaseFunction
-from jira_select.plugin import get_installed_sources
 
 from .flatten_changelog import flatten_changelog
 
@@ -36,11 +34,6 @@ class IssueSnapshotContainer(dict):
             return super().__setitem__(self._name_map[item], value)
 
         return super().__setitem__(item, value)
-
-
-def get_customfield_to_name_mapping(jira: JIRA) -> dict[str, str]:
-    schema = get_installed_sources()["issues"].get_schema(jira)
-    return {row.description: row.id for row in schema if row.description}
 
 
 def snapshot_iterator(issue: Issue, field_name_map: dict[str, str]) -> Iterator[DotMap]:
@@ -100,21 +93,15 @@ class Function(BaseFunction):
 
     _field_name_map = None
 
-    def get_customfield_to_name_mapping(self) -> dict[str, str]:
-        if self._field_name_map is None:
-            self._field_name_map = get_customfield_to_name_mapping(self.jira)
-
-        return self._field_name_map
-
     def __call__(  # type: ignore[override]
         self, issue: Issue, date: datetime.datetime
     ) -> DotMap:
         last_snapshot: DotMap = DotMap({})
 
         if date > parse_datetime(issue.created):
-            mapping = self.get_customfield_to_name_mapping()
-
-            for snapshot in snapshot_iterator(issue, mapping):
+            for snapshot in snapshot_iterator(
+                issue, self.executor.field_name_map if self.executor else {}
+            ):
                 if parse_datetime(snapshot.created) < date:
                     return last_snapshot
 

@@ -18,6 +18,7 @@ from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Type
+from weakref import proxy
 
 import keyring
 from jira import JIRA
@@ -185,7 +186,7 @@ def get_installed_formatters() -> Dict[str, Type[BaseFormatter]]:
 
 class BaseFormatter(metaclass=ABCMeta):
     def __init__(self, executor: Executor, stream: IO[bytes]):
-        self._executor = executor
+        self._executor = proxy(executor)
         self._stream = stream
 
     @classmethod
@@ -226,7 +227,7 @@ def register_function(fn: Callable):
 
 
 def get_installed_functions(
-    jira: JIRA = None, query: Query = None
+    jira: JIRA = None, executor: Executor = None
 ) -> Dict[str, Callable]:
     possible_commands: Dict[str, Callable] = copy.copy(BUILTIN_FUNCTIONS)
 
@@ -262,19 +263,23 @@ def get_installed_functions(
     possible_commands.update(REGISTERED_FUNCTIONS)
 
     for fn_name, fn in get_entrypoints(FUNCTION_ENTRYPOINT, BaseFunction).items():
-        possible_commands[fn_name] = fn(jira, query=query)
+        possible_commands[fn_name] = fn(jira, executor=executor)
 
     return possible_commands
 
 
 class BaseFunction(metaclass=ABCMeta):
-    def __init__(self, jira: Optional[JIRA], query: Optional[Query]):
+    def __init__(self, jira: Optional[JIRA], executor: Optional[Executor]):
         self._jira = jira
-        self._query = query
+        self._executor = executor
 
     @property
     def query(self) -> Optional[Query]:
-        return self._query
+        return self.executor.query if self.executor else None
+
+    @property
+    def executor(self) -> Optional[Executor]:
+        return self._executor
 
     @property
     def jira(self):

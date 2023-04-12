@@ -377,9 +377,7 @@ class Executor:
     ):
         self._query: Query = Query(jira, definition)
         self._jira: JIRA = jira
-        self._functions: Dict[str, Callable] = get_installed_functions(
-            jira, self._query
-        )
+        self._functions: Dict[str, Callable] = get_installed_functions(jira, self)
         self._progress_bar_enabled = progress_bar
 
         self._enable_cache = enable_cache
