@@ -196,7 +196,7 @@ Subquery
               in_progress_intervals: interval_matching(issue, status='In Progress')
             from: issues
             where:
-            - parent = {params.key}
+            - parent = "{params.key}"
             expand:
             - changelog
       expand:
