@@ -454,6 +454,7 @@ class Executor:
                 str(self.query.order_by),
                 str(self.query.limit),
                 str(self.query.expand),
+                str(self.parameters),
             ]
         )
 
