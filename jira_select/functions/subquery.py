@@ -39,6 +39,7 @@ class Function(BaseFunction):
             query_definition,
             progress_bar=False,
             parameters=params,
+            schema=self.executor.schema if self.executor else None,
         )
         for row in query:
             row_values = list(row.values())

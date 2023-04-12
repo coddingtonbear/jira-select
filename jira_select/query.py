@@ -384,6 +384,7 @@ class Executor:
         enable_cache: bool = True,
         progress_bar: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
+        schema: Optional[List[SchemaRow]] = None,
     ):
         self._query: Query = Query(jira, definition)
         self._jira: JIRA = jira
@@ -392,7 +393,7 @@ class Executor:
 
         self._enable_cache = enable_cache
         self._cache = MinimumRecencyCache(get_cache_path())
-        self._source_schema: List[SchemaRow] = []
+        self._source_schema: List[SchemaRow] = schema if schema is not None else []
         self._field_name_map: Dict[str, str] = FieldNameMap()
 
         self._parameters: Dict[str, Any] = parameters or {}
@@ -400,6 +401,10 @@ class Executor:
     @property
     def jira(self) -> JIRA:
         return self._jira
+
+    @property
+    def schema(self) -> List[SchemaRow]:
+        return self._source_schema
 
     @property
     def cache(self) -> MinimumRecencyCache:
