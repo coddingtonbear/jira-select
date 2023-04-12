@@ -501,11 +501,20 @@ class Executor:
         shared: Dict[str, Any] = {}
 
         for definition in self.query.static:
+            if missing := find_missing_parameters(
+                definition.expression, list(self.parameters.keys())
+            ):
+                raise ExpressionParameterMissing(
+                    "Parameter {params.%s} found in expression, but no parameter was specified!"
+                    % missing[0]
+                )
+
             shared[definition.column] = normalize_value(
                 evaluate_expression(
                     definition.expression,
                     names={},
                     functions=self.functions,
+                    interpolations={"params": DotMap(self.parameters)},
                 )
             )
 
