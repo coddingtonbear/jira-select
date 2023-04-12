@@ -9,7 +9,7 @@ The viewer you see being used on in the demo gif is called `Visidata <https://ww
 1. You could use the ``--format=table`` command-line argument to tell jira-select to print your output to the screen in a fancy table mode.
 2. You could ask jira-select to open the query results in your system's defualt viewer using the ``--launch-default-viewer`` command-line argument.  On Windows, you will also need to specify an output path explicitly to make this work by using ``--output=/some/path/to/write/output/to.csv``.
 3. If you're running on Windows, you could install this under "Windows Subsystem for Linux" so that you can use the default viewer (visidata). See more information here: `Windows Subsystem for Linux Installation Guide for Windows 10 <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`_.
-4. You could use the ``run`` subcommand instead of ``shell`.  This particular subcommand is a lot less fancy than ``shell``, though.
+4. You could use the ``run-query`` subcommand instead of ``shell``.  This particular subcommand is a lot less fancy than ``shell``, though.
 
 Sometimes filtering using ``having`` (or sorting using ``sort_by``) on a value I see in the output doesn't work; why not?
 -------------------------------------------------------------------------------------------------------------------------
