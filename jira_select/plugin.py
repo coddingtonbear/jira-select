@@ -21,6 +21,7 @@ from typing import Type
 from weakref import proxy
 
 import keyring
+import portion
 from jira import JIRA
 from rich.console import Console
 from rich.progress import TaskID
@@ -103,6 +104,11 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     ),
     # JSON
     "json_loads": json.loads,
+    "empty_interval": portion.empty,
+    "closed_interval": portion.closed,
+    "open_interval": portion.open,
+    "openclosed_interval": portion.openclosed,
+    "closedopen_interval": portion.closedopen,
 }
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 

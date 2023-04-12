@@ -346,6 +346,19 @@ Dates
    This relies on `python-dateutil`; there are many additional options available
    that you can find documented `here <https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.parse>`_.
 
+Intervals
+---------
+
+.. py:function:: empty_interval() -> portion.Interval
+
+.. py:function:: closed_interval() -> portion.Interval
+
+.. py:function:: open_interval() -> portion.Interval
+
+.. py:function:: openclosed_interval() -> portion.Interval
+
+.. py:function:: closedopen_interval() -> portion.Interval
+
 Json
 ----
 
