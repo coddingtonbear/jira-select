@@ -16,6 +16,7 @@ from typing import Dict
 from typing import List
 from typing import Mapping
 from typing import Optional
+from typing import Set
 from typing import Tuple
 from typing import Union
 
@@ -339,6 +340,16 @@ def launch_default_viewer(relpath: str) -> None:
             "Could not determine method of launching default "
             f"interpreter for platform {sys.platform}."
         )
+
+
+def find_used_parameters(expression: str) -> List[str]:
+    used_params: Set[str] = set()
+
+    expression_params = PARAM_FINDER.findall(expression)
+    for expression_param in expression_params:
+        used_params.add(expression_param)
+
+    return list(used_params)
 
 
 def find_missing_parameters(expression: str, known_params: List[str]) -> List[str]:

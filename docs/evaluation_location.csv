@@ -1,7 +1,7 @@
 ,Use,Type,Evaluated where?,Can use custom functions?,Can use query parameters?
 ``select``,Defines data to return,List[Expression],Local,Yes,Yes
 ``from``,Defines data source,str,*n/a*,*n/a*,**No**
-``where``,Remote filtering of results,"List[JqlString] (for 'issues') *or* Dict[str, Any] (for 'boards' and 'sprints')",Remote,**No**,**No**
+``where``,Remote filtering of results,"List[JqlString] (for 'issues') *or* Dict[str, Any] (for 'boards' and 'sprints')",Remote,**No**,**Yes**
 ``order_by``,Remote ordering of results,List[JqlString],Remote,**No**,**No**
 ``filter``,Local pre-grouping filtering of results,List[Expression],Local,Yes,Yes
 ``group_by``,Grouping returned rows together,List[Expression],Local,Yes,Yes

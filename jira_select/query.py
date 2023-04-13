@@ -43,6 +43,7 @@ from .utils import calculate_result_hash
 from .utils import evaluate_expression
 from .utils import expression_includes_group_by
 from .utils import find_missing_parameters
+from .utils import find_used_parameters
 from .utils import get_cache_path
 from .utils import get_field_data
 from .utils import get_row_dict
@@ -454,7 +455,13 @@ class Executor:
                 str(self.query.order_by),
                 str(self.query.limit),
                 str(self.query.expand),
-                str(self.parameters),
+                str(
+                    {
+                        key: value
+                        for key, value in self.parameters.items()
+                        if key in find_used_parameters("".join(self.query.where))
+                    }
+                ),
             ]
         )
 
