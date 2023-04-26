@@ -1,0 +1,13 @@
+include *.md
+include *.txt
+include *.yaml
+include .bumpversion.cfg
+recursive-include docs *.bat
+recursive-include docs *.csv
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs *.txt
+recursive-include docs Makefile
+recursive-include pyinstaller *.spec
+recursive-include pyinstaller *.txt
+recursive-include pyinstaller Makefile
