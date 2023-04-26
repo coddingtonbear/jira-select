@@ -25,7 +25,7 @@ author = "Adam Coddington"
 # The short X.Y version
 version = ""
 # The full version, including alpha/beta/rc tags
-release = "3.0.0.a2"
+release = "3.0.0"
 
 
 # -- General configuration ---------------------------------------------------
