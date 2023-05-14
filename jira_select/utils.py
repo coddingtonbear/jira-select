@@ -72,6 +72,8 @@ class JiraSelectJsonEncoder(json.JSONEncoder):
                 "toValue": obj.toValue,
                 "toString": obj.toString,
             }
+        elif isinstance(obj, set):
+            return list(obj)
         elif isinstance(obj, Interval):
             interval_list = []
             for interval in list(obj):
