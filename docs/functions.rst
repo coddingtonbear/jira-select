@@ -355,6 +355,33 @@ Data Traversal
 Dates
 -----
 
+.. py:function:: now(**replacements) -> datetime.datetime
+
+   Return "now" as a timezone-aware ``datetime.datetime`` object.
+
+   Additional parameters can be passed via keyword arguments;
+   these values will be applied
+   to the ``datetime.datetime`` object
+   via its ``replace`` method.
+   See `Python's documentation <https://docs.python.org/3/library/datetime.html#datetime.datetime.replace>`_ for for more information .
+
+   If you would like to obtain a timezone-unaware datetime object,
+   pass ``tzinfo=None`` as a keyword argument.
+
+.. py:function:: timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0) -> datetime.timedelta
+
+   Returns a ``datetime.timedelta`` object.
+
+   This object can be used in math
+   with existing ``datetime.datetime``objects.
+
+.. py:function:: datetime(year, month, day, hour=0, minute=0, second=0, microsecond=0, tzinfo=None, *, fold=0) -> datetime.datetime
+
+   Returns a ``datetime.datetime`` object.
+
+   To obtain a ``date`` object, call ``.date()`` on the return value
+   of this function.
+
 .. py:function:: parse_datetime(datetime_string: str, *args, **kwargs) -> datetime.datetime
 
    Parse a date string into a datetime object.
@@ -368,6 +395,7 @@ Dates
 
    This relies on `python-dateutil`; there are many additional options available
    that you can find documented `here <https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser.parse>`_.
+
 
 Intervals
 ---------

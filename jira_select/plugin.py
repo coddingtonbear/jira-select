@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import datetime
 import importlib.util
 import json
 import logging
@@ -109,6 +110,8 @@ BUILTIN_FUNCTIONS: Dict[str, Callable] = {
     "open_interval": portion.open,
     "openclosed_interval": portion.openclosed,
     "closedopen_interval": portion.closedopen,
+    "datetime": datetime.datetime,
+    "timedelta": datetime.timedelta,
 }
 REGISTERED_FUNCTIONS: Dict[str, Callable] = {}
 

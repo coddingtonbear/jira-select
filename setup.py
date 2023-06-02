@@ -124,6 +124,7 @@ setup(
             "interval_size = jira_select.functions.interval_size:Function",
             "subquery = jira_select.functions.subquery:Function",
             "union = jira_select.functions.union:Function",
+            "now = jira_select.functions.now:Function",
         ],
         "jira_select.sources": [
             "issues = jira_select.sources.issues:Source",
