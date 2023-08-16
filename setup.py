@@ -125,6 +125,7 @@ setup(
             "subquery = jira_select.functions.subquery:Function",
             "union = jira_select.functions.union:Function",
             "now = jira_select.functions.now:Function",
+            "get_linked_issue_keys = jira_select.functions.get_linked_issue_keys:Function",
         ],
         "jira_select.sources": [
             "issues = jira_select.sources.issues:Source",

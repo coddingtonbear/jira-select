@@ -173,6 +173,23 @@ Jira
    to either find particular entries or filter out rows that do not
    have an entry having particular characteristics.
 
+.. py:function:: get_linked_issue_keys(issue: jira.resources.Issue, link_type: str | None = None) -> list[str]:
+
+   Return a list of issue keys that are related to the relevant issue via the specified relation type (e.g. ``causes``, ``is associated with``, etc.).
+
+   You will want to pass the literal value ``issuelinks`` as the first parameter of this function.  This will provide this function with the list of issuelinks your issue has.
+
+   If ``link_type`` is unspecified, all related issue keys will be returned.
+
+   For example, to find the keys for all issues that were caused by a particular issue, you could run the following query:
+
+   .. code-block:: yaml
+
+      select:
+        caused_bugs: get_linked_issue_keys(issuelinks, 'causes')
+      from: issues
+      where:
+      - type = 'Bug'
 
 Subquery
 --------
