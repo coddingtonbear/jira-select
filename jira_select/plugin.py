@@ -200,8 +200,7 @@ class BaseFormatter(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def get_file_extension(cls) -> str:
-        ...
+    def get_file_extension(cls) -> str: ...
 
     @property
     def executor(self):
@@ -226,8 +225,7 @@ class BaseFormatter(metaclass=ABCMeta):
         return
 
     @abstractmethod
-    def writerow(self, row: Dict[str, Any]):
-        ...
+    def writerow(self, row: Dict[str, Any]): ...
 
 
 def register_function(fn: Callable):
@@ -236,7 +234,7 @@ def register_function(fn: Callable):
 
 
 def get_installed_functions(
-    jira: JIRA = None, executor: Executor = None
+    jira: Optional[JIRA] = None, executor: Optional[Executor] = None
 ) -> Dict[str, Callable]:
     possible_commands: Dict[str, Callable] = copy.copy(BUILTIN_FUNCTIONS)
 
@@ -297,8 +295,7 @@ class BaseFunction(metaclass=ABCMeta):
         return self._jira
 
     @abstractmethod
-    def __call__(self, *args, **kwargs) -> Optional[Any]:
-        ...
+    def __call__(self, *args, **kwargs) -> Optional[Any]: ...
 
 
 def get_installed_sources() -> Dict[str, Type[BaseSource]]:
@@ -351,9 +348,7 @@ class BaseSource(metaclass=ABCMeta):
         return self._executor.jira
 
     @abstractmethod
-    def rehydrate(self, value: Any) -> Any:
-        ...
+    def rehydrate(self, value: Any) -> Any: ...
 
     @abstractmethod
-    def __iter__(self) -> Iterator[Any]:
-        ...
+    def __iter__(self) -> Iterator[Any]: ...

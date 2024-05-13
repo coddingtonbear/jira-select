@@ -79,10 +79,10 @@ class NullAcceptableSort:
 
 
 class Result(metaclass=ABCMeta):
-    def __init__(self):
+    def __init__(self) -> None:
         self._overlay: dict[str, Any] = {}
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         result = self.as_dict()
 
         if name not in result:
@@ -91,12 +91,10 @@ class Result(metaclass=ABCMeta):
         return result[name]
 
     @abstractmethod
-    def as_dict(self) -> Dict[str, Any]:
-        ...
+    def as_dict(self) -> Dict[str, Any]: ...
 
     @abstractmethod
-    def single(self) -> SingleResult:
-        ...
+    def single(self) -> SingleResult: ...
 
     def evaluate_expression(
         self,
@@ -166,7 +164,7 @@ class GroupedFieldContainer(list):
 class GroupedResult(Result):
     def __init__(
         self,
-        rows: List[SingleResult] = None,
+        rows: Optional[List[SingleResult]] = None,
     ):
         super().__init__()
         self._rows: List[SingleResult] = rows if rows is not None else []
@@ -356,16 +354,16 @@ class NullProgressbar:
 
 
 class CounterChannel:
-    def __init__(self):
+    def __init__(self) -> None:
         self._counter: int = 2**32
 
-    def zero(self):
+    def zero(self) -> None:
         self._counter = 0
 
-    def increment(self):
+    def increment(self) -> None:
         self._counter += 1
 
-    def set(self, value: int):
+    def set(self, value: int) -> None:
         self._counter = value
 
     def get(self) -> int:

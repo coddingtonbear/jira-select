@@ -62,9 +62,11 @@ class JiraSelectJsonEncoder(json.JSONEncoder):
         elif isinstance(obj, ChangelogEntry):
             return {
                 "author": obj.author,
-                "created": UTC.normalize(obj.created).strftime(ISO_FORMAT)
-                if obj.created
-                else None,
+                "created": (
+                    UTC.normalize(obj.created).strftime(ISO_FORMAT)
+                    if obj.created
+                    else None
+                ),
                 "field": obj.field,
                 "fieldtype": obj.fieldtype,
                 "fromValue": obj.fromValue,
@@ -120,7 +122,7 @@ def get_default_config_path() -> str:
     )
 
 
-def get_config(path: str = None) -> ConfigDict:
+def get_config(path: str | None = None) -> ConfigDict:
     if path is None:
         path = get_default_config_path()
 
@@ -131,7 +133,7 @@ def get_config(path: str = None) -> ConfigDict:
         return ConfigDict.parse_obj(safe_load(inf))
 
 
-def save_config(data: ConfigDict, path: str = None) -> None:
+def save_config(data: ConfigDict, path: str | None = None) -> None:
     if path is None:
         path = get_default_config_path()
 
