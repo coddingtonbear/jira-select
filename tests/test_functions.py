@@ -94,7 +94,7 @@ class TestGetSprint(JiraSelectFunctionTestCase):
 
         self.execute_function("get_sprint_by_id", arbitrary_sprint_id, jira=mock_jira)
 
-        assert mock_jira.sprint.called_with(arbitrary_sprint_id)
+        assert mock_jira.sprint.assert_called_with(arbitrary_sprint_id)
 
 
 class TestFieldByName(JiraSelectFunctionTestCase):
