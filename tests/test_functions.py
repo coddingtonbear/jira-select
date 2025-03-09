@@ -84,17 +84,20 @@ class TestSprintDetails(JiraSelectFunctionTestCase):
 
 class TestGetSprint(JiraSelectFunctionTestCase):
     def test_basic(self):
+        arbitrary_sprint_data = {"x": True}
         arbitrary_sprint_id = 10
-        arbitrary_sprint_object = Mock(raw={})
+        arbitrary_sprint_object = Mock(raw=arbitrary_sprint_data)
 
         mock_jira = Mock(
             sprint=Mock(return_value=arbitrary_sprint_object),
             _options={"agile_rest_path": "/"},
         )
 
-        self.execute_function("get_sprint_by_id", arbitrary_sprint_id, jira=mock_jira)
+        result = self.execute_function(
+            "get_sprint_by_id", arbitrary_sprint_id, jira=mock_jira
+        )
 
-        assert mock_jira.sprint.assert_called_with(arbitrary_sprint_id)
+        assert result.raw == arbitrary_sprint_data
 
 
 class TestFieldByName(JiraSelectFunctionTestCase):
