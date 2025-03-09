@@ -160,7 +160,7 @@ def get_functions_for_module(
 
 
 def parse_select_definition(
-    expression: Union[str, SelectFieldDefinition]
+    expression: Union[str, SelectFieldDefinition],
 ) -> SelectFieldDefinition:
     if isinstance(expression, str):
         as_match = FIELD_DISPLAY_DEFN_RE.match(expression)

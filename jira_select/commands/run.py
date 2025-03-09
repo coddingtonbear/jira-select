@@ -109,9 +109,11 @@ class Command(BaseCommand):
         query = Executor(
             self.jira,
             query_definition,
-            progress_bar=(self.options.output is not sys.stdout.buffer)
-            if self.options.progressbar
-            else False,
+            progress_bar=(
+                (self.options.output is not sys.stdout.buffer)
+                if self.options.progressbar
+                else False
+            ),
             parameters=dict(self.options.parameters or []),
             enable_cache=self.options.cache,
         )
