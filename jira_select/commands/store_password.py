@@ -6,6 +6,7 @@ import keyring
 from ..constants import APP_NAME
 from ..exceptions import UserError
 from ..plugin import BaseCommand
+from ..types import InstanceDefinition
 
 
 class Command(BaseCommand):
@@ -23,5 +24,9 @@ class Command(BaseCommand):
         if not password:
             raise UserError("Password required")
 
-        instance_url = self.config.get("instance_url") or self.options.instance_url
+        instance = self.config.instances.get(
+            self.options.instance_name, InstanceDefinition()
+        )
+
+        instance_url = self.options.instance_url or instance.url
         keyring.set_password(APP_NAME, instance_url + self.options.username, password)
