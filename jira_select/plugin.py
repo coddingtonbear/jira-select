@@ -183,7 +183,7 @@ class BaseCommand(SafdieBaseCommand):
                 },
                 basic_auth=(username, password),
                 validate=False,
-                get_server_info=False,
+                get_server_info=True,
             )
 
         return self._jira
