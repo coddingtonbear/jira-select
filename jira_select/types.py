@@ -8,7 +8,7 @@ from typing import Tuple
 from typing import Union
 
 from pydantic import BaseModel
-from pydantic import Extra
+from pydantic import ConfigDict as PydanticConfigDict
 from pydantic import Field as ModelField
 
 JiraFieldName = str
@@ -46,23 +46,20 @@ class QueryDefinition(BaseModel):
     group_by: ExpressionList = ModelField(default_factory=list)
     sort_by: ExpressionList = ModelField(default_factory=list)
     expand: ExpressionList = ModelField(default_factory=list)
-    limit: Optional[int]
-    cap: Optional[int]
-    cache: Optional[Union[int, Tuple[Optional[int], Optional[int]]]]
-
-    class Config:
-        allow_population_by_field_name = True
-        extra = Extra.forbid
+    limit: Optional[int] = None
+    cap: Optional[int] = None
+    cache: Optional[Union[int, Tuple[Optional[int], Optional[int]]]] = None
+    model_config = PydanticConfigDict(populate_by_name=True, extra="forbid")
 
 
-QueryDefinition.update_forward_refs()
+QueryDefinition.model_rebuild()
 
 
 class SchemaRow(BaseModel):
     id: str
     type: str
-    description: Optional[str]
-    raw: Optional[Any]
+    description: Optional[str] = None
+    raw: Optional[Any] = None
 
 
 class ShellConfig(BaseModel):
@@ -70,9 +67,9 @@ class ShellConfig(BaseModel):
 
 
 class InstanceDefinition(BaseModel):
-    url: Optional[str]
-    username: Optional[str]
-    password: Optional[str]
+    url: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
     verify: Optional[Union[str, bool]] = True
 
 
