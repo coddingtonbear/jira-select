@@ -33,7 +33,7 @@ def read(*names, **kwargs):
 
 setup(
     name="jira-select",
-    version="3.4.0",
+    version="3.4.1",
     license="MIT",
     description=(
         "Easily run complex SQL-like queries far beyond what "
