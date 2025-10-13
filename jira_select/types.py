@@ -28,7 +28,7 @@ CustomFilterFieldName = str
 JqlList = List[str]
 WhereParamDict = Dict[str, Any]
 
-Expression = str
+Expression = str | bool | int
 
 ExpressionList = List[Expression]
 
