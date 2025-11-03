@@ -4,6 +4,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Union
 
@@ -30,7 +31,7 @@ WhereParamDict = Dict[str, Any]
 
 Expression = str | bool | int
 
-ExpressionList = List[Expression]
+ExpressionList = Sequence[Expression]
 
 
 class QueryDefinition(BaseModel):

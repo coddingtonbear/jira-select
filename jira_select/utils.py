@@ -226,27 +226,29 @@ def get_row_dict(row: Any, overlay: dict[str, Any] | None = None) -> Dict[str, A
 
 
 def expression_includes_group_by(
-    expression: Expression, group_by: List[Expression]
+    expression: Expression, group_by: ExpressionList
 ) -> bool:
     for group_by_expression in group_by:
-        if group_by_expression in expression:
+        if str(group_by_expression) in str(expression):
             return True
 
     return False
 
 
 def evaluate_expression(
-    expression: str,
+    expression: Expression,
     names: Dict[str, Any],
     functions: Optional[Dict[str, Callable]] = None,
     interpolations: Optional[Mapping[str, Any]] = None,
 ) -> Any:
     try:
-        expression = expression.format_map(interpolations or {})
+        formatted_expression = str(expression).format_map(interpolations or {})
     except KeyError as e:
         raise FieldNameError(e)
 
-    return EvalWithCompoundTypes(names=names, functions=functions).eval(expression)
+    return EvalWithCompoundTypes(names=names, functions=functions).eval(
+        formatted_expression
+    )
 
 
 def normalize_value(value: Any) -> Any:
@@ -281,7 +283,7 @@ def normalize_value(value: Any) -> Any:
 
 def get_field_data(
     row: Result,
-    expression: str,
+    expression: Expression,
     functions: Optional[Dict[str, Callable]] = None,
     interpolations: Optional[Mapping[str, Any]] = None,
     error_returns_null=True,
@@ -356,10 +358,12 @@ def find_used_parameters(expression: str) -> List[str]:
     return list(used_params)
 
 
-def find_missing_parameters(expression: str, known_params: List[str]) -> List[str]:
+def find_missing_parameters(
+    expression: Expression, known_params: List[str]
+) -> List[str]:
     missing_parameters: List[str] = []
 
-    expression_params = PARAM_FINDER.findall(expression)
+    expression_params = PARAM_FINDER.findall(str(expression))
     for expression_param in expression_params:
         if expression_param not in known_params:
             missing_parameters.append(expression_param)
