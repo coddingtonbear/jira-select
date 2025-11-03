@@ -92,35 +92,25 @@ class Source(BaseSource):
 
     def __iter__(self) -> Iterator[Dict]:
         start_at = 0
-        max_results = 2**32
-        result_limit = self.query.limit or 2**32
+        result_limit = self.query.limit or 0
 
         jql = self._get_jql()
 
         self.update_progress(completed=0, total=1, visible=True)
-        while start_at < min(max_results, result_limit):
-            results = self.jira.search_issues(
-                jql,
-                startAt=start_at,
-                expand=",".join(self.query.expand),
-                fields="*all",
-                maxResults=min(result_limit, 100),
-            )
+        results = self.jira.search_issues(
+            jql,
+            startAt=start_at,
+            expand=",".join(self.query.expand),
+            fields="*all",
+            maxResults=max(result_limit, 0),
+        )
 
-            max_results = results.total
-            count = min([results.total, result_limit])
-            self.update_count(count)
+        self.update_count(results.total)
 
-            for result in results:
-                self.update_progress(advance=1, total=count, visible=True)
+        for result in results:
+            self.update_progress(advance=1, total=results.total, visible=True)
 
-                yield result.raw
-
-                start_at += 1
-
-                # Return early if our result limit has been reached
-                if start_at >= result_limit:
-                    break
+            yield result.raw
 
     def rehydrate(self, value: Dict) -> Issue:
         return Issue({}, None, value)
